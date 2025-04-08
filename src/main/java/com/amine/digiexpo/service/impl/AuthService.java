@@ -50,8 +50,9 @@ public class AuthService implements IAuthService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Retrieve authenticated user
-            User user = userRepository.findByUsername(loginRequest.getUsername())
+            User user = userRepository.findByUsernameOrEmail(loginRequest.getUsername(), loginRequest.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
+
 
             // Map entity to DTO with Utils
             UserDTO userDTO = Utils.mapUserToDTO(user);
