@@ -10,14 +10,14 @@ import java.util.List;
 
 public interface IAssociationService {
     // Réserver une session un jour par semaine
-    SessionDTO reserveSession(Long associationId, LocalDate date);
+    Response reserveSession(Long associationId, LocalDate date);
 
     // Consulter la liste des réservations (sessions)
-    List<SessionDTO> getSessions(Long associationId);
+    Response getSessions(Long associationId);
 
     // Consulter la liste des bénévoles
-    List<VolunteerDTO> getVolunteers(Long associationId);
+    Response getVolunteers(Long associationId);
 
     // Récupérer les détails de l'association
-    AssociationDTO getAssociationById(Long associationId);
+    Response getAssociationById(Long associationId);
 }

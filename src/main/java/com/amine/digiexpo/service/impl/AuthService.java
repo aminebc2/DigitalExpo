@@ -2,6 +2,7 @@ package com.amine.digiexpo.service.impl;
 
 import com.amine.digiexpo.DTO.LoginRequest;
 import com.amine.digiexpo.DTO.RegisterRequest;
+import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.UserDTO;
 import com.amine.digiexpo.Repository.UserRepository;
 import com.amine.digiexpo.entity.Admin;
@@ -27,68 +28,84 @@ public class AuthService implements IAuthService {
 
     @Autowired
     public AuthService(UserRepository userRepository,
-                           PasswordEncoder passwordEncoder,
-                           AuthenticationManager authenticationManager) {
+                       PasswordEncoder passwordEncoder,
+                       AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
     }
 
     @Override
-    public UserDTO login(LoginRequest loginRequest) {
-        // Authentification avec Spring Security
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(), // ou loginRequest.getEmail() selon ta logique
-                        loginRequest.getPassword()
-                )
-        );
+    public Response login(LoginRequest loginRequest) {
+        try {
+            // Authentication with Spring Security
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(), // or loginRequest.getEmail() depending on your logic
+                            loginRequest.getPassword()
+                    )
+            );
 
-        // Définir le contexte de sécurité
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Set security context
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Récupérer l'utilisateur authentifié
-        User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            // Retrieve authenticated user
+            User user = userRepository.findByUsername(loginRequest.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Mapper l'entité vers DTO avec Utils
-        return Utils.mapUserEntityToUserDTO(user);
+            // Map entity to DTO with Utils
+            UserDTO userDTO = Utils.mapUserToDTO(user);
+
+            // Return successful response
+            return new Response(200, "Login successful", userDTO);
+        } catch (Exception e) {
+            // Handle exceptions and return error response
+            return new Response(500, "Authentication failed: " + e.getMessage(), null);
+        }
     }
 
     @Override
-    public UserDTO register(RegisterRequest registerRequest) {
-        // Vérifier si l'utilisateur existe déjà
-        if (userRepository.findByUsername(registerRequest.getUsername()).isPresent() ||
-                userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            throw new RuntimeException("Username or email already exists");
+    public Response register(RegisterRequest registerRequest) {
+        try {
+            // Check if the user already exists
+            if (userRepository.findByUsername(registerRequest.getUsername()).isPresent() ||
+                    userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+                return new Response(400, "Username or email already exists", null);
+            }
+
+            // Create user based on role
+            User user;
+            switch (registerRequest.getRole()) {
+                case ADMIN:
+                    user = new Admin();
+                    break;
+                case ASSOCIATION:
+                    user = new Association();
+                    break;
+                case BENEVOLE: // or VOLUNTEER depending on your choice
+                    user = new Volunteer();
+                    break;
+                default:
+                    return new Response(400, "Invalid role", null);
+            }
+
+            // Fill common fields
+            user.setUsername(registerRequest.getUsername());
+            user.setEmail(registerRequest.getEmail());
+            user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            user.setRole(registerRequest.getRole());
+
+            // Save the user
+            User savedUser = userRepository.save(user);
+
+            // Map entity to DTO
+            UserDTO userDTO = Utils.mapUserToDTO(savedUser);
+
+            // Return successful response
+            return new Response(201, "Registration successful", userDTO);
+        } catch (Exception e) {
+            // Handle exceptions and return error response
+            return new Response(500, "Registration failed: " + e.getMessage(), null);
         }
-
-        // Créer l'utilisateur selon le rôle
-        User user;
-        switch (registerRequest.getRole()) {
-            case ADMIN:
-                user = new Admin();
-                break;
-            case ASSOCIATION:
-                user = new Association();
-                break;
-            case BENEVOLE: // ou VOLUNTEER selon ton choix final
-                user = new Volunteer();
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid role");
-        }
-
-        // Remplir les champs communs
-        user.setUsername(registerRequest.getUsername());
-        user.setEmail(registerRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        user.setRole(registerRequest.getRole());
-
-        // Sauvegarder l'utilisateur
-        User savedUser = userRepository.save(user);
-
-        // Mapper l'entité vers DTO avec Utils
-        return Utils.mapUserEntityToUserDTO(savedUser);
     }
 }

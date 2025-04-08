@@ -1,6 +1,7 @@
 package com.amine.digiexpo.service.impl;
 
 import com.amine.digiexpo.DTO.AssociationDTO;
+import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
 import com.amine.digiexpo.Repository.AssociationRepository;
@@ -16,40 +17,29 @@ import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.IAdminService;
 import com.amine.digiexpo.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 @Service
 public class AdminService implements IAdminService {
 
-    private final AssociationRepository associationRepository;
-    private final VolunteerRepository volunteerRepository;
-    private final VolunteerRequestRepository volunteerRequestRepository;
-    private final SessionRepository sessionRepository;
-    private final PasswordEncoder passwordEncoder;
-
     @Autowired
-    public AdminService(AssociationRepository associationRepository,
-                            VolunteerRepository volunteerRepository,
-                            VolunteerRequestRepository volunteerRequestRepository,
-                            SessionRepository sessionRepository,
-                            PasswordEncoder passwordEncoder) {
-        this.associationRepository = associationRepository;
-        this.volunteerRepository = volunteerRepository;
-        this.volunteerRequestRepository = volunteerRequestRepository;
-        this.sessionRepository = sessionRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private AssociationRepository associationRepository;
+    @Autowired
+    private VolunteerRepository volunteerRepository;
+    @Autowired
+    private VolunteerRequestRepository volunteerRequestRepository;
+    @Autowired
+    private SessionRepository sessionRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public AssociationDTO createAssociation(AssociationDTO associationDTO) {
+    public Response createAssociation(AssociationDTO associationDTO) {
         if (associationRepository.findByUsername(associationDTO.getUsername()).isPresent() ||
                 associationRepository.findByEmail(associationDTO.getEmail()).isPresent()) {
-            throw new RuntimeException("Username or email already exists");
+            return new Response(400, "Username or email already exists", null);
         }
 
         Association association = new Association();
@@ -63,118 +53,162 @@ public class AdminService implements IAdminService {
         association.setResponsablePhone(associationDTO.getResponsablePhone());
 
         Association savedAssociation = associationRepository.save(association);
-        return Utils.mapAssociationEntityToAssociationDTOWithRelations(savedAssociation);
+        AssociationDTO savedAssociationDTO = Utils.mapAssociationToDTOWithRelations(savedAssociation);
+
+        return new Response(201, "Association created successfully", savedAssociationDTO);
+
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public AssociationDTO updateAssociation(Long associationId, AssociationDTO associationDTO) {
-        Association association = associationRepository.findById(associationId)
-                .orElseThrow(() -> new RuntimeException("Association not found"));
+    public Response updateAssociation(Long associationId, AssociationDTO associationDTO) {
+        try {
+            Association association = associationRepository.findById(associationId)
+                    .orElseThrow(() -> new RuntimeException("Association not found"));
 
-        if (associationDTO.getUsername() != null) association.setUsername(associationDTO.getUsername());
-        if (associationDTO.getEmail() != null) association.setEmail(associationDTO.getEmail());
-        if (associationDTO.getName() != null) association.setName(associationDTO.getName());
-        if (associationDTO.getVille() != null) association.setVille(associationDTO.getVille());
-        if (associationDTO.getResponsableName() != null) association.setResponsableName(associationDTO.getResponsableName());
-        if (associationDTO.getResponsablePhone() != null) association.setResponsablePhone(associationDTO.getResponsablePhone());
+            if (associationDTO.getUsername() != null) association.setUsername(associationDTO.getUsername());
+            if (associationDTO.getEmail() != null) association.setEmail(associationDTO.getEmail());
+            if (associationDTO.getName() != null) association.setName(associationDTO.getName());
+            if (associationDTO.getVille() != null) association.setVille(associationDTO.getVille());
+            if (associationDTO.getResponsableName() != null)
+                association.setResponsableName(associationDTO.getResponsableName());
+            if (associationDTO.getResponsablePhone() != null)
+                association.setResponsablePhone(associationDTO.getResponsablePhone());
 
-        Association updatedAssociation = associationRepository.save(association);
-        return Utils.mapAssociationEntityToAssociationDTOWithRelations(updatedAssociation);
-    }
+            Association updatedAssociation = associationRepository.save(association);
+            AssociationDTO updatedAssociationDTO = Utils.mapAssociationToDTOWithRelations(updatedAssociation);
 
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deleteAssociation(Long associationId) {
-        if (!associationRepository.existsById(associationId)) {
-            throw new RuntimeException("Association not found");
+            return new Response(200, "Association updated successfully", updatedAssociationDTO);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
         }
-        associationRepository.deleteById(associationId);
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<AssociationDTO> getAllAssociations() {
+    public Response deleteAssociation(Long associationId) {
+        try {
+            if (!associationRepository.existsById(associationId)) {
+                throw new RuntimeException("Association not found");
+            }
+            associationRepository.deleteById(associationId);
+            return new Response(200, "Association deleted successfully", null);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response getAllAssociations() {
         List<Association> associations = associationRepository.findAll();
-        return Utils.mapAssociationListEntityToAssociationListDTO(associations);
+        List<AssociationDTO> associationDTOs = associations.stream()
+                .map(Utils::mapAssociationToDTOWithRelations)
+                .toList();
+
+        return new Response(200, "Associations retrieved successfully", associationDTOs);
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public VolunteerDTO createVolunteer(VolunteerDTO volunteerDTO) {
-        if (volunteerRepository.findByUsername(volunteerDTO.getUsername()).isPresent() ||
-                volunteerRepository.findByEmail(volunteerDTO.getEmail()).isPresent()) {
-            throw new RuntimeException("Username or email already exists");
+    public Response createVolunteer(VolunteerDTO volunteerDTO) {
+        try {
+            if (volunteerRepository.findByUsername(volunteerDTO.getUsername()).isPresent() ||
+                    volunteerRepository.findByEmail(volunteerDTO.getEmail()).isPresent()) {
+                throw new RuntimeException("Username or email already exists");
+            }
+
+            Volunteer volunteer = new Volunteer();
+            volunteer.setUsername(volunteerDTO.getUsername());
+            volunteer.setEmail(volunteerDTO.getEmail());
+            volunteer.setPassword(passwordEncoder.encode("defaultPassword"));
+            volunteer.setRole(volunteerDTO.getRole());
+            volunteer.setPhoneNumber(volunteerDTO.getPhoneNumber());
+            volunteer.setAvailableDays(volunteerDTO.getAvailableDays());
+
+            Volunteer savedVolunteer = volunteerRepository.save(volunteer);
+            VolunteerDTO savedVolunteerDTO = Utils.mapVolunteerToDTO(savedVolunteer);
+
+            return new Response(201, "Volunteer created successfully", savedVolunteerDTO);
+        } catch (RuntimeException e) {
+            return new Response(400, e.getMessage(), null);
         }
-
-        Volunteer volunteer = new Volunteer();
-        volunteer.setUsername(volunteerDTO.getUsername());
-        volunteer.setEmail(volunteerDTO.getEmail());
-        volunteer.setPassword(passwordEncoder.encode("defaultPassword"));
-        volunteer.setRole(volunteerDTO.getRole());
-        volunteer.setPhoneNumber(volunteerDTO.getPhoneNumber());
-        volunteer.setAvailableDays(volunteerDTO.getAvailableDays());
-
-        Volunteer savedVolunteer = volunteerRepository.save(volunteer);
-        return Utils.mapVolunteerEntityToVolunteerDTOWithRelations(savedVolunteer);
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public VolunteerDTO updateVolunteer(Long volunteerId, VolunteerDTO volunteerDTO) {
-        Volunteer volunteer = volunteerRepository.findById(volunteerId)
-                .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+    public Response updateVolunteer(Long volunteerId, VolunteerDTO volunteerDTO) {
+        try {
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
 
-        if (volunteerDTO.getUsername() != null) volunteer.setUsername(volunteerDTO.getUsername());
-        if (volunteerDTO.getEmail() != null) volunteer.setEmail(volunteerDTO.getEmail());
-        if (volunteerDTO.getPhoneNumber() != null) volunteer.setPhoneNumber(volunteerDTO.getPhoneNumber());
-        if (volunteerDTO.getAvailableDays() != null) volunteer.setAvailableDays(volunteerDTO.getAvailableDays());
+            if (volunteerDTO.getUsername() != null) volunteer.setUsername(volunteerDTO.getUsername());
+            if (volunteerDTO.getEmail() != null) volunteer.setEmail(volunteerDTO.getEmail());
+            if (volunteerDTO.getPhoneNumber() != null) volunteer.setPhoneNumber(volunteerDTO.getPhoneNumber());
+            if (volunteerDTO.getAvailableDays() != null) volunteer.setAvailableDays(volunteerDTO.getAvailableDays());
 
-        Volunteer updatedVolunteer = volunteerRepository.save(volunteer);
-        return Utils.mapVolunteerEntityToVolunteerDTOWithRelations(updatedVolunteer);
-    }
+            Volunteer updatedVolunteer = volunteerRepository.save(volunteer);
+            VolunteerDTO updatedVolunteerDTO = Utils.mapVolunteerToDTO(updatedVolunteer);
 
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deleteVolunteer(Long volunteerId) {
-        if (!volunteerRepository.existsById(volunteerId)) {
-            throw new RuntimeException("Volunteer not found");
+            return new Response(200, "Volunteer updated successfully", updatedVolunteerDTO);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
         }
-        volunteerRepository.deleteById(volunteerId);
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<VolunteerDTO> getAllVolunteers() {
+    public Response deleteVolunteer(Long volunteerId) {
+        try {
+            if (!volunteerRepository.existsById(volunteerId)) {
+                throw new RuntimeException("Volunteer not found");
+            }
+            volunteerRepository.deleteById(volunteerId);
+            return new Response(200, "Volunteer deleted successfully", null);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response getAllVolunteers() {
         List<Volunteer> volunteers = volunteerRepository.findAll();
-        return Utils.mapVolunteerListEntityToVolunteerListDTO(volunteers);
+        List<VolunteerDTO> volunteerDTOs = volunteers.stream()
+                .map(Utils::mapVolunteerToDTO)
+                .toList();
+
+        return new Response(200, "Volunteers retrieved successfully", volunteerDTOs);
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public void validateVolunteerRequest(Long requestId) {
-        VolunteerRequest volunteerRequest = volunteerRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Volunteer request not found"));
+    public Response validateVolunteerRequest(Long requestId) {
+        try {
+            VolunteerRequest volunteerRequest = volunteerRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer request not found"));
 
-        volunteerRequest.setStatus(RequestStatus.APPROVED);
-        Volunteer volunteer = volunteerRequest.getVolunteer();
-        Association association = volunteerRequest.getAssociation();
-        association.getVolunteers().add(volunteer);
-        volunteer.getAssociations().add(association);
+            volunteerRequest.setStatus(RequestStatus.APPROVED);
+            Volunteer volunteer = volunteerRequest.getVolunteer();
+            Association association = volunteerRequest.getAssociation();
+            association.getVolunteers().add(volunteer);
+            volunteer.getAssociations().add(association);
 
-        volunteerRequestRepository.save(volunteerRequest);
-        associationRepository.save(association);
-        volunteerRepository.save(volunteer);
+            volunteerRequestRepository.save(volunteerRequest);
+            associationRepository.save(association);
+            volunteerRepository.save(volunteer);
+
+            return new Response(200, "Volunteer request approved successfully", volunteerRequest);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        }
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public SessionDTO confirmSession(Long sessionId) {
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new RuntimeException("Session not found"));
+    public Response confirmSession(Long sessionId) {
+        try {
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
 
-        session.setStatus(SessionStatus.CONFIRMED);
-        Session updatedSession = sessionRepository.save(session);
-        return Utils.mapSessionEntityToSessionDTOWithRelations(updatedSession);
+            session.setStatus(SessionStatus.CONFIRMED);
+            Session updatedSession = sessionRepository.save(session);
+            SessionDTO sessionDTO = Utils.mapSessionToDTO(updatedSession);
+
+            return new Response(200, "Session confirmed successfully", sessionDTO);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        }
     }
 }

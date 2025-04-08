@@ -2,10 +2,8 @@ package com.amine.digiexpo.entity;
 
 import com.amine.digiexpo.enumeration.RequestStatus;
 import jakarta.persistence.*;
-import lombok.Data;
 
 @Entity
-@Data
 public class VolunteerRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +19,36 @@ public class VolunteerRequest {
 
     @Enumerated(EnumType.STRING)
     private RequestStatus status = RequestStatus.PENDING;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Volunteer getVolunteer() {
+        return volunteer;
+    }
+
+    public void setVolunteer(Volunteer volunteer) {
+        this.volunteer = volunteer;
+    }
+
+    public Association getAssociation() {
+        return association;
+    }
+
+    public void setAssociation(Association association) {
+        this.association = association;
+    }
+
+    public RequestStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RequestStatus status) {
+        this.status = status;
+    }
 }

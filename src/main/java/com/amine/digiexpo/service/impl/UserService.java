@@ -36,32 +36,23 @@ public class UserService implements IUserService {
 
     @Override
     public Response register(RegisterRequest registerRequest) {
-        Response response = new Response();
-
         // Check if username already exists
         if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()) {
-            response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            response.setMessage("Username already exists");
-            return response;
+            return new Response(HttpStatus.BAD_REQUEST.value(),"Username already exists",null);
         }
 
         // Check if email already exists
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
-            response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            response.setMessage("Email already exists");
-            return response;
+            return new Response(HttpStatus.BAD_REQUEST.value(),"Email already exists",null);
         }
 
         // This should be implemented in specific service implementations
         // for Admin, Association, and Volunteer
-        response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        response.setMessage("Direct registration not supported. Use specific registration endpoints.");
-        return response;
+        return new Response(HttpStatus.BAD_REQUEST.value(),"Direct registration not supported. Use specific registration endpoints.",null);
     }
 
     @Override
     public Response login(LoginRequest loginRequest) {
-        Response response = new Response();
 
         try {
             // Authenticate the user
@@ -85,73 +76,54 @@ public class UserService implements IUserService {
             // Generate JWT token
             String token = jwtService.generateToken(user);
 
-            response.setStatusCode(HttpStatus.OK.value());
-            response.setMessage("Login successful");
-            response.setToken(token);
-            response.setRole(user.getRole().name());
-            response.setUser(Utils.mapUserEntityToUserDTO(user));
+            return new Response(HttpStatus.OK.value(), "Login successful",token,user.getRole(),Utils.mapUserToDTO(user));
 
-            return response;
         } catch (Exception e) {
-            response.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-            response.setMessage("Invalid credentials");
-            return response;
+            return new Response(401, "Invalid credentials", null);
         }
     }
 
     @Override
     public Response getAllUsers() {
-        Response response = new Response();
-        List<User> users = userRepository.findAll();
+        try {
+            List<User> users = userRepository.findAll();
+            List<UserDTO> userDTOs = Utils.mapUserListToDTOList(users);
 
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("Users retrieved successfully");
-        response.setUserList(Utils.mapUserListEntityToUserListDTO(users));
-
-        return response;
+            return new Response(200, "Users retrieved successfully", userDTOs);
+        } catch (Exception e) {
+            return new Response(500, "Error retrieving users", null);
+        }
     }
 
     @Override
     public Response getUserById(Long id) {
-        Response response = new Response();
-
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isPresent()) {
-            response.setStatusCode(HttpStatus.OK.value());
-            response.setMessage("User retrieved successfully");
-            response.setUser(Utils.mapUserEntityToUserDTO(userOptional.get()));
-        } else {
-            response.setStatusCode(HttpStatus.NOT_FOUND.value());
-            response.setMessage("User not found");
+        try {
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            UserDTO userDTO = Utils.mapUserToDTO(user);
+            return new Response(200, "User retrieved successfully", userDTO);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
         }
-
-        return response;
     }
 
     @Override
     public Response updateUser(Long id, UserDTO userDTO) {
-        // This should be implemented in specific service implementations
-        Response response = new Response();
-        response.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        response.setMessage("Direct update not supported. Use specific update endpoints.");
-        return response;
+        return new Response(400, "Direct update not supported. Use specific update endpoints.", null);
     }
 
     @Override
     public Response deleteUser(Long id) {
-        Response response = new Response();
+        try {
+            if (!userRepository.existsById(id)) {
+                throw new RuntimeException("User not found");
+            }
 
-        if (!userRepository.existsById(id)) {
-            response.setStatusCode(HttpStatus.NOT_FOUND.value());
-            response.setMessage("User not found");
-            return response;
+            userRepository.deleteById(id);
+            return new Response(200, "User deleted successfully", null);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
         }
-
-        userRepository.deleteById(id);
-        response.setStatusCode(HttpStatus.OK.value());
-        response.setMessage("User deleted successfully");
-
-        return response;
     }
 
     @Override

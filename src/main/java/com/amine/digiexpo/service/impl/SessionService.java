@@ -1,5 +1,6 @@
 package com.amine.digiexpo.service.impl;
 
+import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.Repository.AssociationRepository;
 import com.amine.digiexpo.Repository.SessionRepository;
@@ -24,8 +25,8 @@ public class SessionService implements ISessionService {
 
     @Autowired
     public SessionService(SessionRepository sessionRepository,
-                              AssociationRepository associationRepository,
-                              VolunteerRepository volunteerRepository) {
+                          AssociationRepository associationRepository,
+                          VolunteerRepository volunteerRepository) {
         this.sessionRepository = sessionRepository;
         this.associationRepository = associationRepository;
         this.volunteerRepository = volunteerRepository;
@@ -33,59 +34,94 @@ public class SessionService implements ISessionService {
 
     @Override
     @PreAuthorize("hasRole('ASSOCIATION')")
-    public SessionDTO createSession(SessionDTO sessionDTO) {
-        Association association = associationRepository.findById(sessionDTO.getAssociation().getId())
-                .orElseThrow(() -> new RuntimeException("Association not found"));
+    public Response createSession(SessionDTO sessionDTO) {
+        try {
+            // Validate the association
+            Association association = associationRepository.findById(sessionDTO.getAssociation().getId())
+                    .orElseThrow(() -> new RuntimeException("Association not found"));
 
-        Session session = new Session();
-        session.setDate(sessionDTO.getDate());
-        session.setStatus(sessionDTO.getStatus());
-        session.setAssociation(association);
+            // Create the session
+            Session session = new Session();
+            session.setDate(sessionDTO.getDate());
+            session.setStatus(sessionDTO.getStatus());
+            session.setAssociation(association);
 
-        Session savedSession = sessionRepository.save(session);
-        return Utils.mapSessionEntityToSessionDTOWithRelations(savedSession);
+            // Save the session
+            Session savedSession = sessionRepository.save(session);
+
+            // Return successful response
+            return new Response(201, "Session created successfully", Utils.mapSessionToDTOWithRelations(savedSession));
+        } catch (Exception e) {
+            // Handle exceptions and return error response
+            return new Response(500, "Failed to create session: " + e.getMessage(), null);
+        }
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public SessionDTO updateSession(Long sessionId, SessionDTO sessionDTO) {
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new RuntimeException("Session not found"));
+    public Response updateSession(Long sessionId, SessionDTO sessionDTO) {
+        try {
+            // Find the session
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
 
-        if (sessionDTO.getDate() != null) {
-            session.setDate(sessionDTO.getDate());
-        }
-        if (sessionDTO.getStatus() != null) {
-            session.setStatus(sessionDTO.getStatus());
-        }
-        if (sessionDTO.getAssociation() != null && sessionDTO.getAssociation().getId() != null) {
-            Association association = associationRepository.findById(sessionDTO.getAssociation().getId())
-                    .orElseThrow(() -> new RuntimeException("Association not found"));
-            session.setAssociation(association);
-        }
-        if (sessionDTO.getVolunteer() != null && sessionDTO.getVolunteer().getId() != null) {
-            Volunteer volunteer = volunteerRepository.findById(sessionDTO.getVolunteer().getId())
-                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
-            session.setVolunteer(volunteer);
-        }
+            // Update session fields if provided in the DTO
+            if (sessionDTO.getDate() != null) {
+                session.setDate(sessionDTO.getDate());
+            }
+            if (sessionDTO.getStatus() != null) {
+                session.setStatus(sessionDTO.getStatus());
+            }
+            if (sessionDTO.getAssociation() != null && sessionDTO.getAssociation().getId() != null) {
+                Association association = associationRepository.findById(sessionDTO.getAssociation().getId())
+                        .orElseThrow(() -> new RuntimeException("Association not found"));
+                session.setAssociation(association);
+            }
+            if (sessionDTO.getVolunteer() != null && sessionDTO.getVolunteer().getId() != null) {
+                Volunteer volunteer = volunteerRepository.findById(sessionDTO.getVolunteer().getId())
+                        .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+                session.setVolunteer(volunteer);
+            }
 
-        Session updatedSession = sessionRepository.save(session);
-        return Utils.mapSessionEntityToSessionDTOWithRelations(updatedSession);
+            // Save the updated session
+            Session updatedSession = sessionRepository.save(session);
+
+            // Return successful response
+            return new Response(200, "Session updated successfully", Utils.mapSessionToDTOWithRelations(updatedSession));
+        } catch (Exception e) {
+            // Handle exceptions and return error response
+            return new Response(500, "Failed to update session: " + e.getMessage(), null);
+        }
     }
 
     @Override
     @PreAuthorize("hasAnyRole('ASSOCIATION', 'BENEVOLE', 'ADMIN')")
-    public SessionDTO getSessionById(Long sessionId) {
-        Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new RuntimeException("Session not found"));
+    public Response getSessionById(Long sessionId) {
+        try {
+            // Find the session by ID
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
 
-        return Utils.mapSessionEntityToSessionDTOWithRelations(session);
+            // Return successful response
+            return new Response(200, "Session retrieved successfully", Utils.mapSessionToDTOWithRelations(session));
+        } catch (Exception e) {
+            // Handle exceptions and return error response
+            return new Response(500, "Failed to retrieve session: " + e.getMessage(), null);
+        }
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public List<SessionDTO> getAllSessions() {
-        List<Session> sessions = sessionRepository.findAll();
-        return Utils.mapSessionListEntityToSessionListDTO(sessions);
+    public Response getAllSessions() {
+        try {
+            // Retrieve all sessions
+            List<Session> sessions = sessionRepository.findAll();
+
+            // Return successful response
+            return new Response(200, "Sessions retrieved successfully", Utils.mapSessionListToDTOList(sessions));
+        } catch (Exception e) {
+            // Handle exceptions and return error response
+            return new Response(500, "Failed to retrieve sessions: " + e.getMessage(), null);
+        }
     }
 }

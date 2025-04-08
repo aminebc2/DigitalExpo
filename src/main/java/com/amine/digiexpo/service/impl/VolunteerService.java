@@ -1,5 +1,6 @@
 package com.amine.digiexpo.service.impl;
 
+import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
 import com.amine.digiexpo.Repository.SessionRepository;
@@ -23,51 +24,66 @@ public class VolunteerService implements IVolunteerService {
 
     @Autowired
     public VolunteerService(VolunteerRepository volunteerRepository,
-                                SessionRepository sessionRepository) {
+                            SessionRepository sessionRepository) {
         this.volunteerRepository = volunteerRepository;
         this.sessionRepository = sessionRepository;
     }
 
     @Override
     @PreAuthorize("hasRole('BENEVOLE')")
-    public VolunteerDTO updateAvailableDays(Long volunteerId, List<DayOfWeek> availableDays) {
-        // Récupérer le bénévole
-        Volunteer volunteer = volunteerRepository.findById(volunteerId)
-                .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+    public Response updateAvailableDays(Long volunteerId, List<DayOfWeek> availableDays) {
+        try {
+            // Récupérer le bénévole
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
 
-        // Mettre à jour les jours de disponibilité
-        volunteer.setAvailableDays(availableDays);
+            // Mettre à jour les jours de disponibilité
+            volunteer.setAvailableDays(availableDays);
 
-        // Sauvegarder les modifications
-        Volunteer updatedVolunteer = volunteerRepository.save(volunteer);
+            // Sauvegarder les modifications
+            Volunteer updatedVolunteer = volunteerRepository.save(volunteer);
 
-        // Mapper vers DTO avec relations
-        return Utils.mapVolunteerEntityToVolunteerDTOWithRelations(updatedVolunteer);
-    }
-
-    @Override
-    @PreAuthorize("hasRole('BENEVOLE')")
-    public List<SessionDTO> getSessions(Long volunteerId) {
-        // Vérifier si le bénévole existe
-        if (!volunteerRepository.existsById(volunteerId)) {
-            throw new RuntimeException("Volunteer not found");
+            // Mapper vers DTO avec relations
+            return new Response(200, "Volunteer availability updated successfully", Utils.mapVolunteerToDTOWithRelations(updatedVolunteer));
+        } catch (Exception e) {
+            // Handle errors and return failure response
+            return new Response(500, "Failed to update volunteer availability: " + e.getMessage(), null);
         }
-
-        // Récupérer les sessions assignées au bénévole
-        List<Session> sessions = sessionRepository.findByVolunteerId(volunteerId);
-
-        // Mapper la liste vers DTOs avec relations
-        return Utils.mapSessionListEntityToSessionListDTO(sessions);
     }
 
     @Override
     @PreAuthorize("hasRole('BENEVOLE')")
-    public VolunteerDTO getVolunteerById(Long volunteerId) {
-        // Récupérer le bénévole
-        Volunteer volunteer = volunteerRepository.findById(volunteerId)
-                .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+    public Response getSessions(Long volunteerId) {
+        try {
+            // Vérifier si le bénévole existe
+            if (!volunteerRepository.existsById(volunteerId)) {
+                throw new RuntimeException("Volunteer not found");
+            }
 
-        // Mapper vers DTO avec relations
-        return Utils.mapVolunteerEntityToVolunteerDTOWithRelations(volunteer);
+            // Récupérer les sessions assignées au bénévole
+            List<Session> sessions = sessionRepository.findByVolunteerId(volunteerId);
+
+            // Mapper la liste vers DTOs avec relations
+            return new Response(200, "Sessions retrieved successfully", Utils.mapSessionListToDTOList(sessions));
+        } catch (Exception e) {
+            // Handle errors and return failure response
+            return new Response(500, "Failed to retrieve sessions: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('BENEVOLE')")
+    public Response getVolunteerById(Long volunteerId) {
+        try {
+            // Récupérer le bénévole
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+
+            // Mapper vers DTO avec relations
+            return new Response(200, "Volunteer retrieved successfully", Utils.mapVolunteerToDTOWithRelations(volunteer));
+        } catch (Exception e) {
+            // Handle errors and return failure response
+            return new Response(500, "Failed to retrieve volunteer: " + e.getMessage(), null);
+        }
     }
 }

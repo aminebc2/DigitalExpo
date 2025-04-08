@@ -5,6 +5,7 @@ import com.amine.digiexpo.entity.*;
 
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -12,201 +13,164 @@ public class Utils {
     private static final String ALPHANUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final SecureRandom secureRandom = new SecureRandom();
 
-    // Random code generator for potential use with request confirmations or session IDs
     public static String generateRandomCode(int length) {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            int randomIndex = secureRandom.nextInt(ALPHANUMERIC_STRING.length());
-            char randomChar = ALPHANUMERIC_STRING.charAt(randomIndex);
-            stringBuilder.append(randomChar);
+            int index = secureRandom.nextInt(ALPHANUMERIC_STRING.length());
+            builder.append(ALPHANUMERIC_STRING.charAt(index));
         }
-        return stringBuilder.toString();
+        return builder.toString();
     }
 
-    // User mapping methods
-    public static UserDTO mapUserEntityToUserDTO(User user) {
+    // ----------- USER MAPPING -----------
+
+    public static UserDTO mapUserToDTO(User user) {
         if (user == null) return null;
 
-        UserDTO userDTO;
+        if (user instanceof Admin) return mapAdminToDTO((Admin) user);
+        if (user instanceof Association) return mapAssociationToDTO((Association) user);
+        if (user instanceof Volunteer) return mapVolunteerToDTO((Volunteer) user);
 
-        if (user instanceof Admin) {
-            userDTO = new AdminDTO();
-        } else if (user instanceof Association) {
-            Association association = (Association) user;
-            AssociationDTO associationDTO = new AssociationDTO();
-
-            associationDTO.setName(association.getName());
-            associationDTO.setVille(association.getVille());
-            associationDTO.setResponsableName(association.getResponsableName());
-            associationDTO.setResponsablePhone(association.getResponsablePhone());
-
-            userDTO = associationDTO;
-        } else if (user instanceof Volunteer) {
-            Volunteer volunteer = (Volunteer) user;
-            VolunteerDTO volunteerDTO = new VolunteerDTO();
-
-            volunteerDTO.setPhoneNumber(volunteer.getPhoneNumber());
-            volunteerDTO.setAvailableDays(volunteer.getAvailableDays());
-
-            userDTO = volunteerDTO;
-        } else {
-            userDTO = new UserDTO();
-        }
-
-        userDTO.setId(user.getId());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setRole(user.getRole());
-
-        return userDTO;
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole());
+        return dto;
     }
 
-    // Session mapping methods
-    public static SessionDTO mapSessionEntityToSessionDTO(Session session) {
-        if (session == null) return null;
-
-        SessionDTO sessionDTO = new SessionDTO();
-        sessionDTO.setId(session.getId());
-        sessionDTO.setDate(session.getDate());
-        sessionDTO.setStatus(session.getStatus());
-
-        return sessionDTO;
+    public static AdminDTO mapAdminToDTO(Admin admin) {
+        if (admin == null) return null;
+        AdminDTO dto = new AdminDTO();
+        dto.setId(admin.getId());
+        dto.setUsername(admin.getUsername());
+        dto.setEmail(admin.getEmail());
+        dto.setRole(admin.getRole());
+        return dto;
     }
 
-    // Volunteer mapping methods
-    public static VolunteerDTO mapVolunteerEntityToVolunteerDTO(Volunteer volunteer) {
-        if (volunteer == null) return null;
-
-        VolunteerDTO volunteerDTO = new VolunteerDTO();
-        volunteerDTO.setId(volunteer.getId());
-        volunteerDTO.setUsername(volunteer.getUsername());
-        volunteerDTO.setEmail(volunteer.getEmail());
-        volunteerDTO.setRole(volunteer.getRole());
-        volunteerDTO.setPhoneNumber(volunteer.getPhoneNumber());
-        volunteerDTO.setAvailableDays(volunteer.getAvailableDays());
-
-        return volunteerDTO;
-    }
-
-    // Association mapping methods
-    public static AssociationDTO mapAssociationEntityToAssociationDTO(Association association) {
+    public static AssociationDTO mapAssociationToDTO(Association association) {
         if (association == null) return null;
 
-        AssociationDTO associationDTO = new AssociationDTO();
-        associationDTO.setId(association.getId());
-        associationDTO.setUsername(association.getUsername());
-        associationDTO.setEmail(association.getEmail());
-        associationDTO.setRole(association.getRole());
-        associationDTO.setName(association.getName());
-        associationDTO.setVille(association.getVille());
-        associationDTO.setResponsableName(association.getResponsableName());
-        associationDTO.setResponsablePhone(association.getResponsablePhone());
-
-        return associationDTO;
+        AssociationDTO dto = new AssociationDTO();
+        dto.setId(association.getId());
+        dto.setUsername(association.getUsername());
+        dto.setEmail(association.getEmail());
+        dto.setRole(association.getRole());
+        dto.setName(association.getName());
+        dto.setVille(association.getVille());
+        dto.setResponsableName(association.getResponsableName());
+        dto.setResponsablePhone(association.getResponsablePhone());
+        return dto;
     }
 
-    // VolunteerRequest mapping methods
-    public static VolunteerRequestDTO mapVolunteerRequestEntityToVolunteerRequestDTO(VolunteerRequest volunteerRequest) {
-        if (volunteerRequest == null) return null;
-
-        VolunteerRequestDTO volunteerRequestDTO = new VolunteerRequestDTO();
-        volunteerRequestDTO.setId(volunteerRequest.getId());
-        volunteerRequestDTO.setStatus(volunteerRequest.getStatus());
-
-        return volunteerRequestDTO;
-    }
-
-    // Advanced mapping methods with relationships
-    public static SessionDTO mapSessionEntityToSessionDTOWithRelations(Session session) {
-        if (session == null) return null;
-
-        SessionDTO sessionDTO = mapSessionEntityToSessionDTO(session);
-
-        if (session.getAssociation() != null) {
-            sessionDTO.setAssociation(mapAssociationEntityToAssociationDTO(session.getAssociation()));
-        }
-
-        if (session.getVolunteer() != null) {
-            sessionDTO.setVolunteer(mapVolunteerEntityToVolunteerDTO(session.getVolunteer()));
-        }
-
-        return sessionDTO;
-    }
-
-    public static VolunteerDTO mapVolunteerEntityToVolunteerDTOWithRelations(Volunteer volunteer) {
+    public static VolunteerDTO mapVolunteerToDTO(Volunteer volunteer) {
         if (volunteer == null) return null;
 
-        VolunteerDTO volunteerDTO = mapVolunteerEntityToVolunteerDTO(volunteer);
+        VolunteerDTO dto = new VolunteerDTO();
+        dto.setId(volunteer.getId());
+        dto.setUsername(volunteer.getUsername());
+        dto.setEmail(volunteer.getEmail());
+        dto.setRole(volunteer.getRole());
+        dto.setPhoneNumber(volunteer.getPhoneNumber());
+        dto.setAvailableDays(volunteer.getAvailableDays());
+        return dto;
+    }
+
+    // ----------- SESSION MAPPING -----------
+
+    public static SessionDTO mapSessionToDTO(Session session) {
+        if (session == null) return null;
+
+        SessionDTO dto = new SessionDTO();
+        dto.setId(session.getId());
+        dto.setDate(session.getDate());
+        dto.setStatus(session.getStatus());
+        return dto;
+    }
+
+    public static SessionDTO mapSessionToDTOWithRelations(Session session) {
+        SessionDTO dto = mapSessionToDTO(session);
+        dto.setAssociation(mapAssociationToDTO(session.getAssociation()));
+        dto.setVolunteer(mapVolunteerToDTO(session.getVolunteer()));
+        return dto;
+    }
+
+    // ----------- VOLUNTEER REQUEST MAPPING -----------
+
+    public static VolunteerRequestDTO mapVolunteerRequestToDTO(VolunteerRequest request) {
+        if (request == null) return null;
+
+        VolunteerRequestDTO dto = new VolunteerRequestDTO();
+        dto.setId(request.getId());
+        dto.setStatus(request.getStatus());
+        return dto;
+    }
+
+    public static VolunteerRequestDTO mapVolunteerRequestToDTOWithRelations(VolunteerRequest request) {
+        VolunteerRequestDTO dto = mapVolunteerRequestToDTO(request);
+        dto.setVolunteer(mapVolunteerToDTO(request.getVolunteer()));
+        dto.setAssociation(mapAssociationToDTO(request.getAssociation()));
+        return dto;
+    }
+
+    // ----------- RELATIONAL MAPPING -----------
+
+    public static VolunteerDTO mapVolunteerToDTOWithRelations(Volunteer volunteer) {
+        VolunteerDTO dto = mapVolunteerToDTO(volunteer);
 
         if (volunteer.getAssociations() != null) {
-            volunteerDTO.setAssociations(volunteer.getAssociations().stream()
-                    .map(Utils::mapAssociationEntityToAssociationDTO)
+            dto.setAssociations(volunteer.getAssociations().stream()
+                    .map(Utils::mapAssociationToDTO)
                     .collect(Collectors.toList()));
         }
 
         if (volunteer.getSessions() != null) {
-            volunteerDTO.setSessions(volunteer.getSessions().stream()
-                    .map(Utils::mapSessionEntityToSessionDTO)
+            dto.setSessions(volunteer.getSessions().stream()
+                    .map(Utils::mapSessionToDTO)
                     .collect(Collectors.toList()));
         }
 
-        return volunteerDTO;
+        return dto;
     }
 
-    public static AssociationDTO mapAssociationEntityToAssociationDTOWithRelations(Association association) {
-        if (association == null) return null;
-
-        AssociationDTO associationDTO = mapAssociationEntityToAssociationDTO(association);
+    public static AssociationDTO mapAssociationToDTOWithRelations(Association association) {
+        AssociationDTO dto = mapAssociationToDTO(association);
 
         if (association.getVolunteers() != null) {
-            associationDTO.setVolunteers(association.getVolunteers().stream()
-                    .map(Utils::mapVolunteerEntityToVolunteerDTO)
+            dto.setVolunteers(association.getVolunteers().stream()
+                    .map(Utils::mapVolunteerToDTO)
                     .collect(Collectors.toList()));
         }
 
         if (association.getSessions() != null) {
-            associationDTO.setSessions(association.getSessions().stream()
-                    .map(Utils::mapSessionEntityToSessionDTO)
+            dto.setSessions(association.getSessions().stream()
+                    .map(Utils::mapSessionToDTO)
                     .collect(Collectors.toList()));
         }
 
-        return associationDTO;
+        return dto;
     }
 
-    public static VolunteerRequestDTO mapVolunteerRequestEntityToVolunteerRequestDTOWithRelations(VolunteerRequest volunteerRequest) {
-        if (volunteerRequest == null) return null;
+    // ----------- LIST MAPPING -----------
 
-        VolunteerRequestDTO volunteerRequestDTO = mapVolunteerRequestEntityToVolunteerRequestDTO(volunteerRequest);
-
-        if (volunteerRequest.getVolunteer() != null) {
-            volunteerRequestDTO.setVolunteer(mapVolunteerEntityToVolunteerDTO(volunteerRequest.getVolunteer()));
-        }
-
-        if (volunteerRequest.getAssociation() != null) {
-            volunteerRequestDTO.setAssociation(mapAssociationEntityToAssociationDTO(volunteerRequest.getAssociation()));
-        }
-
-        return volunteerRequestDTO;
+    public static List<UserDTO> mapUserListToDTOList(List<User> users) {
+        return users.stream().map(Utils::mapUserToDTO).collect(Collectors.toList());
     }
 
-    // List mapping methods
-    public static List<UserDTO> mapUserListEntityToUserListDTO(List<User> userList) {
-        return userList.stream().map(Utils::mapUserEntityToUserDTO).collect(Collectors.toList());
+    public static List<VolunteerDTO> mapVolunteerListToDTOList(List<Volunteer> volunteers) {
+        return volunteers.stream().map(Utils::mapVolunteerToDTO).collect(Collectors.toList());
     }
 
-    public static List<VolunteerDTO> mapVolunteerListEntityToVolunteerListDTO(List<Volunteer> volunteerList) {
-        return volunteerList.stream().map(Utils::mapVolunteerEntityToVolunteerDTO).collect(Collectors.toList());
+    public static List<AssociationDTO> mapAssociationListToDTOList(List<Association> associations) {
+        return associations.stream().map(Utils::mapAssociationToDTO).collect(Collectors.toList());
     }
 
-    public static List<AssociationDTO> mapAssociationListEntityToAssociationListDTO(List<Association> associationList) {
-        return associationList.stream().map(Utils::mapAssociationEntityToAssociationDTO).collect(Collectors.toList());
+    public static List<SessionDTO> mapSessionListToDTOList(List<Session> sessions) {
+        return sessions.stream().map(Utils::mapSessionToDTO).collect(Collectors.toList());
     }
 
-    public static List<SessionDTO> mapSessionListEntityToSessionListDTO(List<Session> sessionList) {
-        return sessionList.stream().map(Utils::mapSessionEntityToSessionDTO).collect(Collectors.toList());
-    }
-
-    public static List<VolunteerRequestDTO> mapVolunteerRequestListEntityToVolunteerRequestListDTO(List<VolunteerRequest> volunteerRequestList) {
-        return volunteerRequestList.stream().map(Utils::mapVolunteerRequestEntityToVolunteerRequestDTO).collect(Collectors.toList());
+    public static List<VolunteerRequestDTO> mapVolunteerRequestListToDTOList(List<VolunteerRequest> requests) {
+        return requests.stream().map(Utils::mapVolunteerRequestToDTO).collect(Collectors.toList());
     }
 }
