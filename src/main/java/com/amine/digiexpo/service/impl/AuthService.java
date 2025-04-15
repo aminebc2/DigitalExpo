@@ -10,8 +10,10 @@ import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.entity.User;
 import com.amine.digiexpo.entity.Volunteer;
 import com.amine.digiexpo.service.interfac.IAuthService;
+import com.amine.digiexpo.utils.JWTUtils;
 import com.amine.digiexpo.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,51 +21,59 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class AuthService implements IAuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    @Autowired
+    private JWTUtils jwtService;
 
     @Autowired
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager) {
+                       AuthenticationManager authenticationManager, JWTUtils jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     @Override
     public Response login(LoginRequest loginRequest) {
         try {
-            // Authentication with Spring Security
+            // Authenticate using Spring Security
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(), // or loginRequest.getEmail() depending on your logic
+                            loginRequest.getUsername(),
                             loginRequest.getPassword()
                     )
             );
 
-            // Set security context
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Retrieve authenticated user
             User user = userRepository.findByUsernameOrEmail(loginRequest.getUsername(), loginRequest.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            String token = jwtService.generateToken(user); // Generate JWT
 
-            // Map entity to DTO with Utils
             UserDTO userDTO = Utils.mapUserToDTO(user);
 
-            // Return successful response
-            return new Response(200, "Login successful", userDTO);
+            // Return both token and user info
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("user", userDTO);
+
+            return new Response(200, "Login successful", data);
         } catch (Exception e) {
-            // Handle exceptions and return error response
             return new Response(500, "Authentication failed: " + e.getMessage(), null);
         }
     }
+
 
     @Override
     public Response register(RegisterRequest registerRequest) {

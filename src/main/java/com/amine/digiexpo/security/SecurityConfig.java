@@ -35,7 +35,7 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)  // Désactive la protection CSRF
                 .cors(Customizer.withDefaults())  // Active la gestion CORS
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/auth/**", "/associations/**", "/aboutus/**","/accueil/**").permitAll()  // Permet l'accès aux endpoints d'authentification et aux ressources publiques
+                        .requestMatchers("/auth/**","/associations/**", "/aboutus/**", "/accueil/**").permitAll()// Permet l'accès aux endpoints d'authentification et aux ressources publiques
                         .anyRequest().authenticated())  // Toute autre requête nécessite une authentification
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Utilise un modèle stateless (sans session)
                 .authenticationProvider(authenticationProvider())  // Fournit un provider d'authentification

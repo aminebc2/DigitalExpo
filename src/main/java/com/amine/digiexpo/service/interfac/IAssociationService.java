@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface IAssociationService {
     // Réserver une session un jour par semaine
-    Response reserveSession(Long associationId, LocalDate date);
+    Response reserveSession(Long associationId, List<LocalDate> dates);
 
     // Consulter la liste des réservations (sessions)
     Response getSessions(Long associationId);

@@ -197,18 +197,20 @@ public class AdminService implements IAdminService {
     }
 
     @Override
-    public Response confirmSession(Long sessionId) {
+    public Response confirmSession(Long sessionId, SessionStatus status) {
         try {
             Session session = sessionRepository.findById(sessionId)
                     .orElseThrow(() -> new RuntimeException("Session not found"));
 
-            session.setStatus(SessionStatus.CONFIRMED);
+            session.setStatus(status);
             Session updatedSession = sessionRepository.save(session);
             SessionDTO sessionDTO = Utils.mapSessionToDTO(updatedSession);
 
-            return new Response(200, "Session confirmed successfully", sessionDTO);
+            return new Response(200, "Session " + status.toString().toLowerCase() + " successfully", sessionDTO);
         } catch (RuntimeException e) {
             return new Response(404, e.getMessage(), null);
         }
     }
+
+
 }

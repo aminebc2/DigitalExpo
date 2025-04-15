@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,27 +25,32 @@ public class AssociationService implements IAssociationService {
     private SessionRepository sessionRepository;
 
     @Override
-    public Response reserveSession(Long associationId, LocalDate date) {
+    public Response reserveSession(Long associationId, List<LocalDate> dates) {
         try {
             Association association = associationRepository.findById(associationId)
                     .orElseThrow(() -> new RuntimeException("Association not found"));
 
-            Session session = new Session();
-            session.setDate(date);
-            session.setStatus(SessionStatus.PENDING);
-            session.setAssociation(association);
+            List<Session> savedSessions = new ArrayList<>();
 
-            Session savedSession = sessionRepository.save(session);
+            for (LocalDate date : dates) {
+                Session session = new Session();
+                session.setDate(date);
+                session.setStatus(SessionStatus.PENDING);
+                session.setAssociation(association);
+                Session saved = sessionRepository.save(session);
+                savedSessions.add(saved);
+            }
 
             Response response = new Response();
             response.setStatusCode(200);
-            response.setMessage("Session reserved successfully");
-            response.setSession(Utils.mapSessionToDTO(savedSession));
+            response.setMessage("Sessions reserved successfully");
+            response.setSessionList(Utils.mapSessionListToDTOList(savedSessions));
             return response;
         } catch (Exception e) {
-            return new Response(500, "Failed to reserve session: " + e.getMessage(), null);
+            return new Response(500, "Failed to reserve sessions: " + e.getMessage(), null);
         }
     }
+
 
     @Override
     public Response getSessions(Long associationId) {

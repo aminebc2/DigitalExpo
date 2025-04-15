@@ -4,6 +4,7 @@ import com.amine.digiexpo.DTO.AssociationDTO;
 import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
+import com.amine.digiexpo.enumeration.SessionStatus;
 
 import java.util.List;
 
@@ -25,5 +26,5 @@ public interface IAdminService {
     Response validateVolunteerRequest(Long requestId);
 
     // Confirmer une session
-    Response confirmSession(Long sessionId);
+    Response confirmSession(Long sessionId, SessionStatus status);
 }
