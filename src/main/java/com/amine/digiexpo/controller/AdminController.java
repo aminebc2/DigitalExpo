@@ -4,7 +4,6 @@ import com.amine.digiexpo.DTO.AssociationDTO;
 import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionStatusUpdateDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
-import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.IAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -5,6 +5,7 @@ import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IVolunteerService {

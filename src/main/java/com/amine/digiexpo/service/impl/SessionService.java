@@ -8,12 +8,14 @@ import com.amine.digiexpo.Repository.VolunteerRepository;
 import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.entity.Session;
 import com.amine.digiexpo.entity.Volunteer;
+import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.ISessionService;
 import com.amine.digiexpo.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -33,32 +35,31 @@ public class SessionService implements ISessionService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ASSOCIATION')")
-    public Response createSession(SessionDTO sessionDTO) {
+    public Response createSession(List<SessionDTO> sessionDTOList) {
         try {
-            // Validate the association
-            Association association = associationRepository.findById(sessionDTO.getAssociation().getId())
-                    .orElseThrow(() -> new RuntimeException("Association not found"));
+            List<Session> savedSessions = new ArrayList<>();
 
-            // Create the session
-            Session session = new Session();
-            session.setDate(sessionDTO.getDate());
-            session.setStatus(sessionDTO.getStatus());
-            session.setAssociation(association);
+            for (SessionDTO dto : sessionDTOList) {
+                Association association = associationRepository.findById(dto.getAssociation().getId())
+                        .orElseThrow(() -> new RuntimeException("Association not found"));
 
-            // Save the session
-            Session savedSession = sessionRepository.save(session);
+                Session session = new Session();
+                session.setDate(dto.getDate());
+                session.setStatus(dto.getStatus() != null ? dto.getStatus() : SessionStatus.PENDING);
+                session.setAssociation(association);
 
-            // Return successful response
-            return new Response(201, "Session created successfully", Utils.mapSessionToDTOWithRelations(savedSession));
+                savedSessions.add(sessionRepository.save(session));
+            }
+
+            return new Response(201, "Sessions created successfully",
+                    Utils.mapSessionListToDTOList(savedSessions));
+
         } catch (Exception e) {
-            // Handle exceptions and return error response
-            return new Response(500, "Failed to create session: " + e.getMessage(), null);
+            return new Response(500, "Failed to create sessions: " + e.getMessage(), null);
         }
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public Response updateSession(Long sessionId, SessionDTO sessionDTO) {
         try {
             // Find the session
@@ -95,7 +96,6 @@ public class SessionService implements ISessionService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ASSOCIATION', 'BENEVOLE', 'ADMIN')")
     public Response getSessionById(Long sessionId) {
         try {
             // Find the session by ID
@@ -111,7 +111,6 @@ public class SessionService implements ISessionService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public Response getAllSessions() {
         try {
             // Retrieve all sessions

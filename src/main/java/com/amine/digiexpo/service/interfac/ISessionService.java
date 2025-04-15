@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ISessionService {
     // Créer une session (utilisé par Association)
-    Response createSession(SessionDTO sessionDTO);
+    Response createSession(List<SessionDTO> sessionDTOList);
 
     // Mettre à jour une session (ex: assigner un bénévole ou confirmer)
     Response updateSession(Long sessionId, SessionDTO sessionDTO);
