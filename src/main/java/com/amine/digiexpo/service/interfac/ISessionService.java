@@ -17,4 +17,7 @@ public interface ISessionService {
 
     // Récupérer toutes les sessions
     Response getAllSessions();
+
+    // Method to assign a volunteer to a session
+    Response assignVolunteerToSession(Long sessionId, Long volunteerId);
 }

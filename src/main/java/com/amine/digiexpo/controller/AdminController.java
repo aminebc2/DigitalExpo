@@ -1,10 +1,8 @@
 package com.amine.digiexpo.controller;
 
-import com.amine.digiexpo.DTO.AssociationDTO;
-import com.amine.digiexpo.DTO.Response;
-import com.amine.digiexpo.DTO.SessionStatusUpdateDTO;
-import com.amine.digiexpo.DTO.VolunteerDTO;
+import com.amine.digiexpo.DTO.*;
 import com.amine.digiexpo.service.interfac.IAdminService;
+import com.amine.digiexpo.service.interfac.ISessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +15,9 @@ public class AdminController {
 
     @Autowired
     private IAdminService adminService;
+
+    @Autowired
+    private ISessionService sessionService;
 
     // ---------------- Association Endpoints ---------------- //
 
@@ -88,6 +89,15 @@ public class AdminController {
         Response response = adminService.confirmSession(sessionId, statusDTO.getStatus());
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    // Admin can assign volunteer to a session for their association
+    @PostMapping("/assign-volunteer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Response> assignVolunteerToSession(@RequestBody VolunteerSessionAssignmentDTO assignmentDTO) {
+        Response response = sessionService.assignVolunteerToSession(assignmentDTO.getSessionId(), assignmentDTO.getVolunteerId());
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
 
 
 }

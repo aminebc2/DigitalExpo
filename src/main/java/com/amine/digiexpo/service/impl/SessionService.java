@@ -138,4 +138,42 @@ public class SessionService implements ISessionService {
             return new Response(500, "Failed to retrieve sessions: " + e.getMessage(), null);
         }
     }
+
+    // Method to assign a volunteer to a session
+    @Override
+    public Response assignVolunteerToSession(Long sessionId, Long volunteerId) {
+        try {
+            // Fetch the session by ID
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
+
+            // Fetch the volunteer by ID
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+
+            // Check if the session belongs to an association
+            Association sessionAssociation = session.getAssociation();
+            if (sessionAssociation == null) {
+                return new Response(400, "Session does not belong to any association", null);
+            }
+
+            // Ensure the volunteer is part of the association
+            if (!sessionAssociation.getVolunteers().contains(volunteer)) {
+                return new Response(400, "This volunteer is not part of the association for this session", null);
+            }
+
+            // Assign the volunteer to the session
+            session.setVolunteer(volunteer);
+
+            // Save the updated session
+            sessionRepository.save(session);
+
+            return new Response(200, "Volunteer successfully assigned to the session", null);
+
+        } catch (RuntimeException e) {
+            return new Response(400, "Failed to assign volunteer: " + e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Unexpected error while updating session: " + e.getMessage(), null);
+        }
+    }
 }
