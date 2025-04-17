@@ -61,42 +61,53 @@ public class SessionService implements ISessionService {
     @Override
     public Response updateSession(Long sessionId, SessionDTO sessionDTO) {
         try {
-            // Find the session
-            Session session = sessionRepository.findById(sessionId)
-                    .orElseThrow(() -> new RuntimeException("Session not found"));
-
-            // Update session fields if provided in the DTO
-            if (sessionDTO.getDate() != null) {
-                session.setDate(sessionDTO.getDate());
+            // 🔎 Validate sessionId
+            if (sessionId == null) {
+                return new Response(400, "Session ID is required", null);
             }
+
+            // 🔎 Find the session or throw
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found with ID: " + sessionId));
+
+            // 🔎 Validate required field: date
+            if (sessionDTO.getDate() == null) {
+                return new Response(400, "Session date is required", null);
+            }
+
+            // ✅ Update fields
+            session.setDate(sessionDTO.getDate());
+
             if (sessionDTO.getStatus() != null) {
                 session.setStatus(sessionDTO.getStatus());
             }
 
-            // Update association if provided
+            // ✅ Update association if provided
             if (sessionDTO.getAssociation() != null && sessionDTO.getAssociation().getId() != null) {
                 Association association = associationRepository.findById(sessionDTO.getAssociation().getId())
-                        .orElseThrow(() -> new RuntimeException("Association not found"));
+                        .orElseThrow(() -> new RuntimeException("Association not found with ID: " + sessionDTO.getAssociation().getId()));
                 session.setAssociation(association);
             }
 
-            // Update volunteer if provided
+            // ✅ Update volunteer if provided
             if (sessionDTO.getVolunteer() != null && sessionDTO.getVolunteer().getId() != null) {
                 Volunteer volunteer = volunteerRepository.findById(sessionDTO.getVolunteer().getId())
-                        .orElseThrow(() -> new RuntimeException("Volunteer not found"));
-                session.setVolunteer(volunteer); // Assuming it's a many-to-many relationship
+                        .orElseThrow(() -> new RuntimeException("Volunteer not found with ID: " + sessionDTO.getVolunteer().getId()));
+                session.setVolunteer(volunteer);
             }
 
-            // Save the updated session
+            // 💾 Save the updated session
             Session updatedSession = sessionRepository.save(session);
 
-            // Return successful response
             return new Response(200, "Session updated successfully", Utils.mapSessionToDTOWithRelations(updatedSession));
+
         } catch (RuntimeException e) {
-            // Handle exceptions and return error response
-            return new Response(500, "Failed to update session: " + e.getMessage(), null);
+            return new Response(400, "Failed to update session: " + e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Unexpected error while updating session: " + e.getMessage(), null);
         }
     }
+
 
 
     @Override
