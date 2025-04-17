@@ -13,6 +13,7 @@ public class Utils {
     private static final String ALPHANUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final SecureRandom secureRandom = new SecureRandom();
 
+    // Generates a random alphanumeric code of the given length
     public static String generateRandomCode(int length) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
@@ -51,7 +52,6 @@ public class Utils {
 
     public static AssociationDTO mapAssociationToDTO(Association association) {
         if (association == null) return null;
-
         AssociationDTO dto = new AssociationDTO();
         dto.setId(association.getId());
         dto.setUsername(association.getUsername());
@@ -66,7 +66,6 @@ public class Utils {
 
     public static VolunteerDTO mapVolunteerToDTO(Volunteer volunteer) {
         if (volunteer == null) return null;
-
         VolunteerDTO dto = new VolunteerDTO();
         dto.setId(volunteer.getId());
         dto.setUsername(volunteer.getUsername());
@@ -81,7 +80,6 @@ public class Utils {
 
     public static SessionDTO mapSessionToDTO(Session session) {
         if (session == null) return null;
-
         SessionDTO dto = new SessionDTO();
         dto.setId(session.getId());
         dto.setDate(session.getDate());
@@ -90,33 +88,56 @@ public class Utils {
     }
 
     public static SessionDTO mapSessionToDTOWithRelations(Session session) {
+        if (session == null) return null;
+
         SessionDTO dto = mapSessionToDTO(session);
-        dto.setAssociation(mapAssociationToDTO(session.getAssociation()));
-        dto.setVolunteer(mapVolunteerToDTO(session.getVolunteer()));
+
+        if (session.getAssociation() != null) {
+            dto.setAssociation(mapAssociationToDTO(session.getAssociation()));
+        }
+
+        if (session.getVolunteer() != null) {
+            dto.setVolunteer(mapVolunteerToDTO(session.getVolunteer()));
+        }
+
         return dto;
     }
 
     // ----------- VOLUNTEER REQUEST MAPPING -----------
 
-    public static VolunteerRequestDTO mapVolunteerRequestToDTO(VolunteerRequest request) {
-        if (request == null) return null;
-
+    public static VolunteerRequestDTO mapVolunteerRequestToDTO(VolunteerRequest volunteerRequest) {
+        if (volunteerRequest == null) return null;
         VolunteerRequestDTO dto = new VolunteerRequestDTO();
-        dto.setId(request.getId());
-        dto.setStatus(request.getStatus());
+        dto.setId(volunteerRequest.getId());
+        dto.setStatus(volunteerRequest.getStatus());
+
+        if (volunteerRequest.getVolunteer() != null) {
+            dto.setVolunteer(mapVolunteerToDTO(volunteerRequest.getVolunteer()));
+        }
+
+        if (volunteerRequest.getAssociation() != null) {
+            dto.setAssociation(mapAssociationToDTO(volunteerRequest.getAssociation()));
+        }
+
         return dto;
     }
 
     public static VolunteerRequestDTO mapVolunteerRequestToDTOWithRelations(VolunteerRequest request) {
+        if (request == null) return null;
+
         VolunteerRequestDTO dto = mapVolunteerRequestToDTO(request);
+
         dto.setVolunteer(mapVolunteerToDTO(request.getVolunteer()));
         dto.setAssociation(mapAssociationToDTO(request.getAssociation()));
+
         return dto;
     }
 
     // ----------- RELATIONAL MAPPING -----------
 
     public static VolunteerDTO mapVolunteerToDTOWithRelations(Volunteer volunteer) {
+        if (volunteer == null) return null;
+
         VolunteerDTO dto = mapVolunteerToDTO(volunteer);
 
         if (volunteer.getAssociations() != null) {
@@ -135,6 +156,8 @@ public class Utils {
     }
 
     public static AssociationDTO mapAssociationToDTOWithRelations(Association association) {
+        if (association == null) return null;
+
         AssociationDTO dto = mapAssociationToDTO(association);
 
         if (association.getVolunteers() != null) {

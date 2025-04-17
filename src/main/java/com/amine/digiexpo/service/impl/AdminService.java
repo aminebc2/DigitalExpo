@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 @Service
 public class AdminService implements IAdminService {
@@ -206,7 +207,7 @@ public class AdminService implements IAdminService {
             Session updatedSession = sessionRepository.save(session);
             SessionDTO sessionDTO = Utils.mapSessionToDTO(updatedSession);
 
-            return new Response(200, "Session " + status.toString().toLowerCase() + " successfully", sessionDTO);
+            return new Response(200, "Session " + status.name().toLowerCase() + " successfully", sessionDTO);
         } catch (RuntimeException e) {
             return new Response(404, e.getMessage(), null);
         }

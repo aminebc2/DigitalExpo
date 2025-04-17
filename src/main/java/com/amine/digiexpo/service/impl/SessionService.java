@@ -12,7 +12,6 @@ import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.ISessionService;
 import com.amine.digiexpo.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -73,15 +72,19 @@ public class SessionService implements ISessionService {
             if (sessionDTO.getStatus() != null) {
                 session.setStatus(sessionDTO.getStatus());
             }
+
+            // Update association if provided
             if (sessionDTO.getAssociation() != null && sessionDTO.getAssociation().getId() != null) {
                 Association association = associationRepository.findById(sessionDTO.getAssociation().getId())
                         .orElseThrow(() -> new RuntimeException("Association not found"));
                 session.setAssociation(association);
             }
+
+            // Update volunteer if provided
             if (sessionDTO.getVolunteer() != null && sessionDTO.getVolunteer().getId() != null) {
                 Volunteer volunteer = volunteerRepository.findById(sessionDTO.getVolunteer().getId())
                         .orElseThrow(() -> new RuntimeException("Volunteer not found"));
-                session.setVolunteer(volunteer);
+                session.setVolunteer(volunteer); // Assuming it's a many-to-many relationship
             }
 
             // Save the updated session
@@ -89,11 +92,12 @@ public class SessionService implements ISessionService {
 
             // Return successful response
             return new Response(200, "Session updated successfully", Utils.mapSessionToDTOWithRelations(updatedSession));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // Handle exceptions and return error response
             return new Response(500, "Failed to update session: " + e.getMessage(), null);
         }
     }
+
 
     @Override
     public Response getSessionById(Long sessionId) {

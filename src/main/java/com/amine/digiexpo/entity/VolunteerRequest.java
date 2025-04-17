@@ -10,11 +10,11 @@ public class VolunteerRequest {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "volunteer_id")
+    @JoinColumn(name = "volunteer_id", referencedColumnName = "id")
     private Volunteer volunteer;
 
     @ManyToOne
-    @JoinColumn(name = "association_id")
+    @JoinColumn(name = "association_id", referencedColumnName = "id")
     private Association association;
 
     @Enumerated(EnumType.STRING)

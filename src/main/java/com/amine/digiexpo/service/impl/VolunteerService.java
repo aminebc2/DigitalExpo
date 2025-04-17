@@ -87,4 +87,28 @@ public class VolunteerService implements IVolunteerService {
             return new Response(500, "Failed to retrieve volunteer: " + e.getMessage(), null);
         }
     }
+
+    @Override
+    public Response assignSessionToVolunteerByDate(Long volunteerId, Long sessionId, LocalDate date) {
+        try {
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
+
+            // Check if the volunteer is available on the given date
+            if (volunteer.getAvailableDays().contains(date.getDayOfWeek())) {
+                // Add volunteer to the session
+                session.setVolunteer(volunteer);
+                sessionRepository.save(session);
+
+                return new Response(200, "Session assigned to volunteer successfully", null);
+            } else {
+                return new Response(400, "Volunteer is not available on the selected date", null);
+            }
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        }
+    }
 }

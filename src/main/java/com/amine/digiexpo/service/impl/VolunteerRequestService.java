@@ -1,6 +1,7 @@
 package com.amine.digiexpo.service.impl;
 
 import com.amine.digiexpo.DTO.Response;
+import com.amine.digiexpo.DTO.UpdateRequestStatusDTO;
 import com.amine.digiexpo.DTO.VolunteerRequestDTO;
 import com.amine.digiexpo.Repository.AssociationRepository;
 import com.amine.digiexpo.Repository.VolunteerRepository;
@@ -20,28 +21,27 @@ import java.util.List;
 @Service
 public class VolunteerRequestService implements IVolunteerRequestService {
 
-    private final VolunteerRequestRepository volunteerRequestRepository;
-    private final VolunteerRepository volunteerRepository;
-    private final AssociationRepository associationRepository;
+    @Autowired
+    private VolunteerRequestRepository requestRepository;
 
     @Autowired
-    public VolunteerRequestService(VolunteerRequestRepository volunteerRequestRepository,
-                                   VolunteerRepository volunteerRepository,
-                                   AssociationRepository associationRepository) {
-        this.volunteerRequestRepository = volunteerRequestRepository;
-        this.volunteerRepository = volunteerRepository;
-        this.associationRepository = associationRepository;
-    }
+    private VolunteerRepository volunteerRepository;
+
+    @Autowired
+    private AssociationRepository associationRepository;
+
+    @Autowired
+    private VolunteerRequestRepository volunteerRequestRepository;
 
     @Override
     @PreAuthorize("hasRole('BENEVOLE')")
-    public Response createRequest(Long volunteerId, Long associationId) {
+    public Response createRequest(VolunteerRequestDTO dto) {
         try {
-            // Retrieve the volunteer and association
-            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+            // Retrieve the volunteer and association from the DTO
+            Volunteer volunteer = volunteerRepository.findById(dto.getVolunteer().getId())
                     .orElseThrow(() -> new RuntimeException("Volunteer not found"));
 
-            Association association = associationRepository.findById(associationId)
+            Association association = associationRepository.findById(dto.getAssociation().getId())
                     .orElseThrow(() -> new RuntimeException("Association not found"));
 
             // Create the request
@@ -63,34 +63,38 @@ public class VolunteerRequestService implements IVolunteerRequestService {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public Response updateRequestStatus(Long requestId, RequestStatus status) {
+    public Response updateRequestStatus(UpdateRequestStatusDTO updateRequestStatusDTO) {
         try {
-            // Retrieve the request
-            VolunteerRequest volunteerRequest = volunteerRequestRepository.findById(requestId)
-                    .orElseThrow(() -> new RuntimeException("Volunteer request not found"));
+            // Get requestId and status from the DTO
+            Long requestId = updateRequestStatusDTO.getRequestId();
+            RequestStatus status = updateRequestStatusDTO.getStatus();
 
-            // Update the request status
-            volunteerRequest.setStatus(status);
+            // Retrieve the request by ID
+            VolunteerRequest request = requestRepository.findById(requestId)
+                    .orElseThrow(() -> new RuntimeException("Request not found"));
 
+            // Update the status of the request
+            request.setStatus(status);
+
+            // If approved, add the volunteer to the association and vice versa
             if (status == RequestStatus.APPROVED) {
-                Volunteer volunteer = volunteerRequest.getVolunteer();
-                Association association = volunteerRequest.getAssociation();
-
-                // Add the volunteer to the association
+                Volunteer volunteer = request.getVolunteer();
+                Association association = request.getAssociation();
                 association.getVolunteers().add(volunteer);
                 volunteer.getAssociations().add(association);
 
-                // Save updated association and volunteer
+                // Save the changes to both the association and volunteer
                 associationRepository.save(association);
                 volunteerRepository.save(volunteer);
             }
 
-            // Save and return the updated request
-            VolunteerRequest updatedRequest = volunteerRequestRepository.save(volunteerRequest);
-            return new Response(200, "Request updated successfully", Utils.mapVolunteerRequestToDTOWithRelations(updatedRequest));
+            // Save the updated request
+            VolunteerRequest updatedRequest = requestRepository.save(request);
+
+            // Return success response
+            return new Response(200, "Request status updated", Utils.mapVolunteerRequestToDTOWithRelations(updatedRequest));
         } catch (Exception e) {
-            // Handle errors and return failure response
-            return new Response(500, "Failed to update request: " + e.getMessage(), null);
+            return new Response(500, "Error updating request status: " + e.getMessage(), null);
         }
     }
 
@@ -99,13 +103,10 @@ public class VolunteerRequestService implements IVolunteerRequestService {
     public Response getAllRequests() {
         try {
             // Retrieve all requests
-            List<VolunteerRequest> requests = volunteerRequestRepository.findAll();
-
-            // Return success response with list of requests
-            return new Response(200, "Requests retrieved successfully", Utils.mapVolunteerRequestListToDTOList(requests));
+            List<VolunteerRequest> list = requestRepository.findAll();
+            return new Response(200, "List of requests retrieved", Utils.mapVolunteerRequestListToDTOList(list));
         } catch (Exception e) {
-            // Handle errors and return failure response
-            return new Response(500, "Failed to retrieve requests: " + e.getMessage(), null);
+            return new Response(500, "Error retrieving requests: " + e.getMessage(), null);
         }
     }
 
@@ -113,19 +114,16 @@ public class VolunteerRequestService implements IVolunteerRequestService {
     @PreAuthorize("hasRole('ASSOCIATION')")
     public Response getRequestsByAssociation(Long associationId) {
         try {
-            // Check if the association exists
+            // Ensure the association exists
             if (!associationRepository.existsById(associationId)) {
-                throw new RuntimeException("Association not found");
+                throw new RuntimeException("Association does not exist");
             }
 
-            // Retrieve the requests for the specific association
-            List<VolunteerRequest> requests = volunteerRequestRepository.findByAssociationId(associationId);
-
-            // Return success response with list of requests
-            return new Response(200, "Requests retrieved successfully", Utils.mapVolunteerRequestListToDTOList(requests));
+            // Retrieve requests for a specific association
+            List<VolunteerRequest> list = requestRepository.findByAssociationId(associationId);
+            return new Response(200, "Requests retrieved", Utils.mapVolunteerRequestListToDTOList(list));
         } catch (Exception e) {
-            // Handle errors and return failure response
-            return new Response(500, "Failed to retrieve requests: " + e.getMessage(), null);
+            return new Response(500, "Error retrieving requests: " + e.getMessage(), null);
         }
     }
 }
