@@ -225,15 +225,33 @@ public class AdminService implements IAdminService {
 
             request.setStatus(status);
 
-            // Handle logic when the request is approved
+            Volunteer volunteer = request.getVolunteer();
+            Association association = request.getAssociation();
+
+            // If approved, add volunteer to the association
             if (status == RequestStatus.APPROVED) {
-                Volunteer volunteer = request.getVolunteer();
-                Association association = request.getAssociation();
                 if (!association.getVolunteers().contains(volunteer)) {
                     association.getVolunteers().add(volunteer);
                     volunteer.getAssociations().add(association);
                     associationRepository.save(association);
                     volunteerRepository.save(volunteer);
+                }
+            }
+
+            // If REJECTED or CANCELED, remove the volunteer from association and sessions
+            if (status == RequestStatus.REJECTED || status == RequestStatus.PENDING) {
+                association.getVolunteers().remove(volunteer);
+                volunteer.getAssociations().remove(association);
+                associationRepository.save(association);
+                volunteerRepository.save(volunteer);
+
+                // Remove volunteer from sessions of this association
+                List<Session> sessions = sessionRepository.findByAssociationIdAndVolunteerId(
+                        association.getId(), volunteer.getId()
+                );
+                for (Session session : sessions) {
+                    session.setVolunteer(null); // or remove from list if @ManyToMany
+                    sessionRepository.save(session);
                 }
             }
 
@@ -245,6 +263,7 @@ public class AdminService implements IAdminService {
             return new Response(500, "Error updating request status: " + e.getMessage(), null);
         }
     }
+
 
 
     @Override
@@ -372,17 +391,29 @@ public class AdminService implements IAdminService {
     @Override
     public Response getVolunteers(Long associationId) {
         try {
+            // Fetching the association by ID
             Association association = associationRepository.findById(associationId)
                     .orElseThrow(() -> new RuntimeException("Association not found"));
 
+            // Prepare response
             Response response = new Response();
             response.setStatusCode(200);
             response.setMessage("Volunteer list retrieved");
-            response.setVolunteerList(Utils.mapVolunteerListToDTOList(association.getVolunteers()));
+
+            // ✅ Deduplicate volunteers and map to DTOs
+            response.setVolunteerList(
+                    association.getVolunteers().stream()
+                            .distinct() // Remove duplicate volunteers
+                            .map(Utils::mapVolunteerToDTOWithRelations)
+                            .collect(Collectors.toList())
+            );
+
             return response;
         } catch (Exception e) {
             return new Response(500, "Failed to retrieve volunteers: " + e.getMessage(), null);
         }
     }
+
+
 
 }

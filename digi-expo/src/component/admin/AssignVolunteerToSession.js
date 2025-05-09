@@ -19,25 +19,35 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
         const fetchVolunteers = async () => {
             try {
                 const response = await AdminService.getAssoVolunteers(associationId);
-                console.log('API Response:', response); // Log the response to ensure it's as expected
+                console.log('API Response:', response);  // Log the entire response
 
-                if (response && response.data) {
-                    setVolunteers(response.data);  // Set volunteers if the response is correct
+                // Using the response logs, I can see that all volunteers have the same ID (14)
+                // This is causing React's key duplication error
+                // Let's create a deduplicated list with unique identifiers
+                const volunteerArray = Array.isArray(response) ? response :
+                    response?.volunteerList && Array.isArray(response.volunteerList) ? response.volunteerList :
+                        [];
+
+                console.log('Original Volunteer Array:', volunteerArray);
+
+                // Since all volunteers have the same ID and username, let's deduplicate them
+                // or add unique identifiers if we need to keep them all
+                const processedVolunteers = Array.from(new Map(volunteerArray.map(v => [v.id, v])).values());
+                if (processedVolunteers.length > 0) {
+                    setVolunteers(processedVolunteers);
                 } else {
-                    setError('No data found for volunteers');
+                    console.warn('No volunteers found in response:', response);
+                    setError('No volunteers found for this association');
                 }
             } catch (error) {
                 console.error('Error fetching volunteers:', error);
                 setError(error.message || 'Failed to load volunteers');
             }
-            setLoading(false); // Stop loading once done
+            setLoading(false);
         };
 
         fetchVolunteers();
-    }, [associationId]); // Ensure associationId is tracked
-
-
-
+    }, [associationId]);
 
     const handleAssign = async () => {
         if (!selectedVolunteerId) {
@@ -54,27 +64,48 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
         }
     };
 
-    if (loading) return <div>Loading volunteers...</div>;
-    if (error) return <div className="alert alert-danger">{error}</div>;
+    if (loading) return <div className="spinner-border" role="status"><span className="sr-only">Loading...</span></div>;
 
     return (
         <div>
+            {error && <div className="alert alert-danger">{error}</div>}
+
             <div className="mb-3">
                 <label className="form-label">Select Volunteer</label>
-                <select className="form-select" onChange={(e) => setSelectedVolunteerId(e.target.value)}>
+                <select
+                    className="form-select"
+                    onChange={(e) => setSelectedVolunteerId(e.target.value)}
+                    value={selectedVolunteerId}
+                >
                     <option value="">Choose one</option>
-                    {volunteers.length > 0 ? (
-                        volunteers.map((v) => (
-                            <option key={v.id} value={v.id}>{v.username}</option>
-                        ))
-                    ) : (
-                        <option disabled>No volunteers available</option>
-                    )}
+                    {volunteers.map((volunteer, index) => {
+                        // Use both volunteer.id and index to ensure a unique key
+                        const key = `volunteer-${volunteer.id}-${index}`;
+
+                        // Use the volunteer ID for the value
+                        const value = volunteer.id || '';
+
+                        // Use the username for display
+                        const displayName = volunteer.username || 'Unknown volunteer';
+
+                        return (
+                            <option key={key} value={value}>
+                                {displayName} (#{index + 1})
+                            </option>
+                        );
+                    })}
                 </select>
             </div>
+
             <div className="d-flex justify-content-end">
                 <button className="btn btn-secondary me-2" onClick={onClose}>Cancel</button>
-                <button className="btn btn-primary" onClick={handleAssign}>Assign</button>
+                <button
+                    className="btn btn-primary"
+                    onClick={handleAssign}
+                    disabled={!selectedVolunteerId}
+                >
+                    Assign
+                </button>
             </div>
         </div>
     );

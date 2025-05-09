@@ -22,14 +22,8 @@ public class Volunteer extends User {
     @ElementCollection
     private List<DayOfWeek> availableDays;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "volunteer_association",
-            joinColumns = @JoinColumn(name = "volunteer_id"),
-            inverseJoinColumns = @JoinColumn(name = "association_id")
-    )
+    @ManyToMany(mappedBy = "volunteers", fetch = FetchType.LAZY)
     private Set<Association> associations;
-
 
 
     @OneToMany(mappedBy = "volunteer")

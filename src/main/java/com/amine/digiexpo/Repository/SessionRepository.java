@@ -10,7 +10,9 @@ import java.util.List;
 @Repository
 public interface SessionRepository extends JpaRepository<Session, Long> {
     List<Session> findByAssociationId(Long associationId); // Réservations d'une association
-    List<Session> findByVolunteerId(Long volunteerId);     // Sessions à animer pour un bénévole
+    List<Session> findByVolunteerId(Long volunteerId);
+    List<Session> findByAssociationIdAndVolunteerId(Long associationId, Long volunteerId);
+    // Sessions à animer pour un bénévole
     List<Session> findByDate(LocalDate date);
     /*List<Session> findByConfirmedFalse();*/
 }

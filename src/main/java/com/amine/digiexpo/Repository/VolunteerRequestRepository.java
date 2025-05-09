@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface VolunteerRequestRepository extends JpaRepository<VolunteerRequest, Long> {
     List<VolunteerRequest> findByAssociationId(Long associationId);
+    boolean existsByVolunteerIdAndAssociationId(Long volunteerId, Long associationId);
     List<VolunteerRequest> findByVolunteerId(Long volunteerId);
     Optional<VolunteerRequest> findByVolunteerAndAssociation(Volunteer volunteer, Association association);
     /*List<VolunteerRequest> findByApprovedFalse(); */// Pour Admin

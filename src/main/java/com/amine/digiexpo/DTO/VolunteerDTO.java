@@ -13,6 +13,10 @@ public class VolunteerDTO extends UserDTO {
     private List<AssociationDTO> associations;
     private List<SessionDTO> sessions;
 
+    public VolunteerDTO() {
+
+    }
+
     public String getPhoneNumber() {
         return phoneNumber;
     }

@@ -183,45 +183,64 @@ export default class AdminService {
         }
     }
 
-    // Assign volunteer to session (Admin only)
-    static async assignVolunteerToSession(sessionId, volunteerId) {
+    static async assignVolunteerToSession(sessionId, volunteerId, associationId) {
         try {
-            const response = await axios.post(`${this.API_URL}/assign-volunteer`, {
-                sessionId,
-                volunteerId
-            }, {
-                headers: this.getHeader() // Make sure headers are included here too if necessary
-            });
-            return response.data; // Return the response data on success
-        } catch (error) {
-            if (error.response) {
-                console.error('Assign Volunteer Error:', error.response.data);
-                return {
-                    statusCode: error.response.status,
-                    message: error.response.data?.message || 'Request failed',
-                    data: null
-                };
-            } else {
-                console.error('Client-side error while assigning volunteer:', error.message);
-                return {
-                    statusCode: 500,
-                    message: 'Unexpected client-side error: ' + error.message,
-                    data: null
-                };
-            }
-        }
-    }
+            const payload = { sessionId, volunteerId, associationId };
+            console.log("Assigning volunteer with payload:", payload);
 
-    static async getAssoVolunteers(associationId) {
-        try {
-            const response = await axios.get(`${this.API_URL}/volunteers/${associationId}`, {
-                headers: this.getHeader()
+            const response = await axios.post(`${this.API_URL}/assign-volunteer`, payload, {
+                headers: this.getHeader(),
             });
-            return response.data; // Return the volunteer list from the backend
+
+            return response.data;
         } catch (error) {
-            console.error("Error fetching volunteers:", error);
+            console.error("Assign Volunteer Error:", error.response?.data || error.message);
             throw error;
         }
     }
+
+
+    static async getAssoVolunteers(associationId) {
+        try {
+            console.log(`Fetching volunteers for association ID: ${associationId}`);
+
+            if (!associationId) {
+                console.error('Association ID is missing or invalid');
+                throw new Error('Association ID is required');
+            }
+
+            const response = await axios.get(`${this.API_URL}/asso-volunteers/${associationId}`, {
+                headers: this.getHeader()
+            });
+
+            console.log('Raw API Response:', response);
+
+            // Check if response has expected structure
+            if (!response || !response.data) {
+                console.error('Invalid response format - missing data property');
+                throw new Error('Invalid server response');
+            }
+
+            const responseData = response.data;
+            console.log('Fetched Volunteers data:', responseData);
+
+            // Return the entire response data so the component can handle the structure
+            return responseData;
+        } catch (error) {
+            console.error("Error fetching volunteers:", error);
+
+            // Add more detailed error information
+            if (error.response) {
+                // The request was made and the server responded with a non-2xx status
+                console.error("Server responded with error:", error.response.status, error.response.data);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error("No response received from server:", error.request);
+            }
+
+            throw error;
+        }
+    }
+
 
 }

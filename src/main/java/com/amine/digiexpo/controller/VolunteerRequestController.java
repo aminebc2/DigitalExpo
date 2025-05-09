@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-    @RequestMapping("/volunteer-requests")
+@RequestMapping("/volunteer-requests")
 public class VolunteerRequestController {
 
     @Autowired

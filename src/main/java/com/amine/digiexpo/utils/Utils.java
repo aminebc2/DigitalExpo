@@ -154,14 +154,16 @@ public class Utils {
     public static VolunteerDTO mapVolunteerToDTOWithRelations(Volunteer volunteer) {
         if (volunteer == null) return null;
 
-        VolunteerDTO dto = mapVolunteerToDTO(volunteer);
+        VolunteerDTO dto = mapVolunteerToDTO(volunteer); // basic mapping
 
+        // Ensure associations are not null
         if (volunteer.getAssociations() != null) {
             dto.setAssociations(volunteer.getAssociations().stream()
                     .map(Utils::mapAssociationToDTO)
                     .collect(Collectors.toList()));
         }
 
+        // Ensure sessions are not null
         if (volunteer.getSessions() != null) {
             dto.setSessions(volunteer.getSessions().stream()
                     .map(Utils::mapSessionToDTO)
@@ -170,6 +172,7 @@ public class Utils {
 
         return dto;
     }
+
 
     public static AssociationDTO mapAssociationToDTOWithRelations(Association association) {
         AssociationDTO dto = new AssociationDTO();

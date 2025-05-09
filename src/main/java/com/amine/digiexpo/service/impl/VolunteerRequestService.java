@@ -45,23 +45,29 @@ public class VolunteerRequestService implements IVolunteerRequestService {
             Association association = associationRepository.findById(dto.getAssociation().getId())
                     .orElseThrow(() -> new RuntimeException("Association not found"));
 
+            // ❗ Check if a request already exists
+            boolean exists = volunteerRequestRepository.existsByVolunteerIdAndAssociationId(
+                    dto.getVolunteer().getId(), dto.getAssociation().getId());
+            if (exists) {
+                return new Response(400, "Request already exists for this volunteer and association", null);
+            }
+
             // Create the request
             VolunteerRequest volunteerRequest = new VolunteerRequest();
             volunteerRequest.setVolunteer(volunteer);
             volunteerRequest.setAssociation(association);
             volunteerRequest.setStatus(RequestStatus.PENDING);
 
-
             // Save the request
             VolunteerRequest savedRequest = volunteerRequestRepository.save(volunteerRequest);
 
-            // Return success response
-            return new Response(201, "Request created successfully", Utils.mapVolunteerRequestToDTOWithRelations(savedRequest));
+            return new Response(201, "Request created successfully",
+                    Utils.mapVolunteerRequestToDTOWithRelations(savedRequest));
         } catch (Exception e) {
-            // Handle errors and return failure response
             return new Response(500, "Failed to create request: " + e.getMessage(), null);
         }
     }
+
 
 
     /*@Override
