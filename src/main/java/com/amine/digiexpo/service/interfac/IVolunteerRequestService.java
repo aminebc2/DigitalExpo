@@ -11,11 +11,11 @@ public interface IVolunteerRequestService {
     // Envoyer une demande pour rejoindre une association
     Response createRequest(VolunteerRequestDTO dto);
 
-    // Valider ou rejeter une demande (utilisé par Admin)
+    /*// Valider ou rejeter une demande (utilisé par Admin)
     Response updateRequestStatus(UpdateRequestStatusDTO updateRequestStatusDTO);
 
     // Consulter toutes les demandes (pour Admin)
-    Response getAllRequests();
+    Response getAllRequests();*/
 
     // Consulter les demandes d'une association spécifique
     Response getRequestsByAssociation(Long associationId);

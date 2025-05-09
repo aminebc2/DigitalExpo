@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -50,6 +51,7 @@ public class VolunteerRequestService implements IVolunteerRequestService {
             volunteerRequest.setAssociation(association);
             volunteerRequest.setStatus(RequestStatus.PENDING);
 
+
             // Save the request
             VolunteerRequest savedRequest = volunteerRequestRepository.save(volunteerRequest);
 
@@ -61,7 +63,8 @@ public class VolunteerRequestService implements IVolunteerRequestService {
         }
     }
 
-    @Override
+
+    /*@Override
     @PreAuthorize("hasRole('ADMIN')")
     public Response updateRequestStatus(UpdateRequestStatusDTO updateRequestStatusDTO) {
         try {
@@ -108,7 +111,7 @@ public class VolunteerRequestService implements IVolunteerRequestService {
         } catch (Exception e) {
             return new Response(500, "Error retrieving requests: " + e.getMessage(), null);
         }
-    }
+    }*/
 
     @Override
     @PreAuthorize("hasRole('ASSOCIATION')")

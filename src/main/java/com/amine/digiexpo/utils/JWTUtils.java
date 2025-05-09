@@ -1,3 +1,4 @@
+
 package com.amine.digiexpo.utils;
 
 
@@ -41,8 +42,9 @@ public class JWTUtils {
     }
 
     private <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = Jwts.parser()
+        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(Key)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
         return claimsResolver.apply(claims);

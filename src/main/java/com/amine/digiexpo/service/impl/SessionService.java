@@ -58,7 +58,7 @@ public class SessionService implements ISessionService {
         }
     }
 
-    @Override
+    /*@Override
     public Response updateSession(Long sessionId, SessionDTO sessionDTO) {
         try {
             // 🔎 Validate sessionId
@@ -106,7 +106,7 @@ public class SessionService implements ISessionService {
         } catch (Exception e) {
             return new Response(500, "Unexpected error while updating session: " + e.getMessage(), null);
         }
-    }
+    }*/
 
 
 
@@ -125,7 +125,7 @@ public class SessionService implements ISessionService {
         }
     }
 
-    @Override
+    /*@Override
     public Response getAllSessions() {
         try {
             // Retrieve all sessions
@@ -137,10 +137,10 @@ public class SessionService implements ISessionService {
             // Handle exceptions and return error response
             return new Response(500, "Failed to retrieve sessions: " + e.getMessage(), null);
         }
-    }
+    }*/
 
     // Method to assign a volunteer to a session
-    @Override
+    /*@Override
     public Response assignVolunteerToSession(Long sessionId, Long volunteerId) {
         try {
             // Fetch the session by ID
@@ -175,5 +175,5 @@ public class SessionService implements ISessionService {
         } catch (Exception e) {
             return new Response(500, "Unexpected error while updating session: " + e.getMessage(), null);
         }
-    }
+    }*/
 }

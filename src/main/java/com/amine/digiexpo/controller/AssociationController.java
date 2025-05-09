@@ -16,7 +16,7 @@ public class AssociationController {
     @Autowired
     private IAssociationService associationService;
 
-    @PostMapping("/reserve-sessions/{associationId}")
+    @PostMapping("/reserve/{associationId}")
     public ResponseEntity<Response> reserveSessions(
             @PathVariable Long associationId,
             @RequestBody DateListDTO dateListDTO) {
@@ -43,6 +43,13 @@ public class AssociationController {
     @GetMapping("/{associationId}")
     public ResponseEntity<Response> getAssociationById(@PathVariable Long associationId) {
         Response response = associationService.getAssociationById(associationId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/session/{sessionId}")
+    @PreAuthorize("hasRole('ASSOCIATION')")
+    public ResponseEntity<Response> getSessionById(@PathVariable Long sessionId) {
+        Response response = associationService.getSessionById(sessionId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

@@ -28,42 +28,40 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         final String authHeader = request.getHeader("Authorization");
         final String jwtToken;
         final String username;
 
-        // Si l'en-tête Authorization est vide ou nul, on continue le filtre
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwtToken = authHeader.substring(7);  // Extrait le token sans "Bearer "
-        username = jwtUtils.extractUsername(jwtToken);  // Extrait le nom d'utilisateur du token
+        jwtToken = authHeader.substring(7);  // Extract the token without "Bearer "
+        username = jwtUtils.extractUsername(jwtToken);  // Extract username from the token
 
-        // Si l'utilisateur est authentifié mais que le contexte de sécurité est vide
+        // Add logging to verify if the username is correctly extracted
+        System.out.println("Extracted Username: " + username);
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
-            // Si le token est valide, on crée une nouvelle authentification
+            // Add logging to check if user details are loaded correctly
+            System.out.println("User Details: " + userDetails);
+
             if (jwtUtils.isValidToken(jwtToken, userDetails)) {
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-
-                // Crée un token d'authentification
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                // Ajoute les détails de l'authentification à la requête
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Place le token d'authentification dans le contexte de sécurité
                 securityContext.setAuthentication(authenticationToken);
                 SecurityContextHolder.setContext(securityContext);
+
+                // Add logging to verify if authentication is set correctly
+                System.out.println("Authentication set in SecurityContext.");
             }
         }
 
-        // Continue le filtrage de la requête
         filterChain.doFilter(request, response);
     }
+
 }

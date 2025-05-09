@@ -8,11 +8,13 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @DiscriminatorValue("VOLUNTEER")
 @Data
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class Volunteer extends User {
 
     private String phoneNumber;
@@ -20,8 +22,15 @@ public class Volunteer extends User {
     @ElementCollection
     private List<DayOfWeek> availableDays;
 
-    @ManyToMany(mappedBy = "volunteers")
-    private List<Association> associations;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "volunteer_association",
+            joinColumns = @JoinColumn(name = "volunteer_id"),
+            inverseJoinColumns = @JoinColumn(name = "association_id")
+    )
+    private Set<Association> associations;
+
+
 
     @OneToMany(mappedBy = "volunteer")
     private List<Session> sessions;
@@ -42,11 +51,11 @@ public class Volunteer extends User {
         this.availableDays = availableDays;
     }
 
-    public List<Association> getAssociations() {
+    public Set<Association> getAssociations() {
         return associations;
     }
 
-    public void setAssociations(List<Association> associations) {
+    public void setAssociations(Set<Association> associations) {
         this.associations = associations;
     }
 

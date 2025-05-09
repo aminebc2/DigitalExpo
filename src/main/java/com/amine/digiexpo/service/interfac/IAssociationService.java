@@ -4,6 +4,7 @@ import com.amine.digiexpo.DTO.AssociationDTO;
 import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
+import com.amine.digiexpo.entity.Association;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,4 +21,7 @@ public interface IAssociationService {
 
     // Récupérer les détails de l'association
     Response getAssociationById(Long associationId);
+
+    Response getSessionById(Long sessionId);
+
 }

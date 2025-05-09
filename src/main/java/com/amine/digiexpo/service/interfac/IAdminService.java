@@ -1,9 +1,6 @@
 package com.amine.digiexpo.service.interfac;
 
-import com.amine.digiexpo.DTO.AssociationDTO;
-import com.amine.digiexpo.DTO.Response;
-import com.amine.digiexpo.DTO.SessionDTO;
-import com.amine.digiexpo.DTO.VolunteerDTO;
+import com.amine.digiexpo.DTO.*;
 import com.amine.digiexpo.enumeration.SessionStatus;
 
 import java.time.LocalDate;
@@ -24,8 +21,21 @@ public interface IAdminService {
     Response getAllVolunteers();
 
     // Valider la demande d’un bénévole
-    Response validateVolunteerRequest(Long requestId);
+    /*Response validateVolunteerRequest(Long requestId);*/
+    Response updateRequestStatus(UpdateRequestStatusDTO updateRequestStatusDTO);
+    Response getAllRequests();
+
 
     // Confirmer une session
     Response confirmSession(Long sessionId, SessionStatus status);
+
+    // Mettre à jour une session (ex: assigner un bénévole ou confirmer)
+    Response updateSession(Long sessionId, SessionStatusUpdateDTO sessionStatusUpdateDTO);
+    Response getSessionById(Long sessionId);
+    // Récupérer toutes les sessions
+    Response getAllSessions();
+
+    // Method to assign a volunteer to a session
+    Response assignVolunteerToSession(Long sessionId, Long volunteerId);
+    Response getVolunteers(Long associationId);
 }

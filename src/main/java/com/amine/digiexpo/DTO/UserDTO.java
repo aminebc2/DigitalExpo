@@ -2,16 +2,22 @@ package com.amine.digiexpo.DTO;
 
 import com.amine.digiexpo.enumeration.Role;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
     private Long id;
-    private String username;
-    private String email;
-    private Role role;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public Long getId() {
         return id;
@@ -21,12 +27,12 @@ public class UserDTO {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getPassword() {
+        return password;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmail() {
@@ -44,4 +50,10 @@ public class UserDTO {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    private String username;
+    private String email;
+    private String password;
+    private Role role;
+
 }

@@ -16,5 +16,7 @@ public interface IVolunteerService {
     // Récupérer les détails du bénévole
     Response getVolunteerById(Long volunteerId);
 
+    Response getSessionById(Long sessionId);
+
     Response assignSessionToVolunteerByDate(Long volunteerId, Long sessionId, LocalDate date);
 }

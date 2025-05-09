@@ -1,14 +1,11 @@
 package com.amine.digiexpo.DTO;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.util.List;
 
-@NoArgsConstructor
 @AllArgsConstructor
 public class VolunteerDTO extends UserDTO {
     private String phoneNumber;

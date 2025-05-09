@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/volunteer-requests")
+    @RequestMapping("/volunteer-requests")
 public class VolunteerRequestController {
 
     @Autowired
@@ -25,7 +25,7 @@ public class VolunteerRequestController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN')")
+    /*@PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/update-status")
     public ResponseEntity<Response> updateStatus(@RequestBody UpdateRequestStatusDTO updateRequestStatusDTO) {
         Response response = requestService.updateRequestStatus(updateRequestStatusDTO);
@@ -37,7 +37,7 @@ public class VolunteerRequestController {
     public ResponseEntity<Response> getAllRequests() {
         Response response = requestService.getAllRequests();
         return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
+    }*/
 
     @PreAuthorize("hasRole('ASSOCIATION')")
     @GetMapping("/association/{associationId}")

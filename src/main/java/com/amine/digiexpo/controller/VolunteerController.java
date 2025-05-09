@@ -22,7 +22,7 @@ public class VolunteerController {
     @PreAuthorize("hasRole('BENEVOLE')")
     public ResponseEntity<Response> updateAvailableDays(
             @PathVariable Long volunteerId,
-            @RequestBody List<DayOfWeek> availableDays) {
+                @RequestBody List<DayOfWeek> availableDays) {
         Response response = volunteerService.updateAvailableDays(volunteerId, availableDays);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

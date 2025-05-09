@@ -9,15 +9,15 @@ public interface ISessionService {
     // Créer une session (utilisé par Association)
     Response createSession(List<SessionDTO> sessionDTOList);
 
-    // Mettre à jour une session (ex: assigner un bénévole ou confirmer)
-    Response updateSession(Long sessionId, SessionDTO sessionDTO);
+    /*// Mettre à jour une session (ex: assigner un bénévole ou confirmer)
+    Response updateSession(Long sessionId, SessionDTO sessionDTO);*/
 
     // Récupérer une session par ID
     Response getSessionById(Long sessionId);
 
-    // Récupérer toutes les sessions
-    Response getAllSessions();
+    /*// Récupérer toutes les sessions
+    Response getAllSessions();*/
 
-    // Method to assign a volunteer to a session
-    Response assignVolunteerToSession(Long sessionId, Long volunteerId);
+    /*// Method to assign a volunteer to a session
+    Response assignVolunteerToSession(Long sessionId, Long volunteerId);*/
 }

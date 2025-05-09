@@ -13,6 +13,16 @@ public class Response {
     private String message;
     private Object data;
 
+    public Object getVolunteerLists() {
+        return volunteerLists;
+    }
+
+    public void setVolunteerLists(Object volunteerLists) {
+        this.volunteerLists = volunteerLists;
+    }
+
+    private Object volunteerLists;
+
     public Response() {
     }
 
@@ -47,6 +57,12 @@ public class Response {
         this.token = token;
         this.role = role;
         this.user = userDTO;
+    }
+
+    public Response(int statusCode, String message, List<VolunteerDTO> volunteerList) {
+        this.statusCode = statusCode;
+        this.message = message;
+        this.volunteerList = volunteerList;
     }
 
     public int getStatusCode() {

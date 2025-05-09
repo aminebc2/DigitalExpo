@@ -89,6 +89,23 @@ public class VolunteerService implements IVolunteerService {
     }
 
     @Override
+    @PreAuthorize("hasRole('BENEVOLE')")
+    public Response getSessionById(Long sessionId) {
+        try {
+            // Find the session by ID
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
+
+            // Return successful response
+            return new Response(200, "Session retrieved successfully", Utils.mapSessionToDTOWithRelations(session));
+        } catch (Exception e) {
+            // Handle exceptions and return error response
+            return new Response(500, "Failed to retrieve session: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public Response assignSessionToVolunteerByDate(Long volunteerId, Long sessionId, LocalDate date) {
         try {
             Volunteer volunteer = volunteerRepository.findById(volunteerId)

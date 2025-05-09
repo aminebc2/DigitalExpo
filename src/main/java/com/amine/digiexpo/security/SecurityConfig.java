@@ -18,50 +18,69 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
-@EnableMethodSecurity
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
     @Autowired
     private JWTAuthFilter jwtAuthFilter;
 
-    // Configuration de la chaîne de sécurité
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable)  // Désactive la protection CSRF
-                .cors(Customizer.withDefaults())  // Active la gestion CORS
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers("/auth/**","/associations/**", "/aboutus/**", "/accueil/**").permitAll()// Permet l'accès aux endpoints d'authentification et aux ressources publiques
-                        .anyRequest().authenticated())  // Toute autre requête nécessite une authentification
-                .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Utilise un modèle stateless (sans session)
-                .authenticationProvider(authenticationProvider())  // Fournit un provider d'authentification
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);  // Ajoute le filtre JWT avant le filtre d'authentification classique
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // Explicitly link to CorsConfig
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**", "/associations/**", "/aboutus/**", "/home/**").permitAll()
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN")
+                        /*.requestMatchers("/session/**").hasAnyRole("ASSOCIATION")*/
+                        .requestMatchers("/association/**").hasAnyRole("ASSOCIATION")
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return httpSecurity.build();
+        return http.build();
     }
 
-    // Configuration du provider d'authentification
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(customUserDetailsService);  // Service qui charge les utilisateurs
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());  // Encodeur de mots de passe
-        return daoAuthenticationProvider;
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
-    // Configuration de l'encodeur de mot de passe
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();  // Utilise l'algorithme BCrypt pour l'encodeur de mot de passe
+        return new BCryptPasswordEncoder();
     }
 
-    // Fourniture de l'AuthenticationManager
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();  // Récupère le gestionnaire d'authentification
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }
