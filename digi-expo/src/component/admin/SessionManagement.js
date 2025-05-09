@@ -58,7 +58,11 @@ const SessionManagement = () => {
 
         setLoading(true);
         try {
-            const updatedSessionData = { status: updatedStatus };
+            const updatedSessionData = {
+                status: updatedStatus,
+                volunteer: (updatedStatus === 'CONFIRMED') ? selectedSession.volunteer : null
+            };
+
             await AdminService.updateSession(selectedSessionId, updatedSessionData);
             setError('');
             setShowStatusModal(false);
@@ -114,22 +118,30 @@ const SessionManagement = () => {
                                     <td>{session.id}</td>
                                     <td>{new Date(session.date).toLocaleDateString()}</td>
                                     <td>{session.association?.name || 'N/A'}</td>
-                                    <td>{session.volunteer?.username || 'N/A'}</td>
+                                    <td>
+                                        {session.status === 'CONFIRMED' && session.volunteer
+                                            ? session.volunteer.username
+                                            : 'N/A'}
+                                    </td>
                                     <td>{session.status}</td>
                                     <td>
-                                        <button
+                                    <button
                                             className="btn btn-sm btn-info"
                                             onClick={() => handleSessionClick(session.id)}
                                         >
                                             Edit
                                         </button>
-                                        <button
-                                            className="btn btn-sm btn-success ms-2"
-                                            onClick={() => handleOpenAssignModal(session)}
-                                        >
-                                            Assign Volunteer
-                                        </button>
+
+                                        {session.status === "CONFIRMED" && (
+                                            <button
+                                                className="btn btn-sm btn-success ms-2"
+                                                onClick={() => handleOpenAssignModal(session)}
+                                            >
+                                                Assign Volunteer
+                                            </button>
+                                        )}
                                     </td>
+
                                 </tr>
                             ))
                         ) : (
