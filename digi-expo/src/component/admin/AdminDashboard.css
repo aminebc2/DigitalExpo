@@ -1,0 +1,6 @@
+/* AdminDashboard.css */
+.list-group-item.active {
+    background-color: #6f42c1 !important; /* Bootstrap purple */
+    border-color: #6f42c1 !important;
+    color: #fff !important;
+}

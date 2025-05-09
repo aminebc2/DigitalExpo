@@ -1,0 +1,23 @@
+/* AssociationManagement.css */
+
+/* Make buttons purple */
+.btn-primary {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+.btn-primary:hover {
+    background-color: #5a32a3;
+    border-color: #502c91;
+}
+
+/* Purple Save button */
+.btn-success {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+.btn-success:hover {
+    background-color: #5a32a3;
+    border-color: #502c91;
+}

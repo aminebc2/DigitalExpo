@@ -1,0 +1,98 @@
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+
+
+const Navbar = () => {
+    const { currentUser, isAuthenticated, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
+    const renderRoleBasedLinks = () => {
+        if (!currentUser?.role) return null;
+
+        switch (currentUser.role) {
+            case 'ADMIN':
+                return (
+                    <li className="nav-item">
+                        <Link className="nav-link text-white" to="/admin">Dashboard</Link>
+                    </li>
+                );
+            case 'BENEVOLE':
+                return (
+                    <>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white" to="/available-days">AvailableDays</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white" to="/sessions">Sessions</Link>
+                        </li>
+                    </>
+                );
+            case 'ASSOCIATION':
+                return (
+                    <>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white" to="/reserve-sessions">ReserveSessions</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white" to="/sessions">Sessions</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white" to="/volunteers">Volunteers</Link>
+                        </li>
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <nav className="navbar navbar-expand-lg" style={{backgroundColor: '#6f42c1'}}>
+            <div className="container">
+                <Link className="navbar-brand text-white" to="/home">DigiExpo</Link>
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                >
+                    <span className="navbar-toggler-icon"></span>
+                </button>
+                <div className="collapse navbar-collapse" id="navbarNav">
+                    <ul className="navbar-nav ms-auto">
+                        {isAuthenticated ? (
+                            <>
+                                <li className="nav-item">
+                                    <Link className="nav-link text-white" to="/home">Home</Link>
+                                </li>
+                                {renderRoleBasedLinks()}
+                                <li className="nav-item">
+                                    <button className="btn btn-link nav-link text-white" onClick={handleLogout}>
+                                        Logout
+                                    </button>
+                                </li>
+                            </>
+                        ) : (
+                            <>
+                                <li className="nav-item">
+                                    <Link className="nav-link text-white" to="/login">Login</Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link text-white" to="/register">Register</Link>
+                                </li>
+                            </>
+                        )}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    );
+};
+
+export default Navbar;
