@@ -125,7 +125,7 @@ const SessionManagement = () => {
                                     </td>
                                     <td>{session.status}</td>
                                     <td>
-                                    <button
+                                        <button
                                             className="btn btn-sm btn-info"
                                             onClick={() => handleSessionClick(session.id)}
                                         >

@@ -1,14 +1,18 @@
 import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './component/Login';
 import Register from './component/Register';
 import Navbar from './component/Navbar';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import ProtectedRoute from './component/ProtectedRoute';
-import AdminDashboard from "./component/admin/AdminDashboard";
+import AdminDashboard from './component/admin/AdminDashboard';
 import Home from './component/Home';
 import Unauthorized from './component/Unauthorized';
-import Footer from "./component/common/Footer";
+import Footer from './component/common/Footer';
+import AssociationDashboard from './component/association/AssociationDashboard';
+import ReserveSessionsPage from './component/association/ReserveSessionsPage';
+import SessionListPage from './component/association/SessionListPage';
+import VolunteerListPage from './component/association/VolunteerListPage';
 
 function App() {
     return (
@@ -31,6 +35,7 @@ function AppRoutes() {
 
     if (loading) return <div>Loading...</div>;
 
+    const loggedAssociationId = localStorage.getItem('associationId');
 
     return (
         <Routes>
@@ -48,15 +53,40 @@ function AppRoutes() {
                     </ProtectedRoute>
                 }
             />
-            {/*<Route
-                path="/admin/volunteer-requests"
+
+            {/* Association routes */}
+            <Route
+                path="/association"
                 element={
-                    <ProtectedRoute allowedRoles={['ADMIN']}>
-                        <VolunteerRequests />
+                    <ProtectedRoute allowedRoles={['ASSOCIATION']}>
+                        <AssociationDashboard />
                     </ProtectedRoute>
                 }
-            />*/}
-
+            />
+            <Route
+                path="/association/reserve/:id"
+                element={
+                    <ProtectedRoute allowedRoles={['ASSOCIATION']}>
+                        <ReserveSessionsPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/association/sessions"
+                element={
+                    <ProtectedRoute allowedRoles={['ASSOCIATION']}>
+                        <SessionListPage associationId={loggedAssociationId} />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/association/volunteers"
+                element={
+                    <ProtectedRoute allowedRoles={['ASSOCIATION']}>
+                        <VolunteerListPage associationId={loggedAssociationId} />
+                    </ProtectedRoute>
+                }
+            />
         </Routes>
     );
 }

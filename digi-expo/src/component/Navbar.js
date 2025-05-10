@@ -37,13 +37,18 @@ const Navbar = () => {
                 return (
                     <>
                         <li className="nav-item">
-                            <Link className="nav-link text-white" to="/reserve-sessions">ReserveSessions</Link>
+                            <Link
+                                className="nav-link text-white"
+                                to={localStorage.getItem('associationId') ? `/association/reserve/${localStorage.getItem('associationId')}` : '#'}
+                            >
+                                Réserver
+                            </Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link text-white" to="/sessions">Sessions</Link>
+                            <Link className="nav-link text-white" to="association/sessions">Sessions</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link text-white" to="/volunteers">Volunteers</Link>
+                            <Link className="nav-link text-white" to="/association/volunteers">Volunteers</Link>
                         </li>
                     </>
                 );
