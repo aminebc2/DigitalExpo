@@ -8,8 +8,6 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log('associationId:', associationId);  // Log the associationId to check if it's valid
-
         if (!associationId) {
             setError('No association ID provided');
             setLoading(false);
@@ -19,28 +17,19 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
         const fetchVolunteers = async () => {
             try {
                 const response = await AdminService.getAssoVolunteers(associationId);
-                console.log('API Response:', response);  // Log the entire response
+                console.log('API Response:', response);
 
-                // Using the response logs, I can see that all volunteers have the same ID (14)
-                // This is causing React's key duplication error
-                // Let's create a deduplicated list with unique identifiers
                 const volunteerArray = Array.isArray(response) ? response :
                     response?.volunteerList && Array.isArray(response.volunteerList) ? response.volunteerList :
                         [];
 
-                console.log('Original Volunteer Array:', volunteerArray);
-
-                // Since all volunteers have the same ID and username, let's deduplicate them
-                // or add unique identifiers if we need to keep them all
                 const processedVolunteers = Array.from(new Map(volunteerArray.map(v => [v.id, v])).values());
                 if (processedVolunteers.length > 0) {
                     setVolunteers(processedVolunteers);
                 } else {
-                    console.warn('No volunteers found in response:', response);
                     setError('No volunteers found for this association');
                 }
             } catch (error) {
-                console.error('Error fetching volunteers:', error);
                 setError(error.message || 'Failed to load volunteers');
             }
             setLoading(false);

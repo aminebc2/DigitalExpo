@@ -79,11 +79,18 @@ const SessionManagement = () => {
         setShowStatusModal(false);
         setSelectedSession(null);
     };
+
     const handleOpenAssignModal = (session) => {
-        setSelectedSession(session);
-        setSelectedSessionId(session.id);
-        setShowAssignModal(true);
+        if (!session.association) {
+            // Show a default message or allow the user to assign an association.
+            setSelectedSession(session);
+            setShowAssignModal(true);
+        } else {
+            setSelectedSession(session);
+            setShowAssignModal(true);
+        }
     };
+
 
     const closeAssignModal = () => {
         setShowAssignModal(false);

@@ -1,10 +1,13 @@
 package com.amine.digiexpo.service.impl;
 
 import com.amine.digiexpo.DTO.Response;
+import com.amine.digiexpo.DTO.SessionDTO;
+import com.amine.digiexpo.DTO.VolunteerDTO;
 import com.amine.digiexpo.Repository.AssociationRepository;
 import com.amine.digiexpo.Repository.SessionRepository;
 import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.entity.Session;
+import com.amine.digiexpo.entity.Volunteer;
 import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.IAssociationService;
 import com.amine.digiexpo.utils.Utils;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AssociationService implements IAssociationService {
@@ -60,10 +64,15 @@ public class AssociationService implements IAssociationService {
             }
 
             List<Session> sessions = sessionRepository.findByAssociationId(associationId);
+
+            // Use the new utility function to map sessions with volunteer details
+            List<SessionDTO> sessionDTOList = Utils.mapSessionListToDTOListWithVolunteerDetails(sessions);
+
             Response response = new Response();
             response.setStatusCode(200);
             response.setMessage("Session list retrieved");
-            response.setSessionList(Utils.mapSessionListToDTOList(sessions));
+            response.setSessionList(sessionDTOList);
+
             return response;
         } catch (Exception e) {
             return new Response(500, "Failed to retrieve sessions: " + e.getMessage(), null);

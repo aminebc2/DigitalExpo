@@ -17,6 +17,12 @@ public class VolunteerDTO extends UserDTO {
 
     }
 
+    public VolunteerDTO(String username, String email, String phoneNumber) {
+        this.setUsername(username);
+        this.setEmail(email);
+        this.setPhoneNumber(phoneNumber);
+    }
+
     public String getPhoneNumber() {
         return phoneNumber;
     }

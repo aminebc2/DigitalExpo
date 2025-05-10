@@ -13,7 +13,7 @@ const SessionListPage = ({ associationId }) => {
             try {
                 const response = await AssociationService.getSessions(associationId);
                 console.log('Fetched sessions:', response);
-                const sessionsList = response?.sessionList; // Correct the path here
+                const sessionsList = response?.sessionList;
                 if (Array.isArray(sessionsList)) {
                     setSessions(sessionsList);
                 } else {
@@ -29,8 +29,8 @@ const SessionListPage = ({ associationId }) => {
         if (associationId) fetchSessions();
     }, [associationId]);
 
-
     const handleShowDetails = (session) => {
+        console.log("Selected session:", session);
         setSelectedSession(session);
         setShowModal(true);
     };
@@ -52,7 +52,6 @@ const SessionListPage = ({ associationId }) => {
         }
         return <p>No volunteer assigned.</p>;
     };
-
 
     return (
         <div className="container mt-4">

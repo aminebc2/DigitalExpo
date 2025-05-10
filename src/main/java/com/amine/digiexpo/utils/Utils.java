@@ -5,6 +5,7 @@ import com.amine.digiexpo.entity.*;
 
 import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -82,13 +83,13 @@ public class Utils {
     // ----------- SESSION MAPPING -----------
 
     public static SessionDTO mapSessionToDTO(Session session) {
-        if (session == null) return null;
         SessionDTO dto = new SessionDTO();
         dto.setId(session.getId());
         dto.setDate(session.getDate());
         dto.setStatus(session.getStatus());
         return dto;
     }
+
 
     public static SessionDTO mapSessionToDTOWithRelations(Session session) {
         SessionDTO dto = new SessionDTO();
@@ -115,6 +116,29 @@ public class Utils {
         return dto;
     }
 
+    public static List<SessionDTO> mapSessionListToDTOListWithVolunteerDetails(List<Session> sessions) {
+        List<SessionDTO> sessionDTOList = new ArrayList<>();
+
+        for (Session session : sessions) {
+            SessionDTO sessionDTO = new SessionDTO();
+            sessionDTO.setId(session.getId());
+            sessionDTO.setDate(session.getDate());
+            sessionDTO.setStatus(session.getStatus());
+
+            // Map volunteer details if available
+            if (session.getVolunteer() != null) {
+                VolunteerDTO volunteerDTO = new VolunteerDTO(
+                        session.getVolunteer().getUsername(),
+                        session.getVolunteer().getEmail(),
+                        session.getVolunteer().getPhoneNumber()); // Again, be mindful of security concerns regarding passwords
+                sessionDTO.setVolunteer(volunteerDTO);
+            }
+
+            sessionDTOList.add(sessionDTO);
+        }
+
+        return sessionDTOList;
+    }
 
 
     // ----------- VOLUNTEER REQUEST MAPPING -----------
