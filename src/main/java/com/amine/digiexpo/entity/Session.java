@@ -22,12 +22,12 @@ public class Session {
     @Enumerated(EnumType.STRING)
     private SessionStatus status = SessionStatus.PENDING;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "association_id")
     @JsonBackReference
     private Association association;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "volunteer_id")
     private Volunteer volunteer;
 

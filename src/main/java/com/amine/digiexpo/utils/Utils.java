@@ -125,13 +125,14 @@ public class Utils {
             sessionDTO.setDate(session.getDate());
             sessionDTO.setStatus(session.getStatus());
 
-            // Map volunteer details if available
             if (session.getVolunteer() != null) {
                 VolunteerDTO volunteerDTO = new VolunteerDTO(
                         session.getVolunteer().getUsername(),
                         session.getVolunteer().getEmail(),
-                        session.getVolunteer().getPhoneNumber()); // Again, be mindful of security concerns regarding passwords
+                        session.getVolunteer().getPhoneNumber());
                 sessionDTO.setVolunteer(volunteerDTO);
+            } else {
+                System.out.println("No volunteer assigned for session ID: " + session.getId());
             }
 
             sessionDTOList.add(sessionDTO);
@@ -139,6 +140,7 @@ public class Utils {
 
         return sessionDTOList;
     }
+
 
 
     // ----------- VOLUNTEER REQUEST MAPPING -----------

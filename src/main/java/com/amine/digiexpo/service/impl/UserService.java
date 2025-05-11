@@ -1,3 +1,4 @@
+/*
 package com.amine.digiexpo.service.impl;
 
 import com.amine.digiexpo.DTO.LoginRequest;
@@ -135,4 +136,4 @@ public class UserService implements IUserService {
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
-}
+}*/

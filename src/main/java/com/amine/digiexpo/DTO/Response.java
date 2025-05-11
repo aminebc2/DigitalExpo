@@ -13,30 +13,6 @@ public class Response {
     private String message;
     private Object data;
 
-    public Object getVolunteerLists() {
-        return volunteerLists;
-    }
-
-    public void setVolunteerLists(Object volunteerLists) {
-        this.volunteerLists = volunteerLists;
-    }
-
-    private Object volunteerLists;
-
-    public Response() {
-    }
-
-    public Response(int statusCode, String message, Object data) {
-        this.statusCode = statusCode;
-        this.message = message;
-        this.data = data;
-    }// Pour retourner des données optionnelles
-
-    // For authentication
-    private String token;
-    private Role role;
-    private String expirationTime;
-
     // Single objects
     private UserDTO user;
     private AssociationDTO association;
@@ -51,12 +27,13 @@ public class Response {
     private List<SessionDTO> sessionList;
     private List<VolunteerRequestDTO> volunteerRequestList;
 
-    public Response(int value, String message, String token, Role role, UserDTO userDTO) {
-        this.statusCode = value;
+    // Constructors
+    public Response() {}
+
+    public Response(int statusCode, String message, Object data) {
+        this.statusCode = statusCode;
         this.message = message;
-        this.token = token;
-        this.role = role;
-        this.user = userDTO;
+        this.data = data;
     }
 
     public Response(int statusCode, String message, List<VolunteerDTO> volunteerList) {
@@ -87,30 +64,6 @@ public class Response {
 
     public void setData(Object data) {
         this.data = data;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public String getExpirationTime() {
-        return expirationTime;
-    }
-
-    public void setExpirationTime(String expirationTime) {
-        this.expirationTime = expirationTime;
     }
 
     public UserDTO getUser() {
