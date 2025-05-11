@@ -3,17 +3,21 @@ import AssociationService from '../../service/AssociationService';
 import { Card, Button, Row, Col, Modal } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const SessionListPage = ({ associationId }) => {
+const SessionListPage = () => {
     const [sessions, setSessions] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [selectedSession, setSelectedSession] = useState(null);
+
+    // Get association ID from localStorage
+    const user = JSON.parse(localStorage.getItem("user"));
+    const associationId = user?.id;
 
     useEffect(() => {
         const fetchSessions = async () => {
             try {
                 const response = await AssociationService.getSessions(associationId);
                 console.log('Fetched sessions:', response);
-                const sessionsList = response?.sessionList;
+                const sessionsList = response?.sessionList || response; // handle both structured or flat list
                 if (Array.isArray(sessionsList)) {
                     setSessions(sessionsList);
                 } else {
@@ -30,7 +34,6 @@ const SessionListPage = ({ associationId }) => {
     }, [associationId]);
 
     const handleShowDetails = (session) => {
-        console.log("Selected session:", session);
         setSelectedSession(session);
         setShowModal(true);
     };
@@ -68,7 +71,7 @@ const SessionListPage = ({ associationId }) => {
                                     <Card.Text>
                                         <strong>Status:</strong> {session.status}
                                     </Card.Text>
-                                    <Button variant="primary" block onClick={() => handleShowDetails(session)}>
+                                    <Button variant="primary" style={{ width: '100%' }} onClick={() => handleShowDetails(session)}>
                                         Voir Détails
                                     </Button>
                                 </Card.Body>
@@ -82,7 +85,6 @@ const SessionListPage = ({ associationId }) => {
                 </div>
             )}
 
-            {/* Modal for showing session details */}
             {selectedSession && (
                 <Modal show={showModal} onHide={handleCloseModal}>
                     <Modal.Header closeButton>

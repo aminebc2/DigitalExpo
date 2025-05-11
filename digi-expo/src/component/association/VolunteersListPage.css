@@ -1,0 +1,99 @@
+/* Global styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fc;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.volunteers-container {
+    width: 80%;
+    margin: 40px auto;
+    text-align: center;
+}
+
+/* Title */
+.title {
+    font-size: 2.5rem;
+    color: #007bff;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Loading and error states */
+.loading {
+    font-size: 1.5rem;
+    color: #888;
+}
+
+.error-message {
+    font-size: 1.2rem;
+    color: red;
+}
+
+.no-volunteers {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* Volunteer list */
+.volunteer-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Individual volunteer card */
+.volunteer-card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 250px;
+    transition: transform 0.3s ease-in-out;
+    text-align: left;
+    border: 1px solid #e0e0e0;
+}
+
+.volunteer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Volunteer info styling */
+.volunteer-info {
+    padding: 10px 0;
+}
+
+.volunteer-name {
+    font-size: 1.6rem;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.volunteer-email,
+.volunteer-phone,
+.volunteer-available-days {
+    font-size: 1.1rem;
+    color: #555;
+    margin: 5px 0;
+}
+
+.volunteer-info strong {
+    color: #007bff;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .volunteer-list {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .volunteer-card {
+        width: 90%;
+    }
+}

@@ -31,12 +31,13 @@ export default class AssociationService {
             const response = await axios.get(`${this.API_URL}/volunteers/${associationId}`, {
                 headers: this.getHeader()
             });
-            return response.data; // Return the volunteer list from the backend
+            return response.data; // Return the response from the backend
         } catch (error) {
             console.error("Error fetching volunteers:", error);
             throw error;
         }
     }
+
 
     // 📅 Reserve sessions for the association
     static async reserveSessions(associationId, dateListDTO) {

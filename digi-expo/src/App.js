@@ -12,7 +12,7 @@ import Footer from './component/common/Footer';
 import AssociationDashboard from './component/association/AssociationDashboard';
 import ReserveSessionsPage from './component/association/ReserveSessionsPage';
 import SessionListPage from './component/association/SessionListPage';
-import VolunteerListPage from './component/association/VolunteerListPage';
+import VolunteerListPage from './component/association/VolunteersListPage';
 
 function App() {
     return (
