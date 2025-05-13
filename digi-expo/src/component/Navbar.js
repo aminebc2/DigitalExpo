@@ -26,6 +26,9 @@ const Navbar = () => {
                 return (
                     <>
                         <li className="nav-item">
+                            <Link className="nav-link text-white" to="/volunteer/all-associations">Associations</Link>
+                        </li>
+                        <li className="nav-item">
                             <Link className="nav-link text-white" to="/volunteer/available-days">AvailableDays</Link>
                         </li>
                         <li className="nav-item">

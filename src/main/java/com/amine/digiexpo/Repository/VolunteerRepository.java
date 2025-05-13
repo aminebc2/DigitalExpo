@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
     Optional<Volunteer> findByUsername(String username);
     Optional<Volunteer> findByEmail(String email);
+    Optional<Volunteer> findById(Long volunteerId);
     List<Volunteer> findByAssociations_Id(Long associationId);
 }

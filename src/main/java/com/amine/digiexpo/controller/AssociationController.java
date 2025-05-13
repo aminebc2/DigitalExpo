@@ -2,11 +2,14 @@ package com.amine.digiexpo.controller;
 
 import com.amine.digiexpo.DTO.DateListDTO;
 import com.amine.digiexpo.DTO.Response;
+import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.service.interfac.IAssociationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/association")
@@ -52,6 +55,5 @@ public class AssociationController {
         Response response = associationService.getSessionById(sessionId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-
 
 }

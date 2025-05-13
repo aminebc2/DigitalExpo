@@ -1,10 +1,12 @@
 package com.amine.digiexpo.service.impl;
 
+import com.amine.digiexpo.DTO.AssociationDTO;
 import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
 import com.amine.digiexpo.Repository.AssociationRepository;
 import com.amine.digiexpo.Repository.SessionRepository;
+import com.amine.digiexpo.Repository.VolunteerRepository;
 import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.entity.Session;
 import com.amine.digiexpo.entity.Volunteer;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,9 @@ public class AssociationService implements IAssociationService {
 
     @Autowired
     private SessionRepository sessionRepository;
+
+    @Autowired
+    private VolunteerRepository volunteerRepository;
 
     @Override
     public Response reserveSession(Long associationId, List<LocalDate> dates) {
@@ -125,4 +131,17 @@ public class AssociationService implements IAssociationService {
             return new Response(500, "Failed to retrieve association: " + e.getMessage(), null);
         }
     }
+
+    @Override
+    public Response getAllAssociations() {
+        List<Association> associations = associationRepository.findAll();
+        List<AssociationDTO> dtos = Utils.mapAssociationListToDTOList(associations);
+
+        Response response = new Response();
+        response.setStatusCode(200);
+        response.setMessage("Associations fetched successfully");
+        response.setAssociationList(dtos);
+        return response;
+    }
+
 }

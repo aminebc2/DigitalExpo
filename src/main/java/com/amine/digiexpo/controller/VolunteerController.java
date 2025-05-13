@@ -1,6 +1,7 @@
 package com.amine.digiexpo.controller;
 
 import com.amine.digiexpo.DTO.Response;
+import com.amine.digiexpo.service.interfac.IAssociationService;
 import com.amine.digiexpo.service.interfac.IVolunteerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,9 @@ public class VolunteerController {
 
     @Autowired
     private IVolunteerService volunteerService;
+
+    @Autowired
+    private IAssociationService associationService;
 
     // ✅ Update available days
     @PostMapping("/available-days/{volunteerId}")
@@ -40,6 +44,13 @@ public class VolunteerController {
     @PreAuthorize("hasRole('BENEVOLE')")
     public ResponseEntity<Response> getVolunteerById(@PathVariable Long volunteerId) {
         Response response = volunteerService.getVolunteerById(volunteerId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/all-associations")
+    @PreAuthorize("hasRole('BENEVOLE')")
+    public ResponseEntity<Response> getAllAssociations() {
+        Response response = associationService.getAllAssociations();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

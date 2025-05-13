@@ -35,4 +35,17 @@ export default class VolunteerService {
             throw error;
         }
     }
+
+    static async getAllAssociations() {
+        try {
+            const response = await axios.get(`${this.API_URL}/all-associations`, {
+                headers: this.getHeader()
+            });
+            return response; // ✅ return full response object
+        } catch (error) {
+            console.error('Error fetching associations', error);
+            throw error;
+        }
+    }
+
 }

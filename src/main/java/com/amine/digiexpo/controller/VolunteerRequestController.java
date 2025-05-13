@@ -24,21 +24,6 @@ public class VolunteerRequestController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-
-    /*@PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/update-status")
-    public ResponseEntity<Response> updateStatus(@RequestBody UpdateRequestStatusDTO updateRequestStatusDTO) {
-        Response response = requestService.updateRequestStatus(updateRequestStatusDTO);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/all")
-    public ResponseEntity<Response> getAllRequests() {
-        Response response = requestService.getAllRequests();
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }*/
-
     @PreAuthorize("hasRole('ASSOCIATION')")
     @GetMapping("/association/{associationId}")
     public ResponseEntity<Response> getByAssociation(@PathVariable Long associationId) {

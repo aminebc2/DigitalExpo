@@ -67,6 +67,25 @@ public class Utils {
         return dto;
     }
 
+    public static AssociationDTO mapToAssociationDTO(Association association) {
+        AssociationDTO dto = new AssociationDTO();
+        dto.setId(association.getId());
+        dto.setRole(association.getRole());
+        dto.setName(association.getName());
+        dto.setEmail(association.getEmail());
+        dto.setVille(association.getVille());
+        dto.setResponsableName(association.getResponsableName());
+        dto.setResponsablePhone(association.getResponsablePhone());
+        // You can include additional fields here
+        return dto;
+    }
+
+    public static List<AssociationDTO> mapToAssociationDTOList(List<Association> associations) {
+        return associations.stream()
+                .map(Utils::mapToAssociationDTO)
+                .collect(Collectors.toList());
+    }
+
     public static VolunteerDTO mapVolunteerToDTO(Volunteer volunteer) {
         if (volunteer == null) return null;
         VolunteerDTO dto = new VolunteerDTO();

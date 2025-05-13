@@ -24,4 +24,6 @@ public interface IAssociationService {
 
     Response getSessionById(Long sessionId);
 
+    Response getAllAssociations();
+
 }

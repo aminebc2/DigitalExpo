@@ -68,57 +68,6 @@ public class VolunteerRequestService implements IVolunteerRequestService {
         }
     }
 
-
-
-    /*@Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public Response updateRequestStatus(UpdateRequestStatusDTO updateRequestStatusDTO) {
-        try {
-            // Get requestId and status from the DTO
-            Long requestId = updateRequestStatusDTO.getRequestId();
-            RequestStatus status = updateRequestStatusDTO.getStatus();
-
-            // Retrieve the request by ID
-            VolunteerRequest request = requestRepository.findById(requestId)
-                    .orElseThrow(() -> new RuntimeException("Request not found"));
-
-            // Update the status of the request
-            request.setStatus(status);
-
-            // If approved, add the volunteer to the association and vice versa
-            if (status == RequestStatus.APPROVED) {
-                Volunteer volunteer = request.getVolunteer();
-                Association association = request.getAssociation();
-                association.getVolunteers().add(volunteer);
-                volunteer.getAssociations().add(association);
-
-                // Save the changes to both the association and volunteer
-                associationRepository.save(association);
-                volunteerRepository.save(volunteer);
-            }
-
-            // Save the updated request
-            VolunteerRequest updatedRequest = requestRepository.save(request);
-
-            // Return success response
-            return new Response(200, "Request status updated", Utils.mapVolunteerRequestToDTOWithRelations(updatedRequest));
-        } catch (Exception e) {
-            return new Response(500, "Error updating request status: " + e.getMessage(), null);
-        }
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public Response getAllRequests() {
-        try {
-            // Retrieve all requests
-            List<VolunteerRequest> list = requestRepository.findAll();
-            return new Response(200, "List of requests retrieved", Utils.mapVolunteerRequestListToDTOList(list));
-        } catch (Exception e) {
-            return new Response(500, "Error retrieving requests: " + e.getMessage(), null);
-        }
-    }*/
-
     @Override
     @PreAuthorize("hasRole('ASSOCIATION')")
     public Response getRequestsByAssociation(Long associationId) {
