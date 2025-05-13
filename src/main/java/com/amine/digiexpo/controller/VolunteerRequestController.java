@@ -11,14 +11,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/volunteer-requests")
+@RequestMapping("/volunteer")
 public class VolunteerRequestController {
 
     @Autowired
     private IVolunteerRequestService requestService;
 
     @PreAuthorize("hasRole('BENEVOLE')")
-    @PostMapping("/create")
+    @PostMapping("/create-request")
     public ResponseEntity<Response> createRequest(@RequestBody VolunteerRequestDTO dto) {
         Response response = requestService.createRequest(dto);
         return ResponseEntity.status(response.getStatusCode()).body(response);

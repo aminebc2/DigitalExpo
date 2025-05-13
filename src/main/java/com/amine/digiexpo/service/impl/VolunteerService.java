@@ -17,6 +17,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.amine.digiexpo.utils.Utils.mapSessionListToDTOListWithAssociationDetails;
+import static com.amine.digiexpo.utils.Utils.mapSessionToDTOWithAssociationDetails;
+
 @Service
 public class VolunteerService implements IVolunteerService {
 
@@ -56,21 +59,25 @@ public class VolunteerService implements IVolunteerService {
     @PreAuthorize("hasRole('BENEVOLE')")
     public Response getSessions(Long volunteerId) {
         try {
-            // Vérifier si le bénévole existe
+            // Check if the volunteer exists
             if (!volunteerRepository.existsById(volunteerId)) {
                 throw new RuntimeException("Volunteer not found");
             }
 
-            // Récupérer les sessions assignées au bénévole
+            // Retrieve the sessions assigned to the volunteer
             List<Session> sessions = sessionRepository.findByVolunteerId(volunteerId);
 
-            // Mapper la liste vers DTOs avec relations
-            return new Response(200, "Sessions retrieved successfully", Utils.mapSessionListToDTOList(sessions));
+            // Map the list of sessions to DTOs with association details
+            List<SessionDTO> sessionDTOs = mapSessionListToDTOListWithAssociationDetails(sessions);
+
+            // Return the response with the session data
+            return new Response(200, "Sessions retrieved successfully", sessionDTOs);
         } catch (Exception e) {
-            // Handle errors and return failure response
+            // Handle errors and return a failure response
             return new Response(500, "Failed to retrieve sessions: " + e.getMessage(), null);
         }
     }
+
 
     @Override
     @PreAuthorize("hasRole('BENEVOLE')")
@@ -104,7 +111,7 @@ public class VolunteerService implements IVolunteerService {
         }
     }
 
-    @Override
+    /*@Override
     @PreAuthorize("hasRole('ADMIN')")
     public Response assignSessionToVolunteerByDate(Long volunteerId, Long sessionId, LocalDate date) {
         try {
@@ -127,5 +134,5 @@ public class VolunteerService implements IVolunteerService {
         } catch (RuntimeException e) {
             return new Response(404, e.getMessage(), null);
         }
-    }
+    }*/
 }

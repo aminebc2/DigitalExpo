@@ -90,6 +90,25 @@ public class Utils {
         return dto;
     }
 
+    public static SessionDTO mapSessionToDTOWithAssociationDetails(Session session) {
+        SessionDTO dto = new SessionDTO();
+        dto.setId(session.getId());
+        dto.setDate(session.getDate());
+        dto.setStatus(session.getStatus());
+
+        // Add association details to the DTO
+        if (session.getAssociation() != null) {
+            AssociationDTO associationDTO = new AssociationDTO();
+            associationDTO.setId(session.getAssociation().getId());
+            associationDTO.setEmail(session.getAssociation().getEmail());
+            associationDTO.setName(session.getAssociation().getName());
+            associationDTO.setResponsableName(session.getAssociation().getResponsableName());
+            associationDTO.setResponsablePhone(session.getAssociation().getResponsablePhone());
+            dto.setAssociation(associationDTO);
+        }
+
+        return dto;
+    }
 
     public static SessionDTO mapSessionToDTOWithRelations(Session session) {
         SessionDTO dto = new SessionDTO();
@@ -252,6 +271,12 @@ public class Utils {
     public static List<SessionDTO> mapSessionListToDTOList(List<Session> sessions) {
         return sessions.stream()
                 .map(Utils::mapSessionToDTOWithRelations)
+                .collect(Collectors.toList());
+    }
+
+    public static List<SessionDTO> mapSessionListToDTOListWithAssociationDetails(List<Session> sessions) {
+        return sessions.stream()
+                .map(Utils::mapSessionToDTOWithAssociationDetails)
                 .collect(Collectors.toList());
     }
 

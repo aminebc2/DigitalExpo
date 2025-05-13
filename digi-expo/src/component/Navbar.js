@@ -26,10 +26,10 @@ const Navbar = () => {
                 return (
                     <>
                         <li className="nav-item">
-                            <Link className="nav-link text-white" to="/available-days">AvailableDays</Link>
+                            <Link className="nav-link text-white" to="/volunteer/available-days">AvailableDays</Link>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link text-white" to="/sessions">Sessions</Link>
+                            <Link className="nav-link text-white" to="/volunteer/sessions">My Sessions</Link>
                         </li>
                     </>
                 );
@@ -60,7 +60,12 @@ const Navbar = () => {
     return (
         <nav className="navbar navbar-expand-lg" style={{backgroundColor: '#6f42c1'}}>
             <div className="container">
-                <Link className="navbar-brand text-white" to="/home">DigiExpo</Link>
+                <Link className="navbar-brand text-white" to="/home">
+                    <img
+                    src="/Digi-expo.png"
+                    alt="Logo"
+                    style={{ width: '50px', height: '50px', marginRight: '10px' }}
+                />DXC CDG DIGITAL EXPO</Link>
                 <button
                     className="navbar-toggler"
                     type="button"

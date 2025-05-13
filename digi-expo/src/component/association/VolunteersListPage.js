@@ -15,20 +15,16 @@ const VolunteersListPage = ({ associationId }) => {
         const fetchVolunteers = async () => {
             try {
                 const response = await AssociationService.getVolunteers(volunteerId);
-                console.log('Fetched volunteers:', response);
 
                 const volunteersList = response?.volunteerList;
-                console.log('Setting volunteers:', volunteersList);
 
                 if (Array.isArray(volunteersList)) {
                     setVolunteers(volunteersList);
                 } else {
-                    console.warn('volunteerList is not an array:', volunteersList);
                     setVolunteers([]);
                 }
                 setLoading(false);
             } catch (error) {
-                console.error('Error fetching volunteers:', error);
                 setError('Error fetching volunteers');
                 setVolunteers([]);
                 setLoading(false);

@@ -13,6 +13,8 @@ import AssociationDashboard from './component/association/AssociationDashboard';
 import ReserveSessionsPage from './component/association/ReserveSessionsPage';
 import SessionListPage from './component/association/SessionListPage';
 import VolunteerListPage from './component/association/VolunteersListPage';
+import AvailableDays from "./component/volunteer/AvailableDays";
+import SessionPage from "./component/volunteer/SessionsPage";
 
 function App() {
     return (
@@ -36,6 +38,7 @@ function AppRoutes() {
     if (loading) return <div>Loading...</div>;
 
     const loggedAssociationId = localStorage.getItem('associationId');
+    const loggedvolunteerId = localStorage.getItem('volunteerId');
 
     return (
         <Routes>
@@ -87,6 +90,26 @@ function AppRoutes() {
                     </ProtectedRoute>
                 }
             />
+
+            {/* Volunteer routes */}
+            <Route
+                path="/volunteer/available-days"
+                element={
+                <ProtectedRoute allowedRoles={['BENEVOLE']}>
+                    <AvailableDays volunteerId={loggedvolunteerId}/>
+                </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/volunteer/sessions"
+                element={
+                    <ProtectedRoute allowedRoles={['BENEVOLE']}>
+                        <SessionPage volunteerId={loggedvolunteerId}/>
+                    </ProtectedRoute>
+                }
+            />
+
+
         </Routes>
     );
 }

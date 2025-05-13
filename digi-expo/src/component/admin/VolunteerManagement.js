@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
-
 const VolunteerManagement = () => {
     const [volunteers, setVolunteers] = useState([]);
     const [formData, setFormData] = useState(initialFormState());
@@ -18,7 +17,7 @@ const VolunteerManagement = () => {
             password: '',
             role: 'BENEVOLE',
             phoneNumber: '',
-            availableDays: '',
+            availableDays: [],
         };
     }
 
@@ -36,8 +35,6 @@ const VolunteerManagement = () => {
             if (result.data.length === 0) {
                 setError('No volunteers found');
             }
-
-
         } catch (err) {
             setError(err.message || 'Failed to load volunteers');
         } finally {
@@ -45,10 +42,19 @@ const VolunteerManagement = () => {
         }
     };
 
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCheckboxChange = (e) => {
+        const { value, checked } = e.target;
+        setFormData(prev => {
+            const updatedDays = checked
+                ? [...prev.availableDays, value]
+                : prev.availableDays.filter(day => day !== value);
+            return { ...prev, availableDays: updatedDays };
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -58,10 +64,8 @@ const VolunteerManagement = () => {
         setSuccessMessage('');
 
         try {
-            // Prepare plain JSON payload
             const payload = { ...formData };
 
-            // If updating, remove password if left empty
             if (editingVolunteer && !payload.password) {
                 delete payload.password;
             }
@@ -78,7 +82,6 @@ const VolunteerManagement = () => {
                 response = await AdminService.createVolunteer(payload);
             }
 
-            // Check if the response has the expected structure
             if (response && (response.statusCode === 200 || response.statusCode === 201)) {
                 setSuccessMessage(response.message || 'Volunteer successfully saved!');
                 await fetchVolunteers();
@@ -190,27 +193,22 @@ const VolunteerManagement = () => {
                         <div className="row">
                             <InputField label="Phone Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} required />
                             <div className="col-md-6 mb-3">
-                                <label htmlFor="availableDays">Available Days</label>
-                                <select
-                                    multiple
-                                    className="form-control"
-                                    id="availableDays"
-                                    name="availableDays"
-                                    value={formData.availableDays}
-                                    onChange={(e) => {
-                                        const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-                                        setFormData(prev => ({...prev, availableDays: selectedOptions}));
-                                    }}
-                                    required
-                                >
-                                    <option value="MONDAY">Monday</option>
-                                    <option value="TUESDAY">Tuesday</option>
-                                    <option value="WEDNESDAY">Wednesday</option>
-                                    <option value="THURSDAY">Thursday</option>
-                                    <option value="FRIDAY">Friday</option>
-                                    <option value="SATURDAY">Saturday</option>
-                                    <option value="SUNDAY">Sunday</option>
-                                </select>
+                                <label>Available Days</label>
+                                <div>
+                                    {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => (
+                                        <div key={day} className="form-check form-check-inline">
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                name="availableDays"
+                                                value={day}
+                                                checked={formData.availableDays.includes(day)}
+                                                onChange={handleCheckboxChange}
+                                            />
+                                            <label className="form-check-label">{day}</label>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <div className="mt-3">
@@ -257,7 +255,6 @@ const VolunteerManagement = () => {
                                             <button className="btn btn-danger btn-sm"
                                                     onClick={() => handleDelete(vol.id)}>Delete
                                             </button>
-
                                         </td>
                                     </tr>
                                 ))

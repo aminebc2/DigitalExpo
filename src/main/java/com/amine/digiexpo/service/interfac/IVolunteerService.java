@@ -18,5 +18,5 @@ public interface IVolunteerService {
 
     Response getSessionById(Long sessionId);
 
-    Response assignSessionToVolunteerByDate(Long volunteerId, Long sessionId, LocalDate date);
+    /*Response assignSessionToVolunteerByDate(Long volunteerId, Long sessionId, LocalDate date);*/
 }
