@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/associations/**", "/aboutus/**", "/home/**").permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN")
-                        /*.requestMatchers("/session/**").hasAnyRole("ASSOCIATION")*/
+                        .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/association/**").hasAnyRole("ASSOCIATION")
                         .requestMatchers("volunteer/**").hasAnyRole("BENEVOLE")
                         .anyRequest().authenticated()

@@ -53,6 +53,9 @@ const Navbar = () => {
                         <li className="nav-item">
                             <Link className="nav-link text-white" to="/association/volunteers">Volunteers</Link>
                         </li>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white" to="/association/profile">Profile</Link>
+                        </li>
                     </>
                 );
             default:

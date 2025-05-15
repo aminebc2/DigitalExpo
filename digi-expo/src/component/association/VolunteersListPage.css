@@ -1,99 +1,73 @@
-/* Global styles */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7fc;
-    color: #333;
-    margin: 0;
-    padding: 0;
-}
-
 .volunteers-container {
-    width: 80%;
-    margin: 40px auto;
-    text-align: center;
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #34495e;
 }
 
-/* Title */
 .title {
+    text-align: center;
+    font-weight: 700;
     font-size: 2.5rem;
-    color: #007bff;
-    margin-bottom: 20px;
-    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #27ae60;
+    letter-spacing: 1.2px;
 }
 
-/* Loading and error states */
-.loading {
-    font-size: 1.5rem;
-    color: #888;
-}
-
-.error-message {
-    font-size: 1.2rem;
-    color: red;
-}
-
+.loading,
+.error-message,
 .no-volunteers {
+    text-align: center;
     font-size: 1.2rem;
-    color: #555;
+    margin: 3rem 0;
+    color: #7f8c8d;
 }
 
-/* Volunteer list */
 .volunteer-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.75rem;
 }
 
-/* Individual volunteer card */
 .volunteer-card {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 250px;
-    transition: transform 0.3s ease-in-out;
-    text-align: left;
-    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(39, 174, 96, 0.15);
+    padding: 1.75rem 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
 }
 
 .volunteer-card:hover {
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.35);
     transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Volunteer info styling */
 .volunteer-info {
-    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
 }
 
 .volunteer-name {
-    font-size: 1.6rem;
-    color: #333;
-    font-weight: bold;
-    margin-bottom: 10px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid #27ae60;
+    padding-bottom: 0.25rem;
 }
 
 .volunteer-email,
 .volunteer-phone,
 .volunteer-available-days {
-    font-size: 1.1rem;
-    color: #555;
-    margin: 5px 0;
+    font-size: 1rem;
+    color: #34495e;
 }
 
-.volunteer-info strong {
-    color: #007bff;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .volunteer-list {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .volunteer-card {
-        width: 90%;
-    }
+.volunteer-email strong,
+.volunteer-phone strong,
+.volunteer-available-days strong {
+    color: #27ae60;
 }

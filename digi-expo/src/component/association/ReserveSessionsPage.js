@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import AssociationService from '../../service/AssociationService';
-import { AuthContext } from '../../context/AuthContext'; // Assuming you're using context for user data
-
+import { AuthContext } from '../../context/AuthContext';
+import './ReserveSessionsPage.css'
 
 const ReserveSessionsPage = () => {
     const { id: associationId } = useParams();
-    const { currentUser } = useContext(AuthContext); // Assuming `AuthContext` holds currentUser data
+    const { currentUser } = useContext(AuthContext);
     const [dates, setDates] = useState(['']);
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (currentUser?.role === 'ASSOCIATION' && currentUser.id) {
@@ -16,60 +17,73 @@ const ReserveSessionsPage = () => {
         }
     }, [currentUser]);
 
-    // Date input change handler
     const handleDateChange = (index, value) => {
         const updatedDates = [...dates];
         updatedDates[index] = value;
         setDates(updatedDates);
     };
 
-    // Add more date input field
     const addDateInput = () => setDates([...dates, '']);
 
-    // Form submission handler
+    const removeDateInput = (index) => {
+        if (dates.length === 1) return; // at least 1 input always
+        const updatedDates = dates.filter((_, i) => i !== index);
+        setDates(updatedDates);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Check if associationId is available
         if (!associationId) {
             setMessage('Identifiant de l’association manquant.');
             return;
         }
-
-        // Prepare DTO for the API call
+        setLoading(true);
         const dto = { dates };
-
         try {
-            // Call the backend service to reserve sessions
             await AssociationService.reserveSessions(associationId, dto);
             setMessage('Sessions réservées avec succès.');
+            setDates(['']); // reset
         } catch (error) {
             console.error("Reservation failed:", error);
             setMessage('Erreur lors de la réservation.');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="container mt-4">
+        <div className="reserve-container">
             <h3>Réserver des Sessions</h3>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="reserve-form">
                 {dates.map((date, index) => (
-                    <input
-                        key={index}
-                        type="date"
-                        className="form-control mb-2"
-                        value={date}
-                        onChange={(e) => handleDateChange(index, e.target.value)}
-                        required
-                    />
+                    <div key={index} className="date-input-wrapper">
+                        <input
+                            type="date"
+                            className="date-input"
+                            value={date}
+                            onChange={(e) => handleDateChange(index, e.target.value)}
+                            required
+                        />
+                        {dates.length > 1 && (
+                            <button
+                                type="button"
+                                className="remove-btn"
+                                onClick={() => removeDateInput(index)}
+                                title="Supprimer cette date"
+                            >
+                                &times;
+                            </button>
+                        )}
+                    </div>
                 ))}
-                <button type="button" className="btn btn-secondary mb-3" onClick={addDateInput}>
+                <button type="button" className="add-date-btn" onClick={addDateInput}>
                     + Ajouter une autre date
                 </button>
-                <br />
-                <button type="submit" className="btn btn-primary">Réserver</button>
+                <button type="submit" className="submit-btn" disabled={loading}>
+                    {loading ? 'Réservation...' : 'Réserver'}
+                </button>
             </form>
-            {message && <div className="alert alert-info mt-3">{message}</div>}
+            {message && <div className="message">{message}</div>}
         </div>
     );
 };
