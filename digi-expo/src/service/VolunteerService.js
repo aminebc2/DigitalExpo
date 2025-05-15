@@ -14,9 +14,9 @@ export default class VolunteerService {
     static async updateAvailableDays(volunteerId, availableDays) {
         try {
             const response = await axios.post(`${this.API_URL}/available-days/${volunteerId}`,
-                availableDays,{
-                headers: this.getHeader()
-            });
+                availableDays, {
+                    headers: this.getHeader()
+                });
             return response.data;
         } catch (error) {
             console.error('Error updating available days:', error);
@@ -48,4 +48,16 @@ export default class VolunteerService {
         }
     }
 
+    static async createRequest(volunteerId, associationId) {
+        const dto = {
+            volunteer: { id: volunteerId },
+            association: { id: associationId }
+        };
+        const response = await axios.post(`${this.API_URL}/create-request`, dto, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
 }
+
