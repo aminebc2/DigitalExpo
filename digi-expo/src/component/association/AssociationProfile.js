@@ -6,59 +6,98 @@ function AssociationProfile() {
     const [association, setAssociation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [editMode, setEditMode] = useState(false);
+    const [formData, setFormData] = useState({
+        username: "",
+        email: "",
+        name: "",
+        ville: "",
+        responsableName: "",
+        responsablePhone: "",
+    });
 
     const user = JSON.parse(localStorage.getItem("user"));
     const associationId = user?.id;
 
     useEffect(() => {
-        const fetchAssociation = async () => {
+        const fetchData = async () => {
             try {
                 const response = await AssociationService.getAssociationById(associationId);
                 if (response.statusCode === 200) {
-                    setAssociation(response.association || {});
+                    setAssociation(response.association);
+                    setFormData(response.association);
                 } else {
-                    setError(response.message || "Failed to load association");
+                    setError(response.message || "Failed to load data");
                 }
             } catch (err) {
+                setError("An error occurred while fetching data.");
                 console.error(err);
-                setError("Failed to load association");
             } finally {
                 setLoading(false);
             }
         };
-        fetchAssociation();
+
+        if (associationId) {
+            fetchData();
+        }
     }, [associationId]);
 
-    if (loading) return <p>Loading association info...</p>;
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
-    if (!association) return <p>No association data available.</p>; // Extra guard
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSave = async () => {
+        try {
+            const response = await AssociationService.updateAssociation(associationId, formData);
+
+            // Adjust based on actual structure
+            const updated = response.association || response.data || response;
+
+            if (updated && updated.username) {
+                setAssociation(updated);
+                setEditMode(false);
+            } else {
+                setError("Update succeeded but no data returned.");
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Update failed");
+        }
+    };
+
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div className="error">{error}</div>;
+    if (!association) return <div>No data available.</div>;
 
     return (
         <div className="association-container">
             <h2>Association Profile</h2>
-            {association ? (
+            {editMode ? (
                 <>
-                    <p className="association-info">
-                        <span className="association-label">Username:</span> {association.username}
-                    </p>
-                    <p className="association-info">
-                        <span className="association-label">Email:</span> {association.email}
-                    </p>
-                    <p className="association-info">
-                        <span className="association-label">Name:</span> {association.name}
-                    </p>
-                    <p className="association-info">
-                        <span className="association-label">Ville:</span> {association.ville}
-                    </p>
-                    <p className="association-info">
-                        <span className="association-label">Responsable Name:</span> {association.responsableName}
-                    </p>
-                    <p className="association-info">
-                        <span className="association-label">Responsable Phone:</span> {association.responsablePhone}
-                    </p>
+                    {["username", "email", "name", "ville", "responsableName", "responsablePhone"].map((field) => (
+                        <div key={field} className="association-info">
+                            <label className="association-label">{field}:</label>
+                            <input
+                                name={field}
+                                value={formData[field] || ""}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    ))}
+                    <button onClick={handleSave}>Save</button>
+                    <button onClick={() => setEditMode(false)}>Cancel</button>
                 </>
             ) : (
-                <p>No data available.</p>
+                <>
+                    <p><strong>Username:</strong> {association.username}</p>
+                    <p><strong>Email:</strong> {association.email}</p>
+                    <p><strong>Name:</strong> {association.name}</p>
+                    <p><strong>Ville:</strong> {association.ville}</p>
+                    <p><strong>Responsable Name:</strong> {association.responsableName}</p>
+                    <p><strong>Responsable Phone:</strong> {association.responsablePhone}</p>
+                    <button onClick={() => setEditMode(true)}>Edit</button>
+                </>
             )}
         </div>
     );

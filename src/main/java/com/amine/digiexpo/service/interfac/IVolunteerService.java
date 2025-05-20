@@ -1,6 +1,7 @@
 package com.amine.digiexpo.service.interfac;
 
 import com.amine.digiexpo.DTO.Response;
+import com.amine.digiexpo.DTO.VolunteerDTO;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -15,6 +16,8 @@ public interface IVolunteerService {
 
     // Récupérer les détails du bénévole
     Response getVolunteerById(Long volunteerId);
+
+    Response updateVolunteer(Long volunteerId, VolunteerDTO updatedVolunteerDTO);
 
     Response getSessionById(Long sessionId);
 

@@ -17,6 +17,7 @@ import AvailableDays from "./component/volunteer/AvailableDays";
 import SessionPage from "./component/volunteer/SessionsPage";
 import AssociationList from "./component/volunteer/AssociationList";
 import AssociationProfile from "./component/association/AssociationProfile";
+import VolunteerProfile from "./component/volunteer/VolunteerProfile";
 
 function App() {
     return (
@@ -123,6 +124,14 @@ function AppRoutes() {
                 element={
                     <ProtectedRoute allowedRoles={['BENEVOLE']}>
                         <SessionPage volunteerId={loggedvolunteerId}/>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/volunteer/profile"
+                element={
+                    <ProtectedRoute allowedRoles={['BENEVOLE']}>
+                        <VolunteerProfile />
                     </ProtectedRoute>
                 }
             />

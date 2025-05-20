@@ -1,6 +1,8 @@
 package com.amine.digiexpo.controller;
 
+import com.amine.digiexpo.DTO.AssociationDTO;
 import com.amine.digiexpo.DTO.Response;
+import com.amine.digiexpo.DTO.VolunteerDTO;
 import com.amine.digiexpo.service.interfac.IAssociationService;
 import com.amine.digiexpo.service.interfac.IVolunteerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,15 @@ public class VolunteerController {
     @PreAuthorize("hasRole('BENEVOLE')")
     public ResponseEntity<Response> getAllAssociations() {
         Response response = associationService.getAllAssociations();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PutMapping("/update/{volunteerId}")
+    @PreAuthorize("hasRole('BENEVOLE')")
+    public ResponseEntity<Response> updateVolunteer(
+            @PathVariable Long volunteerId,
+            @RequestBody VolunteerDTO updatedVolunteer) {
+        Response response = volunteerService.updateVolunteer(volunteerId, updatedVolunteer);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

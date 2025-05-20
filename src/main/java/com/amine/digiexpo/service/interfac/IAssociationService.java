@@ -19,6 +19,8 @@ public interface IAssociationService {
     // Consulter la liste des bénévoles
     Response getVolunteers(Long associationId);
 
+    Response updateAssociation(Long id, AssociationDTO dto);
+
     // Récupérer les détails de l'association
     Response getAssociationById(Long associationId);
 

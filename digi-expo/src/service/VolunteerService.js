@@ -59,5 +59,29 @@ export default class VolunteerService {
         return response.data;
     }
 
+    static async getVolunteerById(volunteerId) {
+        try {
+            const response = await axios.get(`${this.API_URL}/${volunteerId}`,{
+                headers: this.getHeader()
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching volunteer info:", error);
+            throw error;
+        }
+    }
+
+    static  async updateVolunteer(id, data){
+        try {
+            const response = await axios.put(`${this.API_URL}/update/${id}`, data,{
+                headers: this.getHeader()
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching volunteer info:", error);
+            throw error;
+        }
+    }
+
 }
 

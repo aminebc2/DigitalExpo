@@ -61,6 +61,26 @@ public class AssociationService implements IAssociationService {
         }
     }
 
+    @Override
+    public Response updateAssociation(Long associationId, AssociationDTO updatedAssociationDTO) {
+        try {
+            Association existing = associationRepository.findById(associationId)
+                    .orElseThrow(() -> new RuntimeException("Association not found"));
+
+            existing.setUsername(updatedAssociationDTO.getUsername());
+            existing.setEmail(updatedAssociationDTO.getEmail());
+            existing.setName(updatedAssociationDTO.getName());
+            existing.setVille(updatedAssociationDTO.getVille());
+            existing.setResponsableName(updatedAssociationDTO.getResponsableName());
+            existing.setResponsablePhone(updatedAssociationDTO.getResponsablePhone());
+
+            Association saved = associationRepository.save(existing);
+
+            return new Response(200, "Association updated successfully", Utils.mapAssociationToDTO(saved));
+        } catch (Exception e) {
+            return new Response(500, "Failed to update association: " + e.getMessage(), null);
+        }
+    }
 
     @Override
     public Response getSessions(Long associationId) {

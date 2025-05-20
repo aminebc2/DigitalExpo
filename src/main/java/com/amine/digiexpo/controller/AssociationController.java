@@ -1,5 +1,6 @@
 package com.amine.digiexpo.controller;
 
+import com.amine.digiexpo.DTO.AssociationDTO;
 import com.amine.digiexpo.DTO.DateListDTO;
 import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.entity.Association;
@@ -39,6 +40,14 @@ public class AssociationController {
     @GetMapping("/volunteers/{associationId}")
     public ResponseEntity<Response> getVolunteers(@PathVariable Long associationId) {
         Response response = associationService.getVolunteers(associationId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PutMapping("/update/{associationId}")
+    public ResponseEntity<Response> updateAssociation(
+            @PathVariable Long associationId,
+            @RequestBody AssociationDTO updatedAssociation) {
+        Response response = associationService.updateAssociation(associationId, updatedAssociation);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

@@ -65,6 +65,18 @@ export default class AssociationService {
         }
     }
 
+    static  async updateAssociation(id, data){
+        try {
+            const response = await axios.put(`${this.API_URL}/update/${id}`, data,{
+                headers: this.getHeader()
+            });
+            return response.data; // Return the association details from the backend
+        } catch (error) {
+            console.error("Error fetching association info:", error);
+            throw error;
+        }
+    }
+
     // Get session details by ID
     static async getSessionById(sessionId) {
         try {

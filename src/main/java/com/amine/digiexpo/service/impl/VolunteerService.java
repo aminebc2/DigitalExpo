@@ -1,10 +1,12 @@
 package com.amine.digiexpo.service.impl;
 
+import com.amine.digiexpo.DTO.AssociationDTO;
 import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
 import com.amine.digiexpo.Repository.SessionRepository;
 import com.amine.digiexpo.Repository.VolunteerRepository;
+import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.entity.Session;
 import com.amine.digiexpo.entity.Volunteer;
 import com.amine.digiexpo.service.interfac.IVolunteerService;
@@ -78,23 +80,6 @@ public class VolunteerService implements IVolunteerService {
         }
     }
 
-
-    @Override
-    @PreAuthorize("hasRole('BENEVOLE')")
-    public Response getVolunteerById(Long volunteerId) {
-        try {
-            // Récupérer le bénévole
-            Volunteer volunteer = volunteerRepository.findById(volunteerId)
-                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
-
-            // Mapper vers DTO avec relations
-            return new Response(200, "Volunteer retrieved successfully", Utils.mapVolunteerToDTOWithRelations(volunteer));
-        } catch (Exception e) {
-            // Handle errors and return failure response
-            return new Response(500, "Failed to retrieve volunteer: " + e.getMessage(), null);
-        }
-    }
-
     @Override
     @PreAuthorize("hasRole('BENEVOLE')")
     public Response getSessionById(Long sessionId) {
@@ -111,28 +96,39 @@ public class VolunteerService implements IVolunteerService {
         }
     }
 
-    /*@Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public Response assignSessionToVolunteerByDate(Long volunteerId, Long sessionId, LocalDate date) {
+    @Override
+    @PreAuthorize("hasRole('BENEVOLE')")
+    public Response updateVolunteer(Long volunteerId, VolunteerDTO updatedVolunteerDTO) {
+        try {
+            Volunteer existing = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Association not found"));
+
+            existing.setUsername(updatedVolunteerDTO.getUsername());
+            existing.setEmail(updatedVolunteerDTO.getEmail());
+            existing.setPhoneNumber(updatedVolunteerDTO.getPhoneNumber());
+            existing.setAvailableDays(updatedVolunteerDTO.getAvailableDays());
+
+            Volunteer saved = volunteerRepository.save(existing);
+
+            return new Response(200, "Association updated successfully", Utils.mapVolunteerToDTO(saved));
+        } catch (Exception e) {
+            return new Response(500, "Failed to update association: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response getVolunteerById(Long volunteerId) {
         try {
             Volunteer volunteer = volunteerRepository.findById(volunteerId)
-                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+                    .orElseThrow(() -> new RuntimeException("Association not found"));
 
-            Session session = sessionRepository.findById(sessionId)
-                    .orElseThrow(() -> new RuntimeException("Session not found"));
-
-            // Check if the volunteer is available on the given date
-            if (volunteer.getAvailableDays().contains(date.getDayOfWeek())) {
-                // Add volunteer to the session
-                session.setVolunteer(volunteer);
-                sessionRepository.save(session);
-
-                return new Response(200, "Session assigned to volunteer successfully", null);
-            } else {
-                return new Response(400, "Volunteer is not available on the selected date", null);
-            }
-        } catch (RuntimeException e) {
-            return new Response(404, e.getMessage(), null);
+            Response response = new Response();
+            response.setStatusCode(200);
+            response.setMessage("Volunteer found");
+            response.setVolunteer(Utils.mapVolunteerToDTO(volunteer));
+            return response;
+        } catch (Exception e) {
+            return new Response(500, "Failed to retrieve association: " + e.getMessage(), null);
         }
-    }*/
+    }
 }

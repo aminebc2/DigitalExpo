@@ -34,13 +34,16 @@ const Navbar = () => {
                         <li className="nav-item">
                             <Link className="nav-link text-white" to="/volunteer/sessions">My Sessions</Link>
                         </li>
+                        <li className="nav-item">
+                            <Link className="nav-link text-white" to="/volunteer/profile">Profile</Link>
+                        </li>
                     </>
                 );
             case 'ASSOCIATION':
                 return (
                     <>
                         <li className="nav-item">
-                            <Link
+                        <Link
                                 className="nav-link text-white"
                                 to={localStorage.getItem('associationId') ? `/association/reserve/${localStorage.getItem('associationId')}` : '#'}
                             >
