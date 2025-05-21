@@ -1,83 +1,72 @@
+/*
 import React, { useState, useEffect } from 'react';
 import VolunteerService from '../../service/VolunteerService'; // Ensure the path is correct
 import './AvailableDays.css'; // Import a CSS file for custom styles
 
 const AvailableDays = () => {
-    const [selectedDays, setSelectedDays] = useState([]);
+    const [availableDays, setAvailableDays] = useState([]);
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
-    const authToken = localStorage.getItem('authToken'); // Retrieve token from storage
+    const authToken = localStorage.getItem('authToken');
 
     const user = JSON.parse(localStorage.getItem("user"));
     const volunteerId = user?.id;
 
-    // Days of the week
     const daysOfWeek = [
         'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'
     ];
 
+    // Fetch available days from the server when component mounts
     useEffect(() => {
         if (!volunteerId) {
             setMessage('Volunteer ID is missing. Please log in again.');
             return;
         }
 
-        // Optional: add a key like `volunteer_selectedDays_<volunteerId>` to scope data
-        const storedDays = localStorage.getItem(`selectedDays_${volunteerId}`);
-        if (storedDays) {
-            setSelectedDays(JSON.parse(storedDays));
-        } else {
-            setSelectedDays([]); // Explicitly reset if no stored days
-        }
+        const fetchAvailableDays = async () => {
+            setLoading(true);
+            try {
+                const volunteerData = await VolunteerService.getVolunteerById(volunteerId);
+
+                if (volunteerData.volunteer && volunteerData.volunteer.availableDays) {
+                    setAvailableDays(volunteerData.volunteer.availableDays);
+                } else {
+                    console.log("No availableDays field found");
+                }
+            } catch (error) {
+                setMessage('Failed to load available days.');
+                console.error('Error fetching available days:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAvailableDays();
     }, [volunteerId]);
 
-    // Automatically update available days when selectedDays changes
-    useEffect(() => {
-        if (selectedDays.length > 0) {
-            setLoading(true);
-            const updateAvailableDays = async () => {
-                try {
-                    const response = await VolunteerService.updateAvailableDays(volunteerId, selectedDays, authToken);
-                    setMessage('Your available days have been updated successfully!');
-                } catch (error) {
-                    setMessage('Failed to update days. Please try again.');
-                    console.error('Error updating available days:', error);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            updateAvailableDays();
-        }
-    }, [selectedDays, volunteerId, authToken]); // Trigger update when selectedDays change
-
-    // Handle checkbox selection
     const handleCheckboxChange = (day) => {
-        const newSelectedDays = selectedDays.includes(day)
-            ? selectedDays.filter(d => d !== day) // Remove day if already selected
-            : [...selectedDays, day]; // Add day to the list if not selected
+        setMessage(''); // Clear previous message
+        const newAvailableDays = availableDays.includes(day)
+            ? availableDays.filter(d => d !== day)
+            : [...availableDays, day];
 
-        setSelectedDays(newSelectedDays);
-
-        // Store updated selected days in localStorage
-        localStorage.setItem(`selectedDays_${volunteerId}`, JSON.stringify(newSelectedDays));
+        setAvailableDays(newAvailableDays);
     };
 
-    // Handle submit manually triggered by button
+
     const handleSubmit = async () => {
-        if (selectedDays.length === 0) {
+        if (availableDays.length === 0) {
             setMessage('Please select at least one day.');
             return;
         }
 
         setLoading(true);
         try {
-            const response = await VolunteerService.updateAvailableDays(volunteerId, selectedDays, authToken);
+            await VolunteerService.updateAvailableDays(volunteerId, availableDays);
             setMessage('Your available days have been updated successfully!');
         } catch (error) {
             setMessage('Failed to update days. Please try again.');
             console.error('Error updating available days:', error);
-        } finally {
+        } finally {/!**!/
             setLoading(false);
         }
     };
@@ -86,17 +75,15 @@ const AvailableDays = () => {
         <div className="available-days-container">
             <h2>Update Available Days</h2>
 
-            {/* Display message */}
             {message && <p className="message">{message}</p>}
 
-            {/* Days of the week checkboxes */}
             <div className="checkbox-container">
                 {daysOfWeek.map(day => (
                     <label key={day} className="checkbox-label">
                         <input
                             type="checkbox"
                             value={day}
-                            checked={selectedDays.includes(day)} // Check if day is selected
+                            checked={availableDays.includes(day)}
                             onChange={() => handleCheckboxChange(day)}
                         />
                         {day}
@@ -104,14 +91,9 @@ const AvailableDays = () => {
                 ))}
             </div>
 
-            {/* Submit button */}
             <div className="submit-container">
                 <button onClick={handleSubmit} disabled={loading} className="submit-btn">
-                    {loading ? (
-                        <span>Updating...</span> // Show loading text or spinner
-                    ) : (
-                        'Submit'
-                    )}
+                    {loading ? 'Updating...' : 'Submit'}
                 </button>
             </div>
         </div>
@@ -119,3 +101,4 @@ const AvailableDays = () => {
 };
 
 export default AvailableDays;
+*/

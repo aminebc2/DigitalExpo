@@ -112,14 +112,6 @@ function AppRoutes() {
                 }
             />
             <Route
-                path="/volunteer/available-days"
-                element={
-                <ProtectedRoute allowedRoles={['BENEVOLE']}>
-                    <AvailableDays volunteerId={loggedvolunteerId}/>
-                </ProtectedRoute>
-                }
-            />
-            <Route
                 path="/volunteer/sessions"
                 element={
                     <ProtectedRoute allowedRoles={['BENEVOLE']}>

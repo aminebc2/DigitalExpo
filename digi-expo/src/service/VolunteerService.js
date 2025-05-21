@@ -14,7 +14,7 @@ export default class VolunteerService {
     static async updateAvailableDays(volunteerId, availableDays) {
         try {
             const response = await axios.post(`${this.API_URL}/available-days/${volunteerId}`,
-                availableDays, {
+                {availableDays}, {
                     headers: this.getHeader()
                 });
             return response.data;
