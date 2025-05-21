@@ -17,16 +17,17 @@ const AvailableDays = () => {
     ];
 
     useEffect(() => {
-        // Check if volunteerId exists, else redirect to login page
         if (!volunteerId) {
             setMessage('Volunteer ID is missing. Please log in again.');
             return;
         }
 
-        // Check if selected days are saved in localStorage
-        const storedDays = localStorage.getItem('selectedDays');
+        // Optional: add a key like `volunteer_selectedDays_<volunteerId>` to scope data
+        const storedDays = localStorage.getItem(`selectedDays_${volunteerId}`);
         if (storedDays) {
-            setSelectedDays(JSON.parse(storedDays)); // Parse stored data to array
+            setSelectedDays(JSON.parse(storedDays));
+        } else {
+            setSelectedDays([]); // Explicitly reset if no stored days
         }
     }, [volunteerId]);
 
@@ -59,7 +60,7 @@ const AvailableDays = () => {
         setSelectedDays(newSelectedDays);
 
         // Store updated selected days in localStorage
-        localStorage.setItem('selectedDays', JSON.stringify(newSelectedDays));
+        localStorage.setItem(`selectedDays_${volunteerId}`, JSON.stringify(newSelectedDays));
     };
 
     // Handle submit manually triggered by button
