@@ -64,6 +64,7 @@ public class Utils {
         dto.setVille(association.getVille());
         dto.setResponsableName(association.getResponsableName());
         dto.setResponsablePhone(association.getResponsablePhone());
+        dto.setImageFileName(association.getImageFileName());
         return dto;
     }
 
@@ -76,6 +77,7 @@ public class Utils {
         dto.setVille(association.getVille());
         dto.setResponsableName(association.getResponsableName());
         dto.setResponsablePhone(association.getResponsablePhone());
+        dto.setImageFileName(association.getImageFileName());
         // You can include additional fields here
         return dto;
     }
@@ -123,6 +125,7 @@ public class Utils {
             associationDTO.setName(session.getAssociation().getName());
             associationDTO.setResponsableName(session.getAssociation().getResponsableName());
             associationDTO.setResponsablePhone(session.getAssociation().getResponsablePhone());
+            associationDTO.setImageFileName(session.getAssociation().getImageFileName());
             dto.setAssociation(associationDTO);
         }
 
@@ -248,6 +251,7 @@ public class Utils {
         dto.setVille(association.getVille());
         dto.setResponsableName(association.getResponsableName());
         dto.setResponsablePhone(association.getResponsablePhone());
+        dto.setImageFileName(association.getImageFileName());
         // Mapping des sessions
         if (association.getSessions() != null) {
             List<SessionDTO> sessionDTOs = association.getSessions()

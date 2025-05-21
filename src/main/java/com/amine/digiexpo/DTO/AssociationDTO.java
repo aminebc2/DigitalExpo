@@ -13,6 +13,15 @@ public class AssociationDTO extends UserDTO {
     private String ville;
     private String responsableName;
     private String responsablePhone;
+    private String imageFileName;
+
+    public String getImageFileName() {
+        return imageFileName;
+    }
+
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
+    }
 
     public List<SessionDTO> getSessions() {
         return sessions;

@@ -14,9 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -36,7 +43,7 @@ public class AdminService implements IAdminService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public Response createAssociation(AssociationDTO associationDTO) {
+    public Response createAssociation(AssociationDTO associationDTO, MultipartFile imageFile) {
         try {
             if (associationRepository.findByUsername(associationDTO.getUsername()).isPresent() ||
                     associationRepository.findByEmail(associationDTO.getEmail()).isPresent()) {
@@ -52,6 +59,11 @@ public class AdminService implements IAdminService {
             association.setVille(associationDTO.getVille());
             association.setResponsableName(associationDTO.getResponsableName());
             association.setResponsablePhone(associationDTO.getResponsablePhone());
+            association.setImageFileName(associationDTO.getImageFileName());
+
+            // Save image
+            String fileName = saveImageFile(imageFile);
+            association.setImageFileName(fileName);
 
             Association savedAssociation = associationRepository.save(association);
             AssociationDTO savedAssociationDTO = Utils.mapAssociationToDTOWithRelations(savedAssociation);
@@ -67,7 +79,7 @@ public class AdminService implements IAdminService {
 
 
     @Override
-    public Response updateAssociation(Long associationId, AssociationDTO associationDTO) {
+    public Response updateAssociation(Long associationId, AssociationDTO associationDTO, MultipartFile imageFile) {
         try {
             Association association = associationRepository.findById(associationId)
                     .orElseThrow(() -> new RuntimeException("Association not found"));
@@ -80,6 +92,13 @@ public class AdminService implements IAdminService {
                 association.setResponsableName(associationDTO.getResponsableName());
             if (associationDTO.getResponsablePhone() != null)
                 association.setResponsablePhone(associationDTO.getResponsablePhone());
+            if (associationDTO.getImageFileName() != null)
+                association.setImageFileName(associationDTO.getImageFileName());
+
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String fileName = saveImageFile(imageFile);
+                association.setImageFileName(fileName);
+            }
 
             Association updatedAssociation = associationRepository.save(association);
             AssociationDTO updatedAssociationDTO = Utils.mapAssociationToDTOWithRelations(updatedAssociation);
@@ -87,8 +106,25 @@ public class AdminService implements IAdminService {
             return new Response(200, "Association updated successfully", updatedAssociationDTO);
         } catch (RuntimeException e) {
             return new Response(404, e.getMessage(), null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
+
+    private String saveImageFile(MultipartFile file) throws IOException {
+        String uploadDir = "uploads/associations/";
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path uploadPath = Paths.get(uploadDir);
+
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        Path filePath = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return fileName;
+    }
+
 
     @Override
     public Response deleteAssociation(Long associationId) {

@@ -20,25 +20,39 @@ const AssociationManagement = () => {
         setSuccessMessage('');
 
         try {
-            let response;
+            const formDataToSend = new FormData();
 
-            // Prepare plain JSON payload
-            const payload = { ...formData };
+            // Convert form data to JSON string for the "data" part
+            const {
+                imageFile, // keep separately
+                password, // handled separately for edit/new
+                ...otherData
+            } = formData;
 
-            // Remove password if updating and left empty
-            if (editingAssociation && !payload.password) {
-                delete payload.password;
+            // Include password only if present or new association
+            if (!editingAssociation && !password) {
+                setError('Password is required for creating a new association.');
+                setButtonLoading(false);
+                return;
             }
 
+            // Construct data JSON (without imageFile)
+            const dataToSend = {
+                ...otherData,
+                password: password || undefined, // send password if present
+            };
+
+            formDataToSend.append('data', JSON.stringify(dataToSend));
+
+            if (imageFile) {
+                formDataToSend.append('image', imageFile);
+            }
+
+            let response;
             if (editingAssociation) {
-                response = await AdminService.updateAssociation(editingAssociation.id, payload);
+                response = await AdminService.updateAssociation(editingAssociation.id, formDataToSend);
             } else {
-                if (!payload.password) {
-                    setError('Password is required for creating a new association.');
-                    setButtonLoading(false);
-                    return;
-                }
-                response = await AdminService.createAssociation(payload);
+                response = await AdminService.createAssociation(formDataToSend);
             }
 
             if (response.statusCode === 200 || response.statusCode === 201) {
@@ -59,6 +73,7 @@ const AssociationManagement = () => {
     };
 
 
+
     function initialFormState() {
         return {
             username: '',
@@ -68,7 +83,8 @@ const AssociationManagement = () => {
             name: '',
             ville: '',
             responsableName: '',
-            responsablePhone: ''
+            responsablePhone: '',
+            imageFileName: null
         };
     }
 
@@ -104,7 +120,8 @@ const AssociationManagement = () => {
             name: assoc.name,
             ville: assoc.ville,
             responsableName: assoc.responsableName,
-            responsablePhone: assoc.responsablePhone
+            responsablePhone: assoc.responsablePhone,
+            imageFileName: assoc.imageFileName
         });
         setEditingAssociation(assoc);
         setShowForm(true);
@@ -155,8 +172,10 @@ const AssociationManagement = () => {
                 {showForm && (
                     <form onSubmit={handleSubmit} className="mb-4">
                         <div className="row">
-                            <InputField label="Username" name="username" value={formData.username} onChange={handleInputChange} required />
-                            <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
+                            <InputField label="Username" name="username" value={formData.username}
+                                        onChange={handleInputChange} required/>
+                            <InputField label="Email" name="email" type="email" value={formData.email}
+                                        onChange={handleInputChange} required/>
                         </div>
                         <div className="row">
                             <InputField
@@ -169,12 +188,29 @@ const AssociationManagement = () => {
                             />
                         </div>
                         <div className="row">
-                            <InputField label="Association Name" name="name" value={formData.name} onChange={handleInputChange} required />
-                            <InputField label="City" name="ville" value={formData.ville} onChange={handleInputChange} required />
+                            <InputField label="Association Name" name="name" value={formData.name}
+                                        onChange={handleInputChange} required/>
+                            <InputField label="City" name="ville" value={formData.ville} onChange={handleInputChange}
+                                        required/>
                         </div>
                         <div className="row">
-                            <InputField label="Responsible Person" name="responsableName" value={formData.responsableName} onChange={handleInputChange} required />
-                            <InputField label="Phone Number" name="responsablePhone" value={formData.responsablePhone} onChange={handleInputChange} required />
+                            <InputField label="Responsible Person" name="responsableName"
+                                        value={formData.responsableName} onChange={handleInputChange} required/>
+                            <InputField label="Phone Number" name="responsablePhone" value={formData.responsablePhone}
+                                        onChange={handleInputChange} required/>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <label htmlFor="imageFile">Upload Image</label>
+                                <input
+                                    type="file"
+                                    className="form-control"
+                                    id="imageFile"
+                                    name="imageFile"
+                                    accept="image/*"
+                                    onChange={(e) => setFormData(prev => ({...prev, imageFile: e.target.files[0]}))}
+                                />
+                            </div>
                         </div>
 
                         <div className="mt-3">
@@ -189,7 +225,9 @@ const AssociationManagement = () => {
                 )}
 
                 {globalLoading ? (
-                    <div className="text-center mt-5"><div className="spinner-border"></div></div>
+                    <div className="text-center mt-5">
+                        <div className="spinner-border"></div>
+                    </div>
                 ) : (
                     <div className="table-responsive">
                         <table className="table table-striped">
@@ -202,6 +240,7 @@ const AssociationManagement = () => {
                                 <th>City</th>
                                 <th>Responsible</th>
                                 <th>Phone</th>
+                                <th>Image</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
@@ -217,7 +256,17 @@ const AssociationManagement = () => {
                                         <td>{assoc.responsableName}</td>
                                         <td>{assoc.responsablePhone}</td>
                                         <td>
-                                            <button className="btn btn-sm btn-primary me-1" onClick={() => handleEdit(assoc)}>Edit</button>
+                                            {assoc.imageFileName ? (
+                                                <img src={`http://localhost:8080/images/${assoc.imageFileName}`}
+                                                     alt="Association" width="80"/>
+                                            ) : (
+                                                'No image'
+                                            )}
+                                        </td>
+                                        <td>
+                                            <button className="btn btn-sm btn-primary me-1"
+                                                    onClick={() => handleEdit(assoc)}>Edit
+                                            </button>
                                             <button className="btn btn-sm btn-danger" onClick={() => handleDelete(assoc.id)}>Delete</button>
                                         </td>
                                     </tr>

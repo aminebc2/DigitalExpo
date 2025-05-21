@@ -12,8 +12,12 @@ export default class AdminService {
     }
 
     static createAssociation(data) {
+        const token = localStorage.getItem("token");
         return axios.post(`${this.API_URL}/association`, data, {
-            headers: this.getHeader()
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data"
+            }
         })
             .then(res => res.data)
             .catch(err => {
@@ -22,10 +26,13 @@ export default class AdminService {
             });
     }
 
-
     static updateAssociation(id, data) {
+        const token = localStorage.getItem("token");
         return axios.put(`${this.API_URL}/associations/${id}`, data, {
-            headers: this.getHeader()
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data"
+            }
         }).then(res => res.data);
     }
 

@@ -2,6 +2,7 @@ package com.amine.digiexpo.service.interfac;
 
 import com.amine.digiexpo.DTO.*;
 import com.amine.digiexpo.enumeration.SessionStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,8 +10,8 @@ import java.util.List;
 public interface IAdminService {
 
     // Gérer les associations (CRUD)
-    Response createAssociation(AssociationDTO associationDTO);
-    Response updateAssociation(Long associationId, AssociationDTO associationDTO);
+    Response createAssociation(AssociationDTO associationDTO, MultipartFile imageFile);
+    Response updateAssociation(Long associationId, AssociationDTO associationDTO, MultipartFile imageFile);
     Response deleteAssociation(Long associationId);
     Response getAllAssociations();
 

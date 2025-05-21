@@ -24,15 +24,15 @@ public class Association extends User {
 
     private String responsablePhone;
 
-    public String getPicturePath() {
-        return picturePath;
+    public String getImageFileName() {
+        return imageFileName;
     }
 
-    public void setPicturePath(String picturePath) {
-        this.picturePath = picturePath;
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
     }
 
-    private String picturePath;
+    private String imageFileName;
 
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference

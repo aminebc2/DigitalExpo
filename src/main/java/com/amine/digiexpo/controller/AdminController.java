@@ -4,11 +4,16 @@ import com.amine.digiexpo.DTO.*;
 import com.amine.digiexpo.service.interfac.IAdminService;
 import com.amine.digiexpo.service.interfac.IAssociationService;
 import com.amine.digiexpo.service.interfac.ISessionService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/admin")
@@ -25,16 +30,34 @@ public class AdminController {
     private ISessionService sessionService;
     // --- Associations Endpoints (standard REST naming) --- //
 
-    @PostMapping(value = "/association", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Response> createAssociation(@RequestBody AssociationDTO associationDTO) {
-        Response response = adminService.createAssociation(associationDTO);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @PostMapping(value = "/association", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response> createAssociation(
+            @RequestPart("data") String associationDTOJson,
+            @RequestPart("image") MultipartFile imageFile) {
+        try {
+            AssociationDTO associationDTO = objectMapper.readValue(associationDTOJson, AssociationDTO.class);
+            Response response = adminService.createAssociation(associationDTO, imageFile);
+            return ResponseEntity.status(response.getStatusCode()).body(response);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(400, "Invalid JSON format", null));
+        }
     }
 
-    @PutMapping("/associations/{id}")
-    public ResponseEntity<Response> updateAssociation(@PathVariable Long id, @RequestBody AssociationDTO associationDTO) {
-        Response response = adminService.updateAssociation(id, associationDTO);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
+    @PutMapping(value = "/associations/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response> updateAssociation(
+            @PathVariable Long id,
+            @RequestPart("data") String associationDTOJson,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        try {
+            AssociationDTO associationDTO = objectMapper.readValue(associationDTOJson, AssociationDTO.class);
+            Response response = adminService.updateAssociation(id, associationDTO, imageFile);
+            return ResponseEntity.status(response.getStatusCode()).body(response);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Response(400, "Invalid JSON format", null));
+        }
     }
 
     @DeleteMapping("/associations/{id}")
