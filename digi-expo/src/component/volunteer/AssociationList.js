@@ -9,23 +9,28 @@ const AssociationList = () => {
     const [joinedIds, setJoinedIds] = useState([]);
     const [loadingId, setLoadingId] = useState(null);
 
+    // Get volunteerId from logged-in user stored in localStorage
     const user = JSON.parse(localStorage.getItem("user"));
     const volunteerId = user?.id;
 
     useEffect(() => {
         const fetchAssociations = async () => {
             if (!volunteerId) {
-                setMessage('Volunteer ID is missing. Please log in again.');
+                setError('Volunteer ID is missing. Please log in again.');
                 return;
             }
+            setError('');
             try {
                 const response = await VolunteerService.getAllAssociations();
                 if (response.status === 200) {
+                    // Adjust based on actual response structure
                     setAssociations(response.data.associationList || []);
+                } else {
+                    setError('Failed to load associations');
                 }
             } catch (err) {
                 console.error(err);
-                setError('Failed to load associations');
+                setError('Network or server error while loading associations');
             }
         };
 
@@ -33,15 +38,20 @@ const AssociationList = () => {
     }, [volunteerId]);
 
     const handleJoinAssociation = async (associationId) => {
+        if (!volunteerId) {
+            setError('You must be logged in to join an association.');
+            return;
+        }
         setLoadingId(associationId);
+        setMessage('');
+        setError('');
         try {
-            console.log("volunteerId:", volunteerId, "associationId:", associationId);
             const res = await VolunteerService.createRequest(volunteerId, associationId);
-            setMessage(res.message);
-            setJoinedIds([...joinedIds, associationId]);
-        } catch (error) {
-            const errMsg = error.response?.data?.message || "Failed to send request.";
-            setMessage(errMsg);
+            setMessage(res.message || 'Request sent successfully.');
+            setJoinedIds((prev) => [...prev, associationId]);
+        } catch (err) {
+            const errMsg = err.response?.data?.message || 'Failed to send request.';
+            setError(errMsg);
         } finally {
             setLoadingId(null);
         }
@@ -58,6 +68,15 @@ const AssociationList = () => {
                     {associations.map((assoc) => (
                         <div className="col-md-4" key={assoc.id}>
                             <div className="card association-card mb-4">
+                                {assoc.imageFileName ? (
+                                    <img
+                                        src={`http://localhost:8080/images/${assoc.imageFileName}`}
+                                        alt={`${assoc.name} logo`}
+                                        className="card-img-top association-image"
+                                    />
+                                ) : (
+                                    <div className="no-image-placeholder"></div>
+                                )}
                                 <div className="card-body">
                                     <h5 className="card-title">{assoc.name}</h5>
                                     <p className="card-text"><strong>Email:</strong> {assoc.email}</p>
@@ -75,7 +94,6 @@ const AssociationList = () => {
                                                 ? "Sending..."
                                                 : "Join Association"}
                                     </button>
-
                                 </div>
                             </div>
                         </div>

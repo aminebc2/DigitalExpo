@@ -15,6 +15,8 @@ function AssociationProfile() {
         responsableName: "",
         responsablePhone: "",
     });
+    const [imageFile, setImageFile] = useState(null); // New image file state
+    const [imagePreview, setImagePreview] = useState(null); // For previewing selected image
 
     const user = JSON.parse(localStorage.getItem("user"));
     const associationId = user?.id;
@@ -26,6 +28,10 @@ function AssociationProfile() {
                 if (response.statusCode === 200) {
                     setAssociation(response.association);
                     setFormData(response.association);
+                    if (response.association.imageFileName) {
+                        // assuming backend stores image path or filename
+                        setImagePreview(`http://localhost:8080/images/${response.association.imageFileName}`);
+                    }
                 } else {
                     setError(response.message || "Failed to load data");
                 }
@@ -46,16 +52,45 @@ function AssociationProfile() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file)); // Show preview
+        }
+    };
+
     const handleSave = async () => {
         try {
-            const response = await AssociationService.updateAssociation(associationId, formData);
+            let updatedAssociation;
 
-            // Adjust based on actual structure
-            const updated = response.association || response.data || response;
+            if (imageFile) {
+                // If new image selected, upload with formData using FormData
+                const formPayload = new FormData();
+                // Append text fields
+                Object.entries(formData).forEach(([key, value]) => {
+                    formPayload.append(key, value);
+                });
+                // Append image file
+                formPayload.append("imageFile", imageFile);
 
-            if (updated && updated.username) {
-                setAssociation(updated);
+                const response = await AssociationService.updateAssociationWithImage(associationId, formPayload);
+                updatedAssociation = response.association || response.data || response;
+            } else {
+                // No image update, just send JSON data
+                const response = await AssociationService.updateAssociation(associationId, formData);
+                updatedAssociation = response.association || response.data || response;
+            }
+
+            if (updatedAssociation && updatedAssociation.username) {
+                setAssociation(updatedAssociation);
+                setFormData(updatedAssociation);
+                if (updatedAssociation.imageFileName) {
+                    setImagePreview(`http://localhost:8080/images/${updatedAssociation.imageFileName}`);
+                }
+                setImageFile(null);
                 setEditMode(false);
+                setError(null);
             } else {
                 setError("Update succeeded but no data returned.");
             }
@@ -65,7 +100,6 @@ function AssociationProfile() {
         }
     };
 
-
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="error">{error}</div>;
     if (!association) return <div>No data available.</div>;
@@ -73,20 +107,48 @@ function AssociationProfile() {
     return (
         <div className="association-container">
             <h2>Association Profile</h2>
+
+            {/* Show current or preview image */}
+            <div className="association-image-container">
+                {imagePreview ? (
+                    <img src={imagePreview} alt="Association" className="association-image" />
+                ) : (
+                    <div className="no-image-placeholder">No image available</div>
+                )}
+            </div>
+
             {editMode ? (
                 <>
                     {["username", "email", "name", "ville", "responsableName", "responsablePhone"].map((field) => (
                         <div key={field} className="association-info">
-                            <label className="association-label">{field}:</label>
+                            <label className="association-label" htmlFor={field}>{field}:</label>
                             <input
+                                id={field}
                                 name={field}
                                 value={formData[field] || ""}
                                 onChange={handleChange}
                             />
                         </div>
                     ))}
+
+                    {/* File input for image */}
+                    <div className="association-info">
+                        <label className="association-label" htmlFor="imageFile">Profile Image:</label>
+                        <input
+                            type="file"
+                            id="imageFile"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                        />
+                    </div>
+
                     <button onClick={handleSave}>Save</button>
-                    <button onClick={() => setEditMode(false)}>Cancel</button>
+                    <button onClick={() => {
+                        setEditMode(false);
+                        setImageFile(null);
+                        // Reset preview to original image on cancel
+                        setImagePreview(association.imageFileName ? `http://localhost:8080/images/${association.imageFileName}` : null);
+                    }}>Cancel</button>
                 </>
             ) : (
                 <>

@@ -1,0 +1,139 @@
+.footer {
+    background-color: #ECEEF1;
+    padding: 40px 0;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.footer-links {
+    margin-bottom: 30px;
+}
+
+.contact-label {
+    font-size: 14px;
+    font-weight: 400;
+    color: #000000;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.footer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-nav a {
+    color: #000000;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    transition: color 0.3s ease;
+}
+
+.footer-nav a:hover {
+    color: #5f249f;
+}
+
+.company-info {
+    margin-bottom: 30px;
+}
+
+.footer-logo {
+    max-width: 120px;
+    margin-bottom: 20px;
+}
+
+.company-description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #000000;
+    max-width: 800px;
+}
+
+.footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-links a {
+    color: #000000;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: #5f249f;
+}
+
+.legal-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.legal-links a {
+    color: #000000;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.legal-links a:hover {
+    color: #5f249f;
+}
+
+.legal-links span {
+    color: #000000;
+}
+
+.copyright {
+    font-size: 14px;
+    color: #000000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer-bottom {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    .legal-links {
+        justify-content: center;
+    }
+}
+
+@media (min-width: 768px) {
+    .footer-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .footer-links {
+        display: flex;
+        justify-content: space-between;
+    }
+}

@@ -260,7 +260,7 @@ const AssociationManagement = () => {
                                                 <img src={`http://localhost:8080/images/${assoc.imageFileName}`}
                                                      alt="Association" width="80"/>
                                             ) : (
-                                                'No image'
+                                                ''
                                             )}
                                         </td>
                                         <td>

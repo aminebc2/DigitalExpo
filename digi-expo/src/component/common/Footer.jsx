@@ -1,57 +1,59 @@
 import React from 'react';
+import './Footer.css';
 
 const Footer = () => {
-    return /*(
-        /!*<footer style={{ backgroundColor: '#4b7043', color: 'white', padding: '40px 0', fontFamily: 'Arial, sans-serif' }}>
-            <div style={{ maxWidth: '1200px', margin: 'auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+    return (
+        <footer className="footer">
+            <div className="footer-container">
+                <div className="footer-links">
+                    <div className="contact-section">
+                        <span className="contact-label">CONTACT US</span>
+                    </div>
 
-                <div style={{ flex: '1 1 200px', margin: '10px' }}>
-                    <h3>Quick Links</h3>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                        <li>› Accueil</li>
-                        <li>› Pharmacie</li>
-                        <li>› About</li>
-                        <li>› Map</li>
-                    </ul>
+                    <nav className="footer-nav">
+                        <a href="/careers">Careers</a>
+                        <a href="/customer-stories">Customer Stories</a>
+                        <a href="/industries">Industries</a>
+                        <a href="/investor-relations">Investor Relations</a>
+                        <a href="/newsroom">Newsroom</a>
+                        <a href="/partner-network">Partner Network</a>
+                    </nav>
                 </div>
 
-                <div style={{ flex: '1 1 200px', margin: '10px' }}>
-                    <h3>Extra Links</h3>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                        <li>› Ask Questions</li>
-                        <li>› About Us</li>
-                        <li>› Privacy Policy</li>
-                        <li>› Terms Of Use</li>
-                    </ul>
+                <div className="footer-content">
+                    <div className="company-info">
+                        <img src="/Digi-expo.png" alt="DXC Technology" className="footer-logo" />
+                        <p className="company-description">
+                            DXC Technology (NYSE: DXC) helps global companies run their mission critical systems and operations while
+                            modernizing IT, optimizing data architectures, and ensuring security and scalability across public, private and hybrid
+                            clouds. With decades of driving innovation, the world's largest companies trust DXC to provide services across the
+                            Enterprise Technology Stack to deliver new levels of performance, competitiveness and customer experiences.
+                        </p>
+                    </div>
                 </div>
 
-                <div style={{ flex: '1 1 200px', margin: '10px' }}>
-                    <h3>Contact Info</h3>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                        <li>📞 +2126-7107-4488</li>
-                        <li>📞 +2126-3900-0050</li>
-                        <li>📧 bichamohamedamine@gmail.com</li>
-                        <li>📍 Temara, Morocco - 12000</li>
-                    </ul>
+                <div className="footer-bottom">
+                    <div className="social-links">
+                        <a href="#" aria-label="Facebook"><i className="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i className="fab fa-linkedin"></i></a>
+                        <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
+                    </div>
+                    <div className="legal-links">
+                        <a href="/legal">Legal</a>
+                        <span>|</span>
+                        <a href="/privacy">Privacy</a>
+                        <span>|</span>
+                        <a href="/sitemap">Sitemap</a>
+                    </div>
+                    <div className="copyright">
+                        © DXC Technology Company
+                    </div>
                 </div>
-
-                <div style={{ flex: '1 1 200px', margin: '10px' }}>
-                    <h3>Follow Us</h3>
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                        <li>📘 Facebook</li>
-                        <li>🐦 Twitter</li>
-                        <li>📸 Instagram</li>
-                        <li>💼 LinkedIn</li>
-                    </ul>
-                </div>
-
             </div>
-
-            <div style={{ textAlign: 'center', borderTop: '1px solid white', marginTop: '30px', paddingTop: '10px', fontSize: '14px' }}>
-                Created By <span style={{ color: '#e0e0e0' }}>Amine Bicha & Nouhaila El Amriche</span> | <strong>All Rights Reserved!</strong>
-            </div>
-        </footer>*!/
-    );*/
+        </footer>
+    );
 };
 
 export default Footer;

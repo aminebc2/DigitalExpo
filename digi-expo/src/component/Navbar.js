@@ -28,9 +28,6 @@ const Navbar = () => {
                         <li className="nav-item">
                             <Link className="nav-link text-white" to="/volunteer/all-associations">Associations</Link>
                         </li>
-                        {/*<li className="nav-item">
-                            <Link className="nav-link text-white" to="/volunteer/available-days">AvailableDays</Link>
-                        </li>*/}
                         <li className="nav-item">
                             <Link className="nav-link text-white" to="/volunteer/sessions">My Sessions</Link>
                         </li>
@@ -43,7 +40,7 @@ const Navbar = () => {
                 return (
                     <>
                         <li className="nav-item">
-                            <Link
+                        <Link
                                 className="nav-link text-white"
                                 to={localStorage.getItem('associationId') ? `/association/reserve/${localStorage.getItem('associationId')}` : '#'}
                             >
@@ -71,10 +68,10 @@ const Navbar = () => {
             <div className="container">
                 <Link className="navbar-brand text-white" to="/home">
                     <img
-                        src="/Digi-expo.png"
-                        alt="Logo"
-                        style={{ width: '50px', height: '50px', marginRight: '10px' }}
-                    />DXC CDG DIGITAL EXPO</Link>
+                    src="/Digi-expo.png"
+                    alt="Logo"
+                    style={{ width: '50px', height: '50px', marginRight: '10px' }}
+                />DXC CDG DIGITAL EXPO</Link>
                 <button
                     className="navbar-toggler"
                     type="button"
