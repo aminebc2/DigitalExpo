@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
 import './AssociationManagement.css';
-
+import {
+    FaPlus,
+    FaEdit,
+    FaTrash,
+    FaTimes,
+    FaSave,
+    FaSpinner,
+    FaUser,
+    FaEnvelope,
+    FaLock,
+    FaBuilding,
+    FaCity,
+    FaUserTie,
+    FaPhone,
+    FaImage,
+    FaExclamationCircle,
+    FaCheckCircle,
+    FaCog
+} from 'react-icons/fa';
 
 const AssociationManagement = () => {
     const [associations, setAssociations] = useState([]);
@@ -12,67 +30,6 @@ const AssociationManagement = () => {
     const [buttonLoading, setButtonLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setButtonLoading(true);
-        setError('');
-        setSuccessMessage('');
-
-        try {
-            const formDataToSend = new FormData();
-
-            // Convert form data to JSON string for the "data" part
-            const {
-                imageFile, // keep separately
-                password, // handled separately for edit/new
-                ...otherData
-            } = formData;
-
-            // Include password only if present or new association
-            if (!editingAssociation && !password) {
-                setError('Password is required for creating a new association.');
-                setButtonLoading(false);
-                return;
-            }
-
-            // Construct data JSON (without imageFile)
-            const dataToSend = {
-                ...otherData,
-                password: password || undefined, // send password if present
-            };
-
-            formDataToSend.append('data', JSON.stringify(dataToSend));
-
-            if (imageFile) {
-                formDataToSend.append('image', imageFile);
-            }
-
-            let response;
-            if (editingAssociation) {
-                response = await AdminService.updateAssociation(editingAssociation.id, formDataToSend);
-            } else {
-                response = await AdminService.createAssociation(formDataToSend);
-            }
-
-            if (response.statusCode === 200 || response.statusCode === 201) {
-                setSuccessMessage('Association successfully saved!');
-                await fetchAssociations();
-                setShowForm(false);
-                setFormData(initialFormState());
-                setEditingAssociation(null);
-            } else {
-                setError(response.message || 'Failed to save association');
-            }
-        } catch (err) {
-            console.error(err);
-            setError('Network or server error while saving the association');
-        } finally {
-            setButtonLoading(false);
-        }
-    };
-
-
 
     function initialFormState() {
         return {
@@ -105,10 +62,62 @@ const AssociationManagement = () => {
         }
     };
 
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setButtonLoading(true);
+        setError('');
+        setSuccessMessage('');
+
+        try {
+            const formDataToSend = new FormData();
+            const { imageFile, password, ...otherData } = formData;
+
+            if (!editingAssociation && !password) {
+                setError('Password is required for creating a new association.');
+                setButtonLoading(false);
+                return;
+            }
+
+            const dataToSend = {
+                ...otherData,
+                password: password || undefined,
+            };
+
+            formDataToSend.append('data', JSON.stringify(dataToSend));
+
+            if (imageFile) {
+                formDataToSend.append('image', imageFile);
+            }
+
+
+            let response;
+            if (editingAssociation) {
+                response = await AdminService.updateAssociation(editingAssociation.id, formDataToSend);
+            } else {
+                response = await AdminService.createAssociation(formDataToSend);
+            }
+
+
+            if (response.statusCode === 200 || response.statusCode === 201) {
+                setSuccessMessage('Association successfully saved!');
+                await fetchAssociations();
+                setShowForm(false);
+                setFormData(initialFormState());
+                setEditingAssociation(null);
+            } else {
+                setError(response.message || 'Failed to save association');
+            }
+        } catch (err) {
+            console.error(err);
+            setError('Network or server error while saving the association');
+        } finally {
+            setButtonLoading(false);
+        }
     };
 
     const handleEdit = (assoc) => {
@@ -150,105 +159,232 @@ const AssociationManagement = () => {
         setSuccessMessage('');
     };
 
-
     return (
-        <div className="card">
-            <div className="card-header d-flex justify-content-between align-items-center">
-                <h3>Association Management</h3>
+        <div className="association-management">
+            <div className="association-header">
                 <button
-                    className="btn btn-primary"
+                    className="association-add-btn"
                     onClick={() => {
+                        if (showForm)
                         handleCancel();
                         setShowForm(prev => !prev);
                     }}
                 >
-                    {showForm ? 'Close Form' : 'Add Association'}
+                    {showForm ? (
+                        <>
+                            <FaTimes />
+                            <span>Cancel</span>
+                        </>
+                    ) : (
+                        <>
+                            <FaPlus />
+                            <span>Add Association</span>
+                        </>
+                    )}
                 </button>
             </div>
 
-            <div className="card-body">
-                {error && <div className="alert alert-danger">{error}</div>}
+            {error && (
+                <div className="association-alert association-alert-error">
+                    <FaExclamationCircle />
+                    <span>{error}</span>
+                </div>
+            )}
 
-                {showForm && (
-                    <form onSubmit={handleSubmit} className="mb-4">
-                        <div className="row">
-                            <InputField label="Username" name="username" value={formData.username}
-                                        onChange={handleInputChange} required/>
-                            <InputField label="Email" name="email" type="email" value={formData.email}
-                                        onChange={handleInputChange} required/>
-                        </div>
-                        <div className="row">
-                            <InputField
-                                label={editingAssociation ? "New Password (leave empty to keep current)" : "Password"}
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                required={!editingAssociation}
-                            />
-                        </div>
-                        <div className="row">
-                            <InputField label="Association Name" name="name" value={formData.name}
-                                        onChange={handleInputChange} required/>
-                            <InputField label="City" name="ville" value={formData.ville} onChange={handleInputChange}
-                                        required/>
-                        </div>
-                        <div className="row">
-                            <InputField label="Responsible Person" name="responsableName"
-                                        value={formData.responsableName} onChange={handleInputChange} required/>
-                            <InputField label="Phone Number" name="responsablePhone" value={formData.responsablePhone}
-                                        onChange={handleInputChange} required/>
-                        </div>
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="imageFile">Upload Image</label>
+            {successMessage && (
+                <div className="association-alert association-alert-success">
+                    <FaCheckCircle />
+                    <span>{successMessage}</span>
+                </div>
+            )}
+
+            {showForm && (
+                <div className="association-form-card">
+                    <form onSubmit={handleSubmit}>
+                        <div className="association-form-grid">
+                            <div className="form-group">
+                                <label>
+                                    <FaUser />
+                                    <span>Username</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        value={formData.username}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaEnvelope />
+                                    <span>Email</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaLock />
+                                    <span>{editingAssociation ? "New Password (optional)" : "Password"}</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required={!editingAssociation}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaBuilding />
+                                    <span>Association Name</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaCity />
+                                    <span>City</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        name="ville"
+                                        value={formData.ville}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaUserTie />
+                                    <span>Responsible Person</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        name="responsableName"
+                                        value={formData.responsableName}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaPhone />
+                                    <span>Phone Number</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        name="responsablePhone"
+                                        value={formData.responsablePhone}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="association-form-group">
+                                <label htmlFor="imageFile">
+                                    <FaImage />
+                                    <span>Upload Image</span>
+                                </label>
                                 <input
                                     type="file"
-                                    className="form-control"
                                     id="imageFile"
                                     name="imageFile"
+                                    className="association-file-input"
                                     accept="image/*"
                                     onChange={(e) => setFormData(prev => ({...prev, imageFile: e.target.files[0]}))}
                                 />
                             </div>
                         </div>
 
-                        <div className="mt-3">
-                            <button type="submit" className="btn btn-success me-2" disabled={buttonLoading}>
-                                {buttonLoading ? 'Saving...' : editingAssociation ? 'Update' : 'Save'}
+                        <div className="association-form-actions">
+                            <button type="submit" className="association-btn-save" disabled={buttonLoading}>
+                                {buttonLoading ? (
+                                    <>
+                                        <FaSpinner className="fa-spin" />
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaSave />
+                                        <span>{editingAssociation ? 'Update' : 'Save'}</span>
+                                    </>
+                                )}
                             </button>
-                            <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-                                Cancel
+                            <button type="button" className="association-btn-cancel" onClick={handleCancel}>
+                                <FaTimes />
+                                <span>Close from</span>
                             </button>
                         </div>
                     </form>
-                )}
+                </div>
+            )}
 
-                {globalLoading ? (
-                    <div className="text-center mt-5">
-                        <div className="spinner-border"></div>
-                    </div>
-                ) : (
-                    <div className="table-responsive">
-                        <table className="table table-striped">
+            {globalLoading ? (
+                <div className="association-loading">
+                    <FaSpinner className="fa-spin" />
+                    <p>Loading associations...</p>
+                </div>
+            ) : (
+                <div className="association-table-wrapper">
+                    <div className="association-table-container">
+                        <table className="association-table">
                             <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Email</th>
-                                <th>Name</th>
-                                <th>City</th>
-                                <th>Responsible</th>
-                                <th>Phone</th>
-                                <th>Image</th>
-                                <th>Actions</th>
+                                <th><FaUser className="me-2" />Username</th>
+                                <th><FaEnvelope className="me-2" />Email</th>
+                                <th><FaBuilding className="me-2" />Name</th>
+                                <th><FaCity className="me-2" />City</th>
+                                <th><FaUserTie className="me-2" />Responsible</th>
+                                <th><FaPhone className="me-2" />Phone</th>
+                                <th><FaImage className="me-2" />Image</th>
+                                <th><FaCog className="me-2" />Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             {associations.length > 0 ? (
                                 associations.map((assoc) => (
                                     <tr key={assoc.id}>
-                                        <td>{assoc.id}</td>
                                         <td>{assoc.username}</td>
                                         <td>{assoc.email}</td>
                                         <td>{assoc.name}</td>
@@ -256,48 +392,47 @@ const AssociationManagement = () => {
                                         <td>{assoc.responsableName}</td>
                                         <td>{assoc.responsablePhone}</td>
                                         <td>
-                                            {assoc.imageFileName ? (
-                                                <img src={`http://localhost:8080/images/${assoc.imageFileName}`}
-                                                     alt="Association" width="80"/>
-                                            ) : (
-                                                ''
+                                            {assoc.imageFileName && (
+                                                <img
+                                                    src={`http://localhost:8080/images/${assoc.imageFileName}`}
+                                                    alt="Association"
+                                                    className="association-img"
+                                                />
                                             )}
                                         </td>
                                         <td>
-                                            <button className="btn btn-sm btn-primary me-1"
-                                                    onClick={() => handleEdit(assoc)}>Edit
-                                            </button>
-                                            <button className="btn btn-sm btn-danger" onClick={() => handleDelete(assoc.id)}>Delete</button>
+                                            <div className="association-actions">
+                                                <button
+                                                    className="association-btn-edit"
+                                                    onClick={() => handleEdit(assoc)}
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                                <button
+                                                    className="association-btn-delete"
+                                                    onClick={() => handleDelete(assoc.id)}
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="8" className="text-center">No associations found</td>
+                                    <td colSpan="8" className="association-empty">
+                                        <FaBuilding />
+                                        <p>No associations found</p>
+                                    </td>
                                 </tr>
                             )}
                             </tbody>
                         </table>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 };
-
-const InputField = ({ label, name, value, onChange, type = "text", required = false }) => (
-    <div className="col-md-6 mb-3">
-        <label htmlFor={name}>{label}</label>
-        <input
-            type={type}
-            className="form-control"
-            id={name}
-            name={name}
-            value={value}
-            onChange={onChange}
-            required={required}
-        />
-    </div>
-);
 
 export default AssociationManagement;

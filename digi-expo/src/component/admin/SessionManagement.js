@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
 import AssignVolunteerToSession from '../admin/AssignVolunteerToSession';
+import {
+    FaCalendarAlt,
+    FaSpinner,
+    FaCheck,
+    FaTimes,
+    FaExclamationCircle,
+    FaUser,
+    FaBuilding,
+    FaClock,
+    FaCog,
+    FaEdit,
+    FaUserPlus
+} from 'react-icons/fa';
+import './SessionManagement.css';
 
 const SessionManagement = () => {
     const [sessions, setSessions] = useState([]);
@@ -81,16 +95,9 @@ const SessionManagement = () => {
     };
 
     const handleOpenAssignModal = (session) => {
-        if (!session.association) {
-            // Show a default message or allow the user to assign an association.
-            setSelectedSession(session);
-            setShowAssignModal(true);
-        } else {
-            setSelectedSession(session);
-            setShowAssignModal(true);
-        }
+        setSelectedSession(session);
+        setShowAssignModal(true);
     };
-
 
     const closeAssignModal = () => {
         setShowAssignModal(false);
@@ -98,31 +105,62 @@ const SessionManagement = () => {
         fetchSessions();
     };
 
-    return (
-        <div className="card">
-            <div className="card-header">
-                <h3>Session Management</h3>
-            </div>
-            <div className="card-body">
-                {error && <div className="alert alert-danger">{error}</div>}
+    const getStatusBadgeClass = (status) => {
+        switch (status) {
+            case 'CONFIRMED':
+                return 'status-badge status-badge-confirmed';
+            case 'CANCELED':
+                return 'status-badge status-badge-canceled';
+            default:
+                return 'status-badge status-badge-pending';
+        }
+    };
 
-                <div className="table-responsive">
-                    <table className="table table-striped">
+    const getStatusIcon = (status) => {
+        switch (status) {
+            case 'CONFIRMED':
+                return <FaCheck />;
+            case 'CANCELED':
+                return <FaTimes />;
+            default:
+                return <FaClock />;
+        }
+    };
+
+    if (loading && sessions.length === 0) {
+        return (
+            <div className="session-loading">
+                <div className="spinner" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="session-management">
+
+            {error && (
+                <div className="session-alert session-alert-error">
+                    <FaExclamationCircle />
+                    <span>{error}</span>
+                </div>
+            )}
+
+            <div className="session-table-wrapper">
+                <div className="session-table-container">
+                    <table className="session-table">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Date</th>
-                            <th>Association</th>
-                            <th>Volunteer</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th><FaCalendarAlt className="me-2" />Date</th>
+                            <th><FaBuilding className="me-2" />Association</th>
+                            <th><FaUser className="me-2" />Volunteer</th>
+                            <th><FaClock className="me-2" />Status</th>
+                            <th><FaCog className="me-2" />Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         {sessions.length > 0 ? (
                             sessions.map((session) => (
                                 <tr key={session.id}>
-                                    <td>{session.id}</td>
                                     <td>{new Date(session.date).toLocaleDateString()}</td>
                                     <td>{session.association?.name || 'N/A'}</td>
                                     <td>
@@ -130,98 +168,124 @@ const SessionManagement = () => {
                                             ? session.volunteer.username
                                             : 'N/A'}
                                     </td>
-                                    <td>{session.status}</td>
                                     <td>
-                                        <button
-                                            className="btn btn-sm btn-info"
-                                            onClick={() => handleSessionClick(session.id)}
-                                        >
-                                            Edit
-                                        </button>
-
-                                        {session.status === "CONFIRMED" && (
-                                            <button
-                                                className="btn btn-sm btn-success ms-2"
-                                                onClick={() => handleOpenAssignModal(session)}
-                                            >
-                                                Assign Volunteer
-                                            </button>
-                                        )}
+                                            <span className={getStatusBadgeClass(session.status)}>
+                                                {getStatusIcon(session.status)}
+                                                {session.status}
+                                            </span>
                                     </td>
+                                    <td>
+                                        <div className="session-actions">
+                                            <button
+                                                className="btn-action btn-edit"
+                                                onClick={() => handleSessionClick(session.id)}
+                                            >
+                                                <FaEdit />
+                                                Edit
+                                            </button>
 
+                                            {session.status === "CONFIRMED" && (
+                                                <button
+                                                    className="btn-action btn-assign"
+                                                    onClick={() => handleOpenAssignModal(session)}
+                                                >
+                                                    <FaUserPlus />
+                                                    Assign
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center">No sessions found</td>
+                                <td colSpan="5" className="session-empty">
+                                    <FaCalendarAlt />
+                                    <p>No sessions found</p>
+                                </td>
                             </tr>
                         )}
                         </tbody>
                     </table>
                 </div>
-
-                {/* Edit Status Modal */}
-                {showStatusModal && selectedSession && (
-                    <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Edit Session Status</h5>
-                                    <button className="btn-close" onClick={closeStatusModal}></button>
-                                </div>
-                                <form onSubmit={handleUpdateSession}>
-                                    <div className="modal-body">
-                                        <label className="form-label">Status</label>
-                                        <select
-                                            className="form-select"
-                                            value={updatedStatus}
-                                            onChange={(e) => setUpdatedStatus(e.target.value)}
-                                            required
-                                        >
-                                            <option value="">Select Status</option>
-                                            <option value="PENDING">Pending</option>
-                                            <option value="CONFIRMED">Confirmed</option>
-                                            <option value="CANCELED">Canceled</option>
-                                        </select>
-                                    </div>
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary" onClick={closeStatusModal}>
-                                            Close
-                                        </button>
-                                        <button type="submit" className="btn btn-primary" disabled={loading}>
-                                            {loading ? 'Updating...' : 'Update Status'}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Assign Volunteer Modal */}
-                {showAssignModal && selectedSession && (
-                    <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <div className="modal-dialog">
-                            <div className="modal-content">
-                                <div className="modal-header">
-                                    <h5 className="modal-title">Assign Volunteer</h5>
-                                    <button className="btn-close" onClick={closeAssignModal}></button>
-                                </div>
-                                <div className="modal-body">
-                                    <AssignVolunteerToSession
-                                        sessionId={selectedSession.id}
-                                        associationId={selectedSession.association?.id}
-                                        onClose={closeAssignModal}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
+
+            {/* Edit Status Modal */}
+            {showStatusModal && selectedSession && (
+                <div className="session-modal-backdrop">
+                    <div className="session-modal">
+                        <div className="session-modal-header">
+                            <h5 className="session-modal-title">Edit Session Status</h5>
+                            <button className="session-modal-close" onClick={closeStatusModal}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdateSession}>
+                            <div className="session-modal-body">
+                                <div className="session-form-group">
+                                    <label className="session-form-label">Status</label>
+                                    <select
+                                        className="session-form-select"
+                                        value={updatedStatus}
+                                        onChange={(e) => setUpdatedStatus(e.target.value)}
+                                        required
+                                    >
+                                        <option value="">Select Status</option>
+                                        <option value="PENDING">Pending</option>
+                                        <option value="CONFIRMED">Confirmed</option>
+                                        <option value="CANCELED">Canceled</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="session-modal-footer">
+                                <button type="button" className="btn-action" onClick={closeStatusModal}>
+                                    <FaTimes />
+                                    Close
+                                </button>
+                                <button type="submit" className="btn-action btn-edit" disabled={loading}>
+                                    {loading ? (
+                                        <>
+                                            <FaSpinner className="spinner" />
+                                            <span>Updating...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FaCheck />
+                                            <span>Update Status</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Assign Volunteer Modal */}
+            {showAssignModal && selectedSession && (
+                <div className="session-modal-backdrop">
+                    <div className="session-modal">
+                        <div className="session-modal-header">
+                            <h5 className="session-modal-title">
+                                <FaUserPlus className="me-2" />
+                                Assign Volunteer
+                            </h5>
+                            <button className="session-modal-close" onClick={closeAssignModal}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="session-modal-body">
+                            <AssignVolunteerToSession
+                                sessionId={selectedSession.id}
+                                associationId={selectedSession.association?.id}
+                                onClose={closeAssignModal}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-
 };
 
 export default SessionManagement;

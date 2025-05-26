@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import AssociationService from '../../service/AssociationService';
-import { Card, Button, Row, Col, Modal, Badge } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-const statusVariantMap = {
-    PENDING: 'warning',
-    CONFIRMED: 'success',
-    CANCELLED: 'danger',
-    COMPLETED: 'primary',
-};
+import { FaCalendarAlt, FaInfoCircle, FaSpinner, FaTimes, FaArrowRight, FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
+import './SessionListPage.css';
 
 const SessionListPage = () => {
     const [sessions, setSessions] = useState([]);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedSession, setSelectedSession] = useState(null);
 
@@ -23,15 +18,13 @@ const SessionListPage = () => {
             try {
                 const response = await AssociationService.getSessions(associationId);
                 const sessionsList = response?.sessionList || [];
-                if (Array.isArray(sessionsList)) {
-                    setSessions(sessionsList);
-                } else {
-                    console.warn('sessionList is not an array:', sessionsList);
-                    setSessions([]);
-                }
+                setSessions(Array.isArray(sessionsList) ? sessionsList : []);
+                setLoading(false);
             } catch (error) {
                 console.error('Error fetching sessions:', error);
+                setError('Erreur lors du chargement des sessions');
                 setSessions([]);
+                setLoading(false);
             }
         };
 
@@ -44,116 +37,176 @@ const SessionListPage = () => {
     };
 
     const handleCloseModal = () => {
-        setShowModal(false);
         setSelectedSession(null);
+        setShowModal(false);
     };
 
-    const renderVolunteerDetails = (volunteer) => {
-        if (volunteer) {
-            return (
-                <div className="volunteer-details">
-                    <p><strong>Username:</strong> {volunteer.username || 'N/A'}</p>
-                    <p><strong>Email:</strong> {volunteer.email || 'Not Provided'}</p>
-                    <p><strong>Phone Number:</strong> {volunteer.phoneNumber || 'Not Provided'}</p>
-                </div>
-            );
+    const getStatusBadgeClass = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'pending':
+                return 'session-status-badge pending';
+            case 'confirmed':
+                return 'session-status-badge confirmed';
+            case 'cancelled':
+                return 'session-status-badge cancelled';
+            case 'completed':
+                return 'session-status-badge completed';
+            default:
+                return 'session-status-badge pending';
         }
-        return <p className="text-muted">No volunteer assigned.</p>;
     };
 
     return (
-        <div className="container mt-5">
-            <h3 className="text-center mb-5" style={{ fontWeight: '700', color: '#2c3e50', letterSpacing: '1.1px' }}>
-                Liste des Sessions
-            </h3>
+        <div className="sessions-page">
+            <div className="sessions-content">
+                <h2 className="page-title">
+                    <FaCalendarAlt />
+                    <span>Liste des Sessions</span>
+                </h2>
 
-            {sessions.length > 0 ? (
-                <Row xs={1} md={3} className="g-4">
-                    {sessions.map((session) => (
-                        <Col key={session.id}>
-                            <Card className="session-card shadow-sm border-0 h-100">
-                                <Card.Body className="d-flex flex-column justify-content-between">
-                                    <div>
-                                        <Card.Title className="mb-3" style={{ fontSize: '1.25rem', fontWeight: '600', color: '#34495e' }}>
+                {error && (
+                    <div className="session-alert error">
+                        <FaInfoCircle />
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="session-loading-state">
+                        <FaSpinner className="session-spinner" />
+                        <p>Chargement des sessions...</p>
+                    </div>
+                ) : sessions.length > 0 ? (
+                    <div className="sessions-grid">
+                        {sessions.map((session) => (
+                            <div className="session-card" key={session.id}>
+                                <div className="session-card-content">
+                                    <div className="session-date-section">
+                                        <span className="session-date">
                                             {new Date(session.date).toLocaleDateString('fr-FR', {
-                                                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                                                weekday: 'long',
+                                                day: 'numeric',
+                                                month: 'long'
                                             })}
-                                        </Card.Title>
-                                        <Badge
-                                            bg={statusVariantMap[session.status?.toUpperCase()] || 'secondary'}
-                                            className="mb-3"
-                                            style={{ fontSize: '0.9rem', padding: '0.4em 0.8em', letterSpacing: '0.05em' }}
-                                        >
-                                            {session.status}
-                                        </Badge>
+                                        </span>
+                                        <span className="session-year">
+                                            {new Date(session.date).getFullYear()}
+                                        </span>
                                     </div>
-                                    <Button
-                                        variant="outline-primary"
+
+                                    <div className={getStatusBadgeClass(session.status)}>
+                                        {session.status}
+                                    </div>
+
+                                    <button
+                                        className="session-details-button"
                                         onClick={() => handleShowDetails(session)}
-                                        className="mt-auto"
-                                        style={{ fontWeight: '600', borderRadius: '8px' }}
                                     >
-                                        Voir Détails
-                                    </Button>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))}
-                </Row>
-            ) : (
-                <div className="text-center py-5 text-muted" style={{ fontSize: '1.1rem' }}>
-                    <p>Aucune session disponible.</p>
-                </div>
-            )}
+                                        <span>Voir Détails</span>
+                                        <FaArrowRight className="session-arrow-icon" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="session-empty">
+                        <FaCalendarAlt />
+                        <p>Aucune session disponible</p>
+                    </div>
+                )}
 
-            {selectedSession && (
-                <Modal show={showModal} onHide={handleCloseModal} centered>
-                    <Modal.Header closeButton style={{ backgroundColor: '#f1f3f5' }}>
-                        <Modal.Title>Détails de la session</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p>
-                            <strong>Date:</strong>{' '}
-                            {new Date(selectedSession.date).toLocaleDateString('fr-FR', {
-                                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-                            })}
-                        </p>
-                        <p>
-                            <strong>Status:</strong>{' '}
-                            <Badge bg={statusVariantMap[selectedSession.status?.toUpperCase()] || 'secondary'}>
-                                {selectedSession.status}
-                            </Badge>
-                        </p>
-                        <hr />
-                        <h5>Détails du bénévole</h5>
-                        {renderVolunteerDetails(selectedSession.volunteer)}
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseModal}>
-                            Fermer
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-            )}
+                {showModal && selectedSession && (
+                    <div className="session-details-overlay">
+                        <div className="session-details-container">
+                            <div className="session-details-header">
+                                <h3 className="session-details-title">
+                                    <FaCalendarAlt />
+                                    Détails de la session
+                                </h3>
+                            </div>
+                            <div className="session-details-content">
+                                <div className="session-details-main">
+                                    <div className="session-details-row">
+                                        <div className="session-details-field">
+                                            <div className="session-details-icon">
+                                                <FaCalendarAlt />
+                                            </div>
+                                            <div className="session-details-field-content">
+                                                <span className="session-details-label">Date</span>
+                                                <span className="session-details-value">
+                                                    {new Date(selectedSession.date).toLocaleDateString('fr-FR', {
+                                                        weekday: 'long',
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className={`session-details-status ${selectedSession.status.toLowerCase()}`}>
+                                            {selectedSession.status}
+                                        </div>
+                                    </div>
+                                </div>
 
-            <style jsx>{`
-        .session-card:hover {
-          box-shadow: 0 12px 20px rgba(39, 174, 96, 0.35);
-          transform: translateY(-5px);
-          transition: all 0.3s ease;
-        }
+                                <div className="session-details-section">
+                                    <h4 className="session-details-section-title">
+                                        <FaUser />
+                                        Information du Bénévole
+                                    </h4>
+                                    {selectedSession.volunteer ? (
+                                        <div className="session-details-grid">
+                                            <div className="session-details-field">
+                                                <div className="session-details-icon">
+                                                    <FaUser />
+                                                </div>
+                                                <div className="session-details-field-content">
+                                                    <span className="session-details-label">Nom d'utilisateur</span>
+                                                    <span className="session-details-value">
+                                                        {selectedSession.volunteer.username || 'N/A'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="session-details-field">
+                                                <div className="session-details-icon">
+                                                    <FaEnvelope />
+                                                </div>
+                                                <div className="session-details-field-content">
+                                                    <span className="session-details-label">Email</span>
+                                                    <span className="session-details-value">
+                                                        {selectedSession.volunteer.email || 'Non fourni'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="session-details-field">
+                                                <div className="session-details-icon">
+                                                    <FaPhone />
+                                                </div>
+                                                <div className="session-details-field-content">
+                                                    <span className="session-details-label">Téléphone</span>
+                                                    <span className="session-details-value">
+                                                        {selectedSession.volunteer.phoneNumber || 'Non fourni'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="session-details-empty">
+                                            <p>Aucun bénévole assigné</p>
+                                        </div>
+                                    )}
+                                </div>
 
-        .session-card {
-          transition: all 0.3s ease;
-          border-radius: 12px;
-        }
-
-        .volunteer-details p {
-          margin-bottom: 6px;
-          color: #2c3e50;
-          font-weight: 500;
-        }
-      `}</style>
+                                <button className="session-details-close-btn" onClick={handleCloseModal}>
+                                    <FaTimes />
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

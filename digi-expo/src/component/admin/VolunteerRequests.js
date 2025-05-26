@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
+import {
+    FaUserClock,
+    FaSpinner,
+    FaCheck,
+    FaTimes,
+    FaExclamationCircle,
+    FaUser,
+    FaBuilding,
+    FaClock,
+    FaCog
+} from 'react-icons/fa';
+import './VolunteerRequests.css';
 
 const VolunteerRequests = () => {
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [actionInProgress, setActionInProgress] = useState(false); // To handle action button disabling
+    const [actionInProgress, setActionInProgress] = useState(false);
 
     useEffect(() => {
         fetchVolunteerRequests();
@@ -32,17 +44,12 @@ const VolunteerRequests = () => {
         setActionInProgress(true);
         try {
             const response = await AdminService.updateRequestStatus(requestId, status);
-
-            // Log the response to ensure we see it
-            console.log('Update request status response:', response);
-
             if (response.statusCode === 200) {
-                await fetchVolunteerRequests(); // Refresh the requests list
+                await fetchVolunteerRequests();
             } else {
                 setError(response.message || 'Failed to update request status');
             }
         } catch (err) {
-            // Log the error to get more details
             console.error('Error occurred while updating request status:', err);
             setError('An error occurred while updating the request status');
         } finally {
@@ -50,67 +57,95 @@ const VolunteerRequests = () => {
         }
     };
 
-
     if (loading && requests.length === 0) {
-        return <div className="text-center mt-5"><div className="spinner-border"></div></div>;
+        return (
+            <div className="volunteer-requests-loading">
+                <div className="spinner" />
+            </div>
+        );
     }
 
-    return (
-        <div className="card">
-            <div className="card-header">
-                <h3>Volunteer Requests</h3>
-            </div>
-            <div className="card-body">
-                {error && <div className="alert alert-danger">{error}</div>}
+    const getStatusBadgeClass = (status) => {
+        switch (status) {
+            case 'APPROVED':
+                return 'status-badge status-badge-approved';
+            case 'REJECTED':
+                return 'status-badge status-badge-rejected';
+            default:
+                return 'status-badge status-badge-pending';
+        }
+    };
 
-                <div className="table-responsive">
-                    <table className="table table-striped">
+    const getStatusIcon = (status) => {
+        switch (status) {
+            case 'APPROVED':
+                return <FaCheck />;
+            case 'REJECTED':
+                return <FaTimes />;
+            default:
+                return <FaClock />;
+        }
+    };
+
+    return (
+        <div className="volunteer-requests">
+
+            {error && (
+                <div className="volunteer-requests-alert volunteer-requests-alert-error">
+                    <FaExclamationCircle />
+                    <span>{error}</span>
+                </div>
+            )}
+
+            <div className="volunteer-requests-table-wrapper">
+                <div className="volunteer-requests-table-container">
+                    <table className="volunteer-requests-table">
                         <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Volunteer</th>
-                            <th>Association</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th><FaUser className="me-2" />Volunteer</th>
+                            <th><FaBuilding className="me-2" />Association</th>
+                            <th><FaClock className="me-2" />Status</th>
+                            <th><FaCog className="me-2" />Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         {requests.length > 0 ? (
                             requests.map((request) => (
                                 <tr key={request.id}>
-                                    <td>{request.id}</td>
                                     <td>{request.volunteer?.username || 'N/A'}</td>
                                     <td>{request.association?.name || 'N/A'}</td>
                                     <td>
-                                            <span className={`badge ${request.status === 'APPROVED' ? 'bg-success' : request.status === 'REJECTED' ? 'bg-danger' : 'bg-warning'}`}>
+                                            <span className={getStatusBadgeClass(request.status)}>
+                                                {getStatusIcon(request.status)}
                                                 {request.status}
                                             </span>
                                     </td>
                                     <td>
-                                        {request.status === 'PENDING' && (
-                                            <>
+                                        {request.status === 'PENDING' ? (
+                                            <div className="action-buttons">
                                                 <button
-                                                    className="btn btn-sm btn-success me-2"
+                                                    className="btn-action btn-approve"
                                                     onClick={() => handleUpdateStatus(request.id, 'APPROVED')}
-                                                    disabled={actionInProgress || loading}
+                                                    disabled={actionInProgress}
                                                 >
+                                                    <FaCheck />
                                                     Approve
                                                 </button>
                                                 <button
-                                                    className="btn btn-sm btn-danger me-2"
+                                                    className="btn-action btn-reject"
                                                     onClick={() => handleUpdateStatus(request.id, 'REJECTED')}
-                                                    disabled={actionInProgress || loading}
+                                                    disabled={actionInProgress}
                                                 >
+                                                    <FaTimes />
                                                     Reject
                                                 </button>
-                                            </>
-                                        )}
-                                        {request.status !== 'PENDING' && (
+                                            </div>
+                                        ) : (
                                             <select
-                                                className="form-select form-select-sm"
+                                                className="status-select"
                                                 onChange={(e) => handleUpdateStatus(request.id, e.target.value)}
                                                 value={request.status}
-                                                disabled={actionInProgress || loading}
+                                                disabled={actionInProgress}
                                             >
                                                 <option value="PENDING">Pending</option>
                                                 <option value="APPROVED">Approved</option>
@@ -122,7 +157,10 @@ const VolunteerRequests = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className="text-center">No volunteer requests found</td>
+                                <td colSpan="4" className="volunteer-requests-empty">
+                                    <FaUserClock />
+                                    <p>No volunteer requests found</p>
+                                </td>
                             </tr>
                         )}
                         </tbody>

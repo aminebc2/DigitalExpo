@@ -1,0 +1,297 @@
+.volunteer-profile-page {
+    min-height: 100vh;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #ffffff 85%, #5f249f 15%);
+}
+
+.profile-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #5f249f;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.page-title svg {
+    font-size: 2rem;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 40px;
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+    font-size: 2rem;
+    color: #5f249f;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.alert.error {
+    background-color: #fde8e8;
+    color: #9b1c1c;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+}
+
+/* View Mode Styles */
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.info-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 12px;
+    transition: background-color 0.3s ease;
+}
+
+.info-group:hover {
+    background: #f1f5f9;
+}
+
+.info-icon {
+    color: #5f249f;
+    font-size: 1.2rem;
+    margin-top: 3px;
+}
+
+.info-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.days-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.day-badge {
+    background: #5f249f;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.no-days {
+    color: #a0aec0;
+    font-style: italic;
+}
+
+/* Edit Mode Styles */
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+    background: white;
+    border-color: #5f249f;
+}
+
+.input-icon {
+    color: #5f249f;
+    font-size: 1.2rem;
+}
+
+.form-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    color: #2d3748;
+    outline: none;
+}
+
+.form-input::placeholder {
+    color: #a0aec0;
+}
+
+.days-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.day-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.day-checkbox:hover {
+    background: #f1f5f9;
+}
+
+.day-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 2px solid #5f249f;
+    cursor: pointer;
+}
+
+.day-label {
+    font-size: 0.875rem;
+    color: #2d3748;
+}
+
+/* Button Styles */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.btn-edit,
+.btn-save,
+.btn-cancel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-edit {
+    background: #5f249f;
+    color: white;
+    margin-left: auto;
+}
+
+.btn-edit:hover {
+    background: #8b4fc9;
+}
+
+.btn-save {
+    background: #5f249f;
+    color: white;
+    flex: 1;
+}
+
+.btn-save:hover:not(:disabled) {
+    background: #8b4fc9;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.btn-cancel:hover:not(:disabled) {
+    background: #e2e8f0;
+}
+
+.btn-save:disabled,
+.btn-cancel:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .volunteer-profile-page {
+        padding: 40px 15px;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .profile-card {
+        padding: 20px;
+    }
+
+    .days-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .btn-edit {
+        margin-left: 0;
+    }
+}

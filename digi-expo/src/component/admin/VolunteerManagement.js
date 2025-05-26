@@ -1,5 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
+import {
+    FaPlus,
+    FaEdit,
+    FaTrash,
+    FaTimes,
+    FaSave,
+    FaSpinner,
+    FaUser,
+    FaEnvelope,
+    FaLock,
+    FaPhone,
+    FaCalendar,
+    FaExclamationCircle,
+    FaCheckCircle,
+    FaCog, FaUserClock
+} from 'react-icons/fa';
+import './VolunteerManagement.css';
+
 const VolunteerManagement = () => {
     const [volunteers, setVolunteers] = useState([]);
     const [formData, setFormData] = useState(initialFormState());
@@ -49,11 +67,23 @@ const VolunteerManagement = () => {
 
     const handleCheckboxChange = (e) => {
         const { value, checked } = e.target;
-        setFormData(prev => {
-            const updatedDays = checked
-                ? [...prev.availableDays, value]
-                : prev.availableDays.filter(day => day !== value);
-            return { ...prev, availableDays: updatedDays };
+
+        setFormData(prevData => {
+            const currentDays = Array.isArray(prevData.availableDays) ? [...prevData.availableDays] : [];
+
+            if (checked && !currentDays.includes(value)) {
+                currentDays.push(value);
+            } else if (!checked) {
+                const index = currentDays.indexOf(value);
+                if (index > -1) {
+                    currentDays.splice(index, 1);
+                }
+            }
+
+            return {
+                ...prevData,
+                availableDays: currentDays
+            };
         });
     };
 
@@ -107,7 +137,8 @@ const VolunteerManagement = () => {
             password: '', // Password is omitted in updates if left empty
             role: volunteer.role || 'BENEVOLE',
             phoneNumber: volunteer.phoneNumber || '',
-            availableDays: Array.isArray(volunteer.availableDays) ? volunteer.availableDays : [],
+            // Ensure availableDays is always an array when editing
+            availableDays: Array.isArray(volunteer.availableDays) ? volunteer.availableDays : []
         });
         setEditingVolunteer(volunteer);
         setShowForm(true);
@@ -143,150 +174,220 @@ const VolunteerManagement = () => {
     };
 
     return (
-        <div className="card">
-            <div className="card-header d-flex justify-content-between align-items-center">
-                <h3>Volunteer Management</h3>
+        <div className="volunteer-management">
+            <div className="volunteer-header">
                 <button
-                    className="btn btn-primary"
+                    className="volunteer-add-btn"
                     onClick={() => {
                         handleCancel();
                         setShowForm(prev => !prev);
                     }}
                 >
-                    {showForm ? 'Close Form' : 'Add Volunteer'}
+                    {showForm ? (
+                        <>
+                            <FaTimes/>
+                            <span>Cancel</span>
+                        </>
+                    ) : (
+                        <>
+                            <FaPlus/>
+                            <span>Add Volunteer</span>
+                        </>
+                    )}
                 </button>
             </div>
 
-            <div className="card-body">
-                {error && <div className="alert alert-danger">{error}</div>}
-                {successMessage && <div className="alert alert-success">{successMessage}</div>}
+            {error && (
+                <div className="volunteer-alert volunteer-alert-error">
+                    <FaExclamationCircle />
+                    <span>{error}</span>
+                </div>
+            )}
 
-                {showForm && (
-                    <form onSubmit={handleSubmit} className="mb-4">
-                        <div className="row">
-                            <InputField label="Username" name="username" value={formData.username} onChange={handleInputChange} required />
-                            <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
-                        </div>
-                        <div className="row">
-                            <InputField
-                                label={editingVolunteer ? "New Password (leave empty to keep current)" : "Password"}
-                                name="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                required={!editingVolunteer}
-                            />
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="role">Role</label>
-                                <select
-                                    className="form-control"
-                                    id="role"
-                                    name="role"
-                                    value={formData.role}
-                                    onChange={handleInputChange}
-                                    required
-                                >
-                                    <option value="BENEVOLE">BENEVOLE</option>
-                                </select>
+            {successMessage && (
+                <div className="volunteer-alert volunteer-alert-success">
+                    <FaCheckCircle />
+                    <span>{successMessage}</span>
+                </div>
+            )}
+
+            {showForm && (
+                <div className="volunteer-form-card">
+                    <form onSubmit={handleSubmit}>
+                        <div className="volunteer-form-grid">
+                            <div className="form-group">
+                                <label>
+                                    <FaUser />
+                                    <span>Username</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        value={formData.username}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        <div className="row">
-                            <InputField label="Phone Number" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} required />
-                            <div className="col-md-6 mb-3">
-                                <label>Available Days</label>
-                                <div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaEnvelope />
+                                    <span>Email</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaLock />
+                                    <span>{editingVolunteer ? "New Password (optional)" : "Password"}</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required={!editingVolunteer}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>
+                                    <FaPhone />
+                                    <span>Phone Number</span>
+                                </label>
+                                <div className="input-group">
+                                    <input
+                                        type="text"
+                                        name="phoneNumber"
+                                        value={formData.phoneNumber}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                                <label>
+                                    <FaCalendar />
+                                    <span>Available Days</span>
+                                </label>
+                                <div className="days-group">
                                     {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => (
-                                        <div key={day} className="form-check form-check-inline">
+                                        <label key={day} className="day-checkbox">
                                             <input
-                                                className="form-check-input"
                                                 type="checkbox"
                                                 name="availableDays"
                                                 value={day}
-                                                checked={formData.availableDays.includes(day)}
+                                                checked={Array.isArray(formData.availableDays) && formData.availableDays.includes(day)}
+
                                                 onChange={handleCheckboxChange}
                                             />
-                                            <label className="form-check-label">{day}</label>
-                                        </div>
+                                            <span>{day}</span>
+                                        </label>
                                     ))}
                                 </div>
                             </div>
                         </div>
-                        <div className="mt-3">
-                            <button type="submit" className="btn btn-success me-2" disabled={buttonLoading}>
-                                {buttonLoading ? 'Saving...' : editingVolunteer ? 'Update' : 'Save'}
+
+                        <div className="volunteer-form-actions">
+                            <button type="submit" className="volunteer-btn-save" disabled={buttonLoading}>
+                                {buttonLoading ? (
+                                    <>
+                                        <FaSpinner className="volunteer-spinner" />
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaSave />
+                                        <span>{editingVolunteer ? 'Update' : 'Save'}</span>
+                                    </>
+                                )}
                             </button>
-                            <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-                                Cancel
+                            <button type="button" className="volunteer-btn-cancel" onClick={handleCancel}>
+                                <FaTimes />
+                                <span>Close Form</span>
                             </button>
                         </div>
                     </form>
-                )}
+                </div>
+            )}
 
-                {globalLoading ? (
-                    <div className="text-center mt-5">
-                        <div className="spinner-border"></div>
-                    </div>
-                ) : (
-                    <div className="table-responsive">
-                        <table className="table table-striped">
+            {globalLoading ? (
+                <div className="volunteer-loading">
+                    <FaSpinner className="volunteer-spinner" />
+                    <p>Loading volunteers...</p>
+                </div>
+            ) : (
+                <div className="volunteer-table-wrapper">
+                    <div className="volunteer-table-container">
+                        <table className="volunteer-table">
                             <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Available Days</th>
-                                <th>Actions</th>
+                                <th><FaUser className="me-2" />Username</th>
+                                <th><FaEnvelope className="me-2" />Email</th>
+                                <th><FaPhone className="me-2" />Phone</th>
+                                <th><FaCalendar className="me-2" />Available Days</th>
+                                <th><FaCog className="me-2" />Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             {volunteers.length > 0 ? (
                                 volunteers.map((vol) => (
                                     <tr key={vol.id}>
-                                        <td>{vol.id}</td>
                                         <td>{vol.username}</td>
                                         <td>{vol.email}</td>
                                         <td>{vol.phoneNumber}</td>
                                         <td>{vol.availableDays?.join(', ')}</td>
                                         <td>
-                                            <button className="btn btn-sm btn-primary me-1"
-                                                    onClick={() => handleEdit(vol)}>Edit
-                                            </button>
-                                            <button className="btn btn-danger btn-sm"
-                                                    onClick={() => handleDelete(vol.id)}>Delete
-                                            </button>
+                                            <div className="volunteer-actions">
+                                                <button
+                                                    className="volunteer-btn-edit"
+                                                    onClick={() => handleEdit(vol)}
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                                <button
+                                                    className="volunteer-btn-delete"
+                                                    onClick={() => handleDelete(vol.id)}
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="text-center">
-                                        {volunteers.length === 0 ? "No volunteers found" : "Loading..."}
+                                    <td colSpan="5" className="volunteer-empty">
+                                        <FaUser />
+                                        <p>No volunteers found</p>
                                     </td>
                                 </tr>
                             )}
                             </tbody>
                         </table>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 };
-
-const InputField = ({label, name, value, onChange, type = "text", required = false}) => (
-    <div className="col-md-6 mb-3">
-        <label htmlFor={name}>{label}</label>
-        <input
-            type={type}
-            className="form-control"
-            id={name}
-            name={name}
-            value={value}
-            onChange={onChange}
-            required={required}
-        />
-    </div>
-);
 
 export default VolunteerManagement;

@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { loginUser } from '../service/AuthService';
+import './Auth.css';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({
@@ -42,51 +43,53 @@ const Login = () => {
     };
 
     return (
-        <div className="row justify-content-center">
-            <div className="col-md-6">
-                <div className="card">
-                    <div className="card-header">Login</div>
-                    <div className="card-body">
-                        {error && <div className="alert alert-danger">{error}</div>}
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-3">
-                                <label htmlFor="username" className="form-label">Email</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="username"
-                                    name="username"
-                                    value={credentials.username}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label htmlFor="password" className="form-label">Password</label>
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="password"
-                                    name="password"
-                                    value={credentials.password}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={loading}
-                            >
-                                {loading ? 'Logging in...' : 'Login'}
-                            </button>
-                        </form>
-                    </div>
-                    <div className="card-footer text-center">
-                        <p className="mb-0">
-                            Don't have an account? <a href="/register">Register</a>
-                        </p>
-                    </div>
+        <div className="auth-container">
+            <div className="auth-card">
+                <div className="auth-header">
+                    Welcome Back
+                </div>
+                <div className="auth-body">
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        <div className="form-group">
+                            <label htmlFor="username" className="form-label">Email</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="username"
+                                name="username"
+                                value={credentials.username}
+                                onChange={handleChange}
+                                required
+                                placeholder="Enter your email"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="password" className="form-label">Password</label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                id="password"
+                                name="password"
+                                value={credentials.password}
+                                onChange={handleChange}
+                                required
+                                placeholder="Enter your password"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="auth-button"
+                            disabled={loading}
+                        >
+                            {loading ? 'Logging in...' : 'Login'}
+                        </button>
+                    </form>
+                </div>
+                <div className="auth-footer">
+                    <p>
+                        Don't have an account? <Link to="/register" className="auth-link">Register</Link>
+                    </p>
                 </div>
             </div>
         </div>

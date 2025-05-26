@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from "react";
 import VolunteerService from "../../service/VolunteerService";
-import "../association/AssociationProfile.css";
+import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaSpinner, FaInfoCircle, FaPen, FaSave, FaTimes } from 'react-icons/fa';
+import "./VolunteerProfile.css";
 
 function VolunteerProfile() {
     const [volunteer, setVolunteer] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [editMode, setEditMode] = useState(false);
+    const [saveLoading, setSaveLoading] = useState(false);
+
     const availableDaysOptions = [
         "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY",
         "FRIDAY", "SATURDAY", "SUNDAY"
     ];
+
     const [formData, setFormData] = useState({
         username: "",
         email: "",
         phoneNumber: "",
         availableDays: []
-
     });
 
     const user = JSON.parse(localStorage.getItem("user"));
@@ -63,18 +66,21 @@ function VolunteerProfile() {
     };
 
     const handleSave = async () => {
+        setSaveLoading(true);
         try {
             const response = await VolunteerService.updateVolunteer(volunteerId, formData);
 
             if (response.statusCode === 200) {
-                setVolunteer(response.data);  // ✅ this is where updated volunteer is
+                setVolunteer(response.data);
                 setEditMode(false);
             } else {
-                alert("Update failed: " + response.message);
+                setError("Update failed: " + response.message);
             }
         } catch (error) {
             console.error("Update error:", error);
-            alert("Update failed");
+            setError("Failed to update profile");
+        } finally {
+            setSaveLoading(false);
         }
     };
 
@@ -88,61 +94,187 @@ function VolunteerProfile() {
         setFormData({ ...formData, availableDays: newDays });
     };
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div className="error">{error}</div>;
-    if (!volunteer) return <div>No data available.</div>;
+    if (loading) {
+        return (
+            <div className="volunteer-profile-page">
+                <div className="loading-state">
+                    <FaSpinner className="spinner" />
+                    <p>Loading profile...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="volunteer-profile-page">
+                <div className="alert error">
+                    <FaInfoCircle />
+                    <span>{error}</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (!volunteer) {
+        return (
+            <div className="volunteer-profile-page">
+                <div className="alert error">
+                    <FaInfoCircle />
+                    <span>No profile data available.</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="association-container">
-            <h2>Volunteer Profile</h2>
-            {editMode ? (
-                <>
-                    {["username", "email", "phoneNumber"].map((field) => (
-                        <div key={field} className="association-info">
-                            <label className="association-label">
-                                {field.charAt(0).toUpperCase() + field.slice(1)}:
-                            </label>
-                            <input
-                                type="text"
-                                name={field}
-                                value={formData[field] || ""}
-                                onChange={handleChange}
-                                className="association-input"
-                            />
-                        </div>
-                    ))}
+        <div className="volunteer-profile-page">
+            <div className="profile-content">
+                <h2 className="page-title">
+                    <FaUser />
+                    <span>Mon Profil</span>
+                </h2>
 
-                    <div className="association-info">
-                        <label className="association-label">Available Days:</label>
-                        <div className="checkbox-group">
-                            {availableDaysOptions.map((day) => (
-                                <label key={day} className="checkbox-label">
+                <div className="profile-card">
+                    {editMode ? (
+                        <div className="edit-form">
+                            <div className="form-group">
+                                <div className="input-group">
+                                    <FaUser className="input-icon" />
                                     <input
-                                        type="checkbox"
-                                        value={day}
-                                        checked={formData.availableDays?.includes(day) || false}
-                                        onChange={(e) => handleAvailableDaysChange(day, e.target.checked)}
+                                        type="text"
+                                        name="username"
+                                        value={formData.username || ""}
+                                        onChange={handleChange}
+                                        placeholder="Nom d'utilisateur"
+                                        className="form-input"
                                     />
-                                    {day}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
+                                </div>
+                            </div>
 
-                    <div className="button-group">
-                        <button onClick={handleSave} className="btn btn-save">Save</button>
-                        <button onClick={() => setEditMode(false)} className="btn btn-cancel">Cancel</button>
-                    </div>
-                </>
-            ) : (
-                <>
-                    <p><strong>Username:</strong> {volunteer.username}</p>
-                    <p><strong>Email:</strong> {volunteer.email}</p>
-                    <p><strong>Phone Number:</strong> {volunteer.phoneNumber}</p>
-                    <p><strong>Available Days:</strong> {volunteer.availableDays?.join(", ")}</p>
-                    <button onClick={() => setEditMode(true)} className="btn btn-edit">Edit</button>
-                </>
-            )}
+                            <div className="form-group">
+                                <div className="input-group">
+                                    <FaEnvelope className="input-icon" />
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email || ""}
+                                        onChange={handleChange}
+                                        placeholder="Email"
+                                        className="form-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <div className="input-group">
+                                    <FaPhone className="input-icon" />
+                                    <input
+                                        type="tel"
+                                        name="phoneNumber"
+                                        value={formData.phoneNumber || ""}
+                                        onChange={handleChange}
+                                        placeholder="Numéro de téléphone"
+                                        className="form-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="days-label">
+                                    <FaCalendarAlt className="input-icon" />
+                                    <span>Jours disponibles</span>
+                                </label>
+                                <div className="days-grid">
+                                    {availableDaysOptions.map((day) => (
+                                        <label key={day} className="day-checkbox">
+                                            <input
+                                                type="checkbox"
+                                                value={day}
+                                                checked={formData.availableDays?.includes(day) || false}
+                                                onChange={(e) => handleAvailableDaysChange(day, e.target.checked)}
+                                            />
+                                            <span className="day-label">{day}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="button-group">
+                                <button
+                                    onClick={handleSave}
+                                    className="btn-save"
+                                    disabled={saveLoading}
+                                >
+                                    {saveLoading ? (
+                                        <FaSpinner className="spinner" />
+                                    ) : (
+                                        <>
+                                            <FaSave />
+                                            <span>Enregistrer</span>
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setEditMode(false)}
+                                    className="btn-cancel"
+                                    disabled={saveLoading}
+                                >
+                                    <FaTimes />
+                                    <span>Annuler</span>
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="profile-info">
+                            <div className="info-group">
+                                <FaUser className="info-icon" />
+                                <div className="info-content">
+                                    <span className="info-label">Nom d'utilisateur</span>
+                                    <span className="info-value">{volunteer.username}</span>
+                                </div>
+                            </div>
+
+                            <div className="info-group">
+                                <FaEnvelope className="info-icon" />
+                                <div className="info-content">
+                                    <span className="info-label">Email</span>
+                                    <span className="info-value">{volunteer.email}</span>
+                                </div>
+                            </div>
+
+                            <div className="info-group">
+                                <FaPhone className="info-icon" />
+                                <div className="info-content">
+                                    <span className="info-label">Téléphone</span>
+                                    <span className="info-value">{volunteer.phoneNumber || 'Non renseigné'}</span>
+                                </div>
+                            </div>
+
+                            <div className="info-group">
+                                <FaCalendarAlt className="info-icon" />
+                                <div className="info-content">
+                                    <span className="info-label">Jours disponibles</span>
+                                    <div className="days-badges">
+                                        {volunteer.availableDays?.length > 0 ? (
+                                            volunteer.availableDays.map(day => (
+                                                <span key={day} className="day-badge">{day}</span>
+                                            ))
+                                        ) : (
+                                            <span className="no-days">Aucun jour sélectionné</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onClick={() => setEditMode(true)} className="btn-edit">
+                                <FaPen />
+                                <span>Modifier</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

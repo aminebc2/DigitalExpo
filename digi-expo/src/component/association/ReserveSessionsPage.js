@@ -31,10 +31,21 @@ const ReserveSessionsPage = () => {
         setDates(updatedDates);
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('fr-FR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }).format(date);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!associationId) {
-            setMessage('Identifiant de l’association manquant.');
+            setMessage("Identifiant de l'association manquant.");
             return;
         }
         setLoading(true);
@@ -52,38 +63,62 @@ const ReserveSessionsPage = () => {
     };
 
     return (
-        <div className="reserve-container">
-            <h3>Réserver des Sessions</h3>
-            <form onSubmit={handleSubmit} className="reserve-form">
-                {dates.map((date, index) => (
-                    <div key={index} className="date-input-wrapper">
-                        <input
-                            type="date"
-                            className="date-input"
-                            value={date}
-                            onChange={(e) => handleDateChange(index, e.target.value)}
-                            required
-                        />
-                        {dates.length > 1 && (
-                            <button
-                                type="button"
-                                className="remove-btn"
-                                onClick={() => removeDateInput(index)}
-                                title="Supprimer cette date"
-                            >
-                                &times;
-                            </button>
+        <div className="session-booking-page">
+            <div className="booking-main">
+                <div className="booking-card">
+                    <h3 className="booking-title">Réserver des Sessions</h3>
+                    <form onSubmit={handleSubmit} className="booking-form">
+                        {dates.map((date, index) => (
+                            <div key={index} className="date-field">
+                                <div className="date-input-group">
+                                    <input
+                                        type="date"
+                                        className="date-picker"
+                                        value={date}
+                                        onChange={(e) => handleDateChange(index, e.target.value)}
+                                        required
+                                    />
+                                    {dates.length > 1 && (
+                                        <button
+                                            type="button"
+                                            className="delete-date"
+                                            onClick={() => removeDateInput(index)}
+                                            title="Supprimer cette date"
+                                        >
+                                            &times;
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        <button type="button" className="add-new-date" onClick={addDateInput}>
+                            + Ajouter une autre date
+                        </button>
+                        <button type="submit" className="submit-booking" disabled={loading}>
+                            {loading ? 'Réservation...' : 'Réserver'}
+                        </button>
+                    </form>
+                    {message && <div className="status-message">{message}</div>}
+                </div>
+
+                <div className="preview-section">
+                    <h4 className="preview-title">Dates Sélectionnées</h4>
+                    <div className="dates-list">
+                        {dates.map((date, index) => (
+                            date && (
+                                <div key={index} className="date-card">
+                                    {formatDate(date)}
+                                </div>
+                            )
+                        ))}
+                        {!dates.some(date => date) && (
+                            <div className="empty-dates">
+                                Aucune date sélectionnée
+                            </div>
                         )}
                     </div>
-                ))}
-                <button type="button" className="add-date-btn" onClick={addDateInput}>
-                    + Ajouter une autre date
-                </button>
-                <button type="submit" className="submit-btn" disabled={loading}>
-                    {loading ? 'Réservation...' : 'Réserver'}
-                </button>
-            </form>
-            {message && <div className="message">{message}</div>}
+                </div>
+            </div>
         </div>
     );
 };

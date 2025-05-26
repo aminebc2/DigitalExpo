@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../service/AuthService';
+import './Auth.css';
 
 const Register = () => {
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: '',
-        role: 'BENEVOLE' // Default role
+        role: 'BENEVOLE'
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -41,77 +42,80 @@ const Register = () => {
     };
 
     return (
-        <div className="row justify-content-center">
-            <div className="col-md-6">
-                <div className="card">
-                    <div className="card-header">Register</div>
-                    <div className="card-body">
-                        {error && <div className="alert alert-danger">{error}</div>}
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-3">
-                                <label htmlFor="username" className="form-label">Username</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="username"
-                                    name="username"
-                                    value={formData.username}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label htmlFor="email" className="form-label">Email</label>
-                                <input
-                                    type="email"
-                                    className="form-control"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label htmlFor="password" className="form-label">Password</label>
-                                <input
-                                    type="password"
-                                    className="form-control"
-                                    id="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label htmlFor="role" className="form-label">Role</label>
-                                <select
-                                    className="form-select"
-                                    id="role"
-                                    name="role"
-                                    value={formData.role}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="BENEVOLE">Volunteer</option>
-                                    <option value="ASSOCIATION">Association</option>
-                                </select>
-                            </div>
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={loading}
+        <div className="auth-container">
+            <div className="auth-card">
+                <div className="auth-header">
+                    Create Account
+                </div>
+                <div className="auth-body">
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        <div className="form-group">
+                            <label htmlFor="username" className="form-label">Username</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="username"
+                                name="username"
+                                value={formData.username}
+                                onChange={handleChange}
+                                required
+                                placeholder="Choose a username"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="email" className="form-label">Email</label>
+                            <input
+                                type="email"
+                                className="form-control"
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                                placeholder="Enter your email"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="password" className="form-label">Password</label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                id="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                placeholder="Create a password"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="role" className="form-label">I want to register as</label>
+                            <select
+                                className="form-select"
+                                id="role"
+                                name="role"
+                                value={formData.role}
+                                onChange={handleChange}
+                                required
                             >
-                                {loading ? 'Registering...' : 'Register'}
-                            </button>
-                        </form>
-                    </div>
-                    <div className="card-footer text-center">
-                        <p className="mb-0">
-                            Already have an account? <a href="/login">Login</a>
-                        </p>
-                    </div>
+                                <option value="BENEVOLE">Volunteer</option>
+                                <option value="ASSOCIATION">Association</option>
+                            </select>
+                        </div>
+                        <button
+                            type="submit"
+                            className="auth-button"
+                            disabled={loading}
+                        >
+                            {loading ? 'Creating Account...' : 'Register'}
+                        </button>
+                    </form>
+                </div>
+                <div className="auth-footer">
+                    <p>
+                        Already have an account? <Link to="/login" className="auth-link">Login</Link>
+                    </p>
                 </div>
             </div>
         </div>

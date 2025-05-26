@@ -1,10 +1,17 @@
-// SessionPage.jsx
-
 import React, { useState, useEffect } from 'react';
 import VolunteerService from '../../service/VolunteerService';
-import { Card, Button, Row, Col, Modal, Spinner } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import AssociationService from "../../service/AssociationService";
+import {
+    FaCalendarAlt,
+    FaInfoCircle,
+    FaBuilding,
+    FaEnvelope,
+    FaUserTie,
+    FaPhone,
+    FaSpinner,
+    FaTimes,
+    FaArrowRight
+} from 'react-icons/fa';
+import './SessionPage.css';
 
 const SessionPage = () => {
     const [sessions, setSessions] = useState([]);
@@ -20,7 +27,6 @@ const SessionPage = () => {
         const fetchSessions = async () => {
             try {
                 const response = await VolunteerService.getSessions(volunteerId);
-
                 const sessionsList = response?.data || [];
 
                 if (Array.isArray(sessionsList)) {
@@ -29,7 +35,6 @@ const SessionPage = () => {
                     console.warn('sessionList is not an array:', sessionsList);
                     setSessions([]);
                 }
-
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching sessions:', error);
@@ -53,76 +58,167 @@ const SessionPage = () => {
         setShowModal(false);
     };
 
+    const getStatusClass = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'pending':
+                return 'status-indicator pending';
+            case 'confirmed':
+                return 'status-indicator confirmed';
+            case 'cancelled':
+                return 'status-indicator cancelled';
+            case 'completed':
+                return 'status-indicator completed';
+            default:
+                return 'status-indicator pending';
+        }
+    };
+
     return (
-        <div className="container mt-4">
-            <h3 className="text-center mb-4">Mes Sessions Assignées</h3>
-
-            {error && <p className="text-danger text-center">{error}</p>}
-
-            {loading ? (
-                <div className="text-center">
-                    <Spinner animation="border" variant="primary" />
+        <div className="volunteer-dashboard">
+            <div className="dashboard-container">
+                <div className="dashboard-header">
+                    <h2 className="dashboard-title">
+                        <FaCalendarAlt/>
+                        <span>Mes Sessions Assignées</span>
+                    </h2>
                 </div>
-            ) : sessions.length > 0 ? (
-                <Row>
-                    {sessions.map((session) => (
-                        <Col md={4} key={session.id} className="mb-4">
-                            <Card className="shadow-sm border-light purple">
-                                <Card.Body>
-                                    <Card.Text>
-                                        <strong>Date:</strong> {session.date}
-                                    </Card.Text>
-                                    <Card.Text>
-                                        <strong>Status:</strong> {session.status}
-                                    </Card.Text>
-                                    {/*<Card.Text>
-                                        <strong>Association:</strong> {session.association?.name || 'N/A'}
-                                    </Card.Text>
-                                    <Card.Text>
-                                        <strong>Association Email:</strong> {session.association?.email}
-                                    </Card.Text>
-                                    <Card.Text>
-                                        <strong>Responsable:</strong> {session.association?.responsableName || 'N/A'}
-                                    </Card.Text>
-                                    <Card.Text>
-                                        <strong>Responsable Tel:</strong> {session.association?.responsablePhone || 'N/A'}
-                                    </Card.Text>*/}
 
-                                    <Button variant="primary" style={{ width: '100%' }} onClick={() => handleShowDetails(session)}>
-                                        Voir Détails
-                                    </Button>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))}
-                </Row>
-            ) : (
-                <div className="text-center">
-                    <p>Aucune session assignée.</p>
-                </div>
-            )}
+                {error && (
+                    <div className="alert-box">
+                        <FaInfoCircle />
+                        <span>{error}</span>
+                    </div>
+                )}
 
-            {selectedSession && (
-                <Modal show={showModal} onHide={handleCloseModal} key={selectedSession.id}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Détails de la session</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <p><strong>Date:</strong> {selectedSession.date}</p>
-                        <p><strong>Status:</strong> {selectedSession.status}</p>
-                        <p><strong>Association:</strong> {selectedSession.association?.name || 'N/A'}</p>
-                        <p><strong> Association Email: </strong> {selectedSession.association?.email || 'N/A'}</p>
-                        <p><strong>Responsable Name:</strong> {selectedSession.association?.responsableName || 'N/A'}</p>
-                        <p><strong>Responsable Tel:</strong> {selectedSession.association?.responsablePhone || 'N/A'}
-                        </p>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseModal}>
-                            Fermer
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-            )}
+                {loading ? (
+                    <div className="loading-box">
+                        <FaSpinner className="loading-spinner" />
+                        <p className="loading-text">Chargement des sessions...</p>
+                    </div>
+                ) : sessions.length > 0 ? (
+                    <div className="sessions-layout">
+                        {sessions.map((session) => (
+                            <div className="session-item" key={session.id}>
+                                <div className="session-content">
+                                    <div className="session-date">
+                                        <FaCalendarAlt />
+                                        <span>{session.date}</span>
+                                    </div>
+
+                                    <div className={getStatusClass(session.status)}>
+                                        {session.status}
+                                    </div>
+
+                                    <button
+                                        className="view-details"
+                                        onClick={() => handleShowDetails(session)}
+                                    >
+                                        <span>Voir Détails</span>
+                                        <FaArrowRight />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="empty-state">
+                        <FaCalendarAlt />
+                        <p>Aucune session assignée.</p>
+                    </div>
+                )}
+
+                {showModal && selectedSession && (
+                    <div className="detail-overlay">
+                        <div className="detail-container">
+                            <div className="detail-header">
+                                <h3 className="detail-title">
+                                    <FaCalendarAlt />
+                                    Détails de la session
+                                </h3>
+                                <button className="detail-close" onClick={handleCloseModal}>
+                                    <FaTimes />
+                                </button>
+                            </div>
+                            <div className="detail-body">
+                                <div className="detail-section">
+                                    <div className="detail-row">
+                                        <div className="detail-field">
+                                            <div className="detail-icon">
+                                                <FaCalendarAlt />
+                                            </div>
+                                            <div className="detail-info">
+                                                <span className="detail-label">Date</span>
+                                                <span className="detail-value">{selectedSession.date}</span>
+                                            </div>
+                                        </div>
+                                        <div className={getStatusClass(selectedSession.status)}>
+                                            {selectedSession.status}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="detail-section">
+                                    <h4 className="association-title">
+                                        <FaBuilding />
+                                        Information de l'Association
+                                    </h4>
+                                    <div className="association-grid">
+                                        <div className="detail-field">
+                                            <div className="detail-icon">
+                                                <FaBuilding />
+                                            </div>
+                                            <div className="detail-info">
+                                                <span className="detail-label">Association</span>
+                                                <span className="detail-value">
+                                                    {selectedSession.association?.name || 'N/A'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="detail-field">
+                                            <div className="detail-icon">
+                                                <FaEnvelope />
+                                            </div>
+                                            <div className="detail-info">
+                                                <span className="detail-label">Email</span>
+                                                <span className="detail-value">
+                                                    {selectedSession.association?.email || 'N/A'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="detail-field">
+                                            <div className="detail-icon">
+                                                <FaUserTie />
+                                            </div>
+                                            <div className="detail-info">
+                                                <span className="detail-label">Responsable</span>
+                                                <span className="detail-value">
+                                                    {selectedSession.association?.responsableName || 'N/A'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="detail-field">
+                                            <div className="detail-icon">
+                                                <FaPhone />
+                                            </div>
+                                            <div className="detail-info">
+                                                <span className="detail-label">Téléphone</span>
+                                                <span className="detail-value">
+                                                    {selectedSession.association?.responsablePhone || 'N/A'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button className="detail-action" onClick={handleCloseModal}>
+                                    <FaTimes />
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

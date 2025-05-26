@@ -4,7 +4,6 @@ import AssociationManagement from './AssociationManagement';
 import VolunteerManagement from './VolunteerManagement';
 import VolunteerRequests from './VolunteerRequests';
 import SessionManagement from './SessionManagement';
-import AssignVolunteerToSession from './AssignVolunteerToSession';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -27,49 +26,51 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="container mt-4">
-            <div className="row mb-4">
-                <div className="col">
-                    <h2>Admin Dashboard</h2>
+        <div className="admin-dashboard">
+            <div className="dashboard-header">
+                <h2>
+                    <i className="fas fa-tachometer-alt"></i>
+                    Admin Dashboard
+                </h2>
+                <button className="back-to-home" onClick={() => navigate('/home')}>
+                    <i className="fas fa-home"></i>
+                    Back to Home
+                </button>
+            </div>
+
+            <div className="dashboard-tabs">
+                <div
+                    className={`tab ${activeTab === 'associations' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('associations')}
+                >
+                    <i className="fas fa-building"></i>
+                    <span>Associations</span>
+                </div>
+                <div
+                    className={`tab ${activeTab === 'volunteers' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('volunteers')}
+                >
+                    <i className="fas fa-users"></i>
+                    <span>Volunteers</span>
+                </div>
+                <div
+                    className={`tab ${activeTab === 'volunteerRequests' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('volunteerRequests')}
+                >
+                    <i className="fas fa-user-plus"></i>
+                    <span>Volunteer Requests</span>
+                </div>
+                <div
+                    className={`tab ${activeTab === 'sessions' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('sessions')}
+                >
+                    <i className="fas fa-calendar-alt"></i>
+                    <span>Sessions</span>
                 </div>
             </div>
 
-            <div className="row">
-                <div className="col-md-3">
-                    <div className="list-group">
-                        <button
-                            className={`list-group-item list-group-item-action ${activeTab === 'associations' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('associations')}
-                        >
-                            Associations
-                        </button>
-                        <button
-                            className={`list-group-item list-group-item-action ${activeTab === 'volunteers' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('volunteers')}
-                        >
-                            Volunteers
-                        </button>
-                        <button
-                            className={`list-group-item list-group-item-action ${activeTab === 'volunteerRequests' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('volunteerRequests')}
-                        >
-                            Volunteer Requests
-                        </button>
-                        <button
-                            className={`list-group-item list-group-item-action ${activeTab === 'sessions' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('sessions')}
-                        >
-                            Sessions
-                        </button>
-                    </div>
-                    <button className="btn btn-danger mt-4 w-100" onClick={() => navigate('/home')}>
-                        Back to Home
-                    </button>
-
-                </div>
-                <div className="col-md-9">
-                    {renderTabContent()}
-                </div>
+            <div className="dashboard-content">
+                {renderTabContent()}
             </div>
         </div>
     );
