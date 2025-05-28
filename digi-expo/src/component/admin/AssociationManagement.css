@@ -1,51 +1,59 @@
 .association-management {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin: -2rem;
-    padding: 2rem;
-    width: calc(100% + 4rem);
-    background-color: var(--dxc-white);
+    min-height: 100vh;
+    padding: 20px;
+    background: #f9fafb;
+    position: relative;
+}
+
+.association-content {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .association-header {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-bottom: 0.5rem;
-    padding: 0 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .association-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 600;
-    color: #2d3748;
+    color: white !important;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    margin: 0;
 }
 
 .association-title svg {
-    color: #5f249f;
+    color: white !important;
+    font-size: 1.5rem;
 }
 
 .association-add-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     padding: 8px 16px;
     background: #5f249f;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    font-size: 0.98rem;
+    font-size: 0.875rem;
     transition: all 0.2s;
 }
 
 .association-add-btn:hover {
     background: #8b4fc9;
+    transform: translateY(-1px);
+}
+
+.association-add-btn svg {
+    font-size: 1rem;
 }
 
 /* Alerts */
@@ -255,9 +263,22 @@
     background: #f8fafc;
     color: #64748b;
     font-weight: 600;
-    padding: 10px;
+    padding: 16px;
     text-align: left;
-    border-bottom: 1.5px solid #e2e8f0;
+    border-bottom: 1.5px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+.association-table th svg {
+    color: #5f249f;
+    margin-right: 8px;
+    vertical-align: middle;
+    font-size: 1.1rem;
+}
+
+.me-2 {
+    margin-right: 8px;
+    color: #5f249f;
 }
 
 .association-table th:first-child,

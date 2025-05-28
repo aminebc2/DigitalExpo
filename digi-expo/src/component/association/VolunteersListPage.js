@@ -40,57 +40,66 @@ const VolunteersListPage = ({ associationId }) => {
     };
 
     return (
-        <div className="volunteers-container">
-            <h2 className="page-title">
-                <FaUserFriends />
-                Liste des Bénévoles
-            </h2>
+        <div className="vol-directory">
+            <div className="vol-directory__header">
+                <h2 className="vol-directory__title">
+                    <FaUserFriends className="vol-directory__icon" />
+                    <span>Liste des Bénévoles</span>
+                </h2>
+            </div>
+
             {loading ? (
-                <div className="loading">
-                    <div className="spinner" />
+                <div className="vol-directory__loading">
+                    <div className="vol-directory__spinner" />
                     <p>Loading volunteers...</p>
                 </div>
             ) : error ? (
-                <div className="error-message">
+                <div className="vol-directory__error">
                     <FaUser size={48} />
                     <p>{error}</p>
                 </div>
             ) : volunteers.length === 0 ? (
-                <div className="no-volunteers">
+                <div className="vol-directory__empty">
                     <FaUser size={48} />
                     <p>No volunteers found</p>
                 </div>
             ) : (
-                <div className="volunteer-list">
+                <div className="vol-directory__grid">
                     {volunteers.map((volunteer) => (
-                        <div className="volunteer-card" key={volunteer.id}>
-                            <div className="volunteer-info">
-                                <h4 className="volunteer-name">
+                        <div className="vol-member" key={volunteer.id}>
+                            <div className="vol-member__header">
+                                <div className="vol-member__avatar">
                                     <FaUser />
+                                </div>
+                                <h4 className="vol-member__name">
                                     {volunteer.username || 'Unnamed Volunteer'}
                                 </h4>
-                                <div className="volunteer-details">
-                                    <p className="volunteer-email">
-                                        <strong>
-                                            <FaEnvelope />
-                                            Email:
-                                        </strong>
-                                        {volunteer.email}
-                                    </p>
-                                    <p className="volunteer-phone">
-                                        <strong>
-                                            <FaPhone />
-                                            Phone:
-                                        </strong>
-                                        {volunteer.phoneNumber || 'Not provided'}
-                                    </p>
-                                    <p className="volunteer-available-days">
-                                        <strong>
-                                            <FaCalendarAlt />
-                                            Available:
-                                        </strong>
-                                        {formatAvailableDays(volunteer.availableDays)}
-                                    </p>
+                            </div>
+                            <div className="vol-member__content">
+                                <div className="vol-member__field">
+                                    <FaEnvelope className="vol-member__field-icon" />
+                                    <div className="vol-member__field-content">
+                                        <span className="vol-member__field-label">Email</span>
+                                        <span className="vol-member__field-value">{volunteer.email}</span>
+                                    </div>
+                                </div>
+                                <div className="vol-member__field">
+                                    <FaPhone className="vol-member__field-icon" />
+                                    <div className="vol-member__field-content">
+                                        <span className="vol-member__field-label">Phone</span>
+                                        <span className="vol-member__field-value">
+                                            {volunteer.phoneNumber || 'Not provided'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="vol-member__field">
+                                    <FaCalendarAlt className="vol-member__field-icon" />
+                                    <div className="vol-member__field-content">
+                                        <span className="vol-member__field-label">Available Days</span>
+                                        <span className="vol-member__field-value">
+                                            {formatAvailableDays(volunteer.availableDays)}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

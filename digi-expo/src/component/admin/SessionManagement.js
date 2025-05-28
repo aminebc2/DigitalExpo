@@ -212,20 +212,23 @@ const SessionManagement = () => {
 
             {/* Edit Status Modal */}
             {showStatusModal && selectedSession && (
-                <div className="session-modal-backdrop">
-                    <div className="session-modal">
-                        <div className="session-modal-header">
-                            <h5 className="session-modal-title">Edit Session Status</h5>
-                            <button className="session-modal-close" onClick={closeStatusModal}>
+                <div className="manage-modal__overlay">
+                    <div className="manage-modal__container">
+                        <div className="manage-modal__header">
+                            <h5 className="manage-modal__title">
+                                <FaCog className="manage-modal__title-icon" />
+                                Edit Session Status
+                            </h5>
+                            <button className="manage-modal__close" onClick={closeStatusModal}>
                                 <FaTimes />
                             </button>
                         </div>
                         <form onSubmit={handleUpdateSession}>
-                            <div className="session-modal-body">
-                                <div className="session-form-group">
-                                    <label className="session-form-label">Status</label>
+                            <div className="manage-modal__content">
+                                <div className="manage-form__group">
+                                    <label className="manage-form__label">Status</label>
                                     <select
-                                        className="session-form-select"
+                                        className="manage-form__select"
                                         value={updatedStatus}
                                         onChange={(e) => setUpdatedStatus(e.target.value)}
                                         required
@@ -237,20 +240,28 @@ const SessionManagement = () => {
                                     </select>
                                 </div>
                             </div>
-                            <div className="session-modal-footer">
-                                <button type="button" className="btn-action" onClick={closeStatusModal}>
-                                    <FaTimes />
-                                    Close
+                            <div className="manage-modal__footer">
+                                <button
+                                    type="button"
+                                    className="manage-btn manage-btn--secondary"
+                                    onClick={closeStatusModal}
+                                >
+                                    <FaTimes className="manage-btn__icon" />
+                                    Cancel
                                 </button>
-                                <button type="submit" className="btn-action btn-edit" disabled={loading}>
+                                <button
+                                    type="submit"
+                                    className="manage-btn manage-btn--primary"
+                                    disabled={loading}
+                                >
                                     {loading ? (
                                         <>
-                                            <FaSpinner className="spinner" />
+                                            <FaSpinner className="manage-spinner" />
                                             <span>Updating...</span>
                                         </>
                                     ) : (
                                         <>
-                                            <FaCheck />
+                                            <FaCheck className="manage-btn__icon" />
                                             <span>Update Status</span>
                                         </>
                                     )}
@@ -263,18 +274,18 @@ const SessionManagement = () => {
 
             {/* Assign Volunteer Modal */}
             {showAssignModal && selectedSession && (
-                <div className="session-modal-backdrop">
-                    <div className="session-modal">
-                        <div className="session-modal-header">
-                            <h5 className="session-modal-title">
-                                <FaUserPlus className="me-2" />
+                <div className="manage-modal__overlay">
+                    <div className="manage-modal__container">
+                        <div className="manage-modal__header">
+                            <h5 className="manage-modal__title">
+                                <FaUserPlus className="manage-modal__title-icon" />
                                 Assign Volunteer
                             </h5>
-                            <button className="session-modal-close" onClick={closeAssignModal}>
+                            <button className="manage-modal__close" onClick={closeAssignModal}>
                                 <FaTimes />
                             </button>
                         </div>
-                        <div className="session-modal-body">
+                        <div className="manage-modal__content">
                             <AssignVolunteerToSession
                                 sessionId={selectedSession.id}
                                 associationId={selectedSession.association?.id}
@@ -289,3 +300,4 @@ const SessionManagement = () => {
 };
 
 export default SessionManagement;
+

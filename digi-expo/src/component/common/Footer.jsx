@@ -11,12 +11,9 @@ const Footer = () => {
                     </div>
 
                     <nav className="footer-nav">
-                        <a href="/careers">Careers</a>
-                        <a href="/customer-stories">Customer Stories</a>
-                        <a href="/industries">Industries</a>
-                        <a href="/investor-relations">Investor Relations</a>
-                        <a href="/newsroom">Newsroom</a>
-                        <a href="/partner-network">Partner Network</a>
+                        <a href="/home">Home</a>
+                        <a href="/associations">Associations</a>
+                        <a href="/aboutus">About Us</a>
                     </nav>
                 </div>
 
