@@ -99,6 +99,9 @@ const Navbar = () => {
                         ) : (
                             <>
                                 <li className="nav-item">
+                                    <Link className="nav-link btn-outline-purple" to="/home">Home</Link>
+                                </li>
+                                <li className="nav-item">
                                     <Link className="nav-link btn-outline-purple" to="/login">Login</Link>
                                 </li>
                                 <li className="nav-item">

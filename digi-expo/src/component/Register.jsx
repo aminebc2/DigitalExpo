@@ -44,10 +44,15 @@ const Register = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <div className="auth-header">
-                    Create Account
+                <div className="welcome-container">
+                    <h2>Welcome!</h2>
+                    <p>To keep connected with us please login with your personal info</p>
                 </div>
-                <div className="auth-body">
+                <div className="auth-form-container">
+                    <div className="auth-header">
+                        <h1>Create Account</h1>
+                    </div>
+
                     {error && <div className="alert alert-danger">{error}</div>}
                     <form onSubmit={handleSubmit} className="auth-form">
                         <div className="form-group">
@@ -108,14 +113,14 @@ const Register = () => {
                             className="auth-button"
                             disabled={loading}
                         >
-                            {loading ? 'Creating Account...' : 'Register'}
+                            {loading ? 'Creating Account...' : 'Sign up'}
                         </button>
                     </form>
-                </div>
-                <div className="auth-footer">
-                    <p>
-                        Already have an account? <Link to="/login" className="auth-link">Login</Link>
-                    </p>
+                    <div className="auth-footer">
+                        <p>
+                            Already have an account? <Link to="/login" className="auth-link">Sign in</Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

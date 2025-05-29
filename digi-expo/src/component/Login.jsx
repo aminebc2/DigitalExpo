@@ -45,10 +45,10 @@ const Login = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <div className="auth-header">
-                    Welcome Back
-                </div>
-                <div className="auth-body">
+                <div className="auth-form-container">
+                    <div className="auth-header">
+                        <h1>Sign in</h1>
+                    </div>
                     {error && <div className="alert alert-danger">{error}</div>}
                     <form onSubmit={handleSubmit} className="auth-form">
                         <div className="form-group">
@@ -82,14 +82,18 @@ const Login = () => {
                             className="auth-button"
                             disabled={loading}
                         >
-                            {loading ? 'Logging in...' : 'Login'}
+                            {loading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </form>
+                    <div className="auth-footer">
+                        <p>
+                            Don't have an account? <Link to="/register" className="auth-link">Sign up</Link>
+                        </p>
+                    </div>
                 </div>
-                <div className="auth-footer">
-                    <p>
-                        Don't have an account? <Link to="/register" className="auth-link">Register</Link>
-                    </p>
+                <div className="welcome-container">
+                    <h2>Welcome Back!</h2>
+                    <p>Enter your personal details and start your journey with us</p>
                 </div>
             </div>
         </div>

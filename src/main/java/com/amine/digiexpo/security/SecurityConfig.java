@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/association/**").hasAnyRole("ASSOCIATION")
                         .requestMatchers("volunteer/**").hasAnyRole("BENEVOLE")
+                        .requestMatchers("/Guest/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
