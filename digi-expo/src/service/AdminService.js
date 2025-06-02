@@ -221,6 +221,21 @@ export default class AdminService {
         }
     }
 
+    static async deleteVolunteerRequest(requestId) {
+        try {
+            const response = await axios.delete(`${this.API_URL}/volunteer-request/${requestId}`, {
+                headers: this.getHeader()
+            });
+            return response.data;
+        } catch (error) {
+            if (error.response?.status === 403) {
+                throw new Error('You do not have permission to delete this request');
+            }
+            console.error('Error deleting volunteer request:', error.response?.data || error.message);
+            throw error.response?.data || error;
+        }
+    }
+
 
     static async getAssoVolunteers(associationId) {
         try {

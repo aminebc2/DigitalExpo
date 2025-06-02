@@ -1,7 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import AssociationService from '../../service/AssociationService';
 import { FaCalendarAlt, FaInfoCircle, FaSpinner, FaTimes, FaArrowRight, FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { useLanguage } from '../../context/LanguageContext';
 import './SessionListPage.css';
+
+// Translations object
+const translations = {
+    fr: {
+        pageTitle: "Liste des Sessions",
+        loading: "Chargement des sessions...",
+        error: "Erreur lors du chargement des sessions",
+        noSessions: "Aucune session disponible",
+        viewDetails: "Voir Détails",
+        sessionDetails: "Détails de la session",
+        date: "Date",
+        volunteerInfo: "Information du Bénévole",
+        username: "Nom d'utilisateur",
+        email: "Email",
+        phone: "Téléphone",
+        notProvided: "Non fourni",
+        noVolunteer: "Aucun bénévole assigné",
+        close: "Fermer",
+        status: {
+            pending: "En attente",
+            confirmed: "Confirmé",
+            cancelled: "Annulé",
+            completed: "Terminé"
+        }
+    },
+    en: {
+        pageTitle: "Sessions List",
+        loading: "Loading sessions...",
+        error: "Error loading sessions",
+        noSessions: "No sessions available",
+        viewDetails: "View Details",
+        sessionDetails: "Session Details",
+        date: "Date",
+        volunteerInfo: "Volunteer Information",
+        username: "Username",
+        email: "Email",
+        phone: "Phone",
+        notProvided: "Not provided",
+        noVolunteer: "No volunteer assigned",
+        close: "Close",
+        status: {
+            pending: "Pending",
+            confirmed: "Confirmed",
+            cancelled: "Cancelled",
+            completed: "Completed"
+        }
+    }
+};
 
 const SessionListPage = () => {
     const [sessions, setSessions] = useState([]);
@@ -9,6 +58,8 @@ const SessionListPage = () => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedSession, setSelectedSession] = useState(null);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     const user = JSON.parse(localStorage.getItem("user"));
     const associationId = user?.id;
@@ -22,14 +73,14 @@ const SessionListPage = () => {
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching sessions:', error);
-                setError('Erreur lors du chargement des sessions');
+                setError(t.error);
                 setSessions([]);
                 setLoading(false);
             }
         };
 
         if (associationId) fetchSessions();
-    }, [associationId]);
+    }, [associationId, t.error]);
 
     const handleShowDetails = (session) => {
         setSelectedSession(session);
@@ -56,12 +107,36 @@ const SessionListPage = () => {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long'
+        }).format(date);
+    };
+
+    const formatFullDate = (dateString) => {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        }).format(date);
+    };
+
+    const getTranslatedStatus = (status) => {
+        const statusKey = status?.toLowerCase();
+        return t.status[statusKey] || status;
+    };
+
     return (
         <div className="sessions-page">
             <div className="sessions-content">
                 <h2 className="page-title">
                     <FaCalendarAlt />
-                    <span>Liste des Sessions</span>
+                    <span>{t.pageTitle}</span>
                 </h2>
 
                 {error && (
@@ -74,7 +149,7 @@ const SessionListPage = () => {
                 {loading ? (
                     <div className="session-loading-state">
                         <FaSpinner className="session-spinner" />
-                        <p>Chargement des sessions...</p>
+                        <p>{t.loading}</p>
                     </div>
                 ) : sessions.length > 0 ? (
                     <div className="sessions-grid">
@@ -83,11 +158,7 @@ const SessionListPage = () => {
                                 <div className="session-card-content">
                                     <div className="session-date-section">
                                         <span className="session-date">
-                                            {new Date(session.date).toLocaleDateString('fr-FR', {
-                                                weekday: 'long',
-                                                day: 'numeric',
-                                                month: 'long'
-                                            })}
+                                            {formatDate(session.date)}
                                         </span>
                                         <span className="session-year">
                                             {new Date(session.date).getFullYear()}
@@ -95,14 +166,14 @@ const SessionListPage = () => {
                                     </div>
 
                                     <div className={getStatusBadgeClass(session.status)}>
-                                        {session.status}
+                                        {getTranslatedStatus(session.status)}
                                     </div>
 
                                     <button
                                         className="session-details-button"
                                         onClick={() => handleShowDetails(session)}
                                     >
-                                        <span>Voir Détails</span>
+                                        <span>{t.viewDetails}</span>
                                         <FaArrowRight className="session-arrow-icon" />
                                     </button>
                                 </div>
@@ -112,7 +183,7 @@ const SessionListPage = () => {
                 ) : (
                     <div className="session-empty">
                         <FaCalendarAlt />
-                        <p>Aucune session disponible</p>
+                        <p>{t.noSessions}</p>
                     </div>
                 )}
 
@@ -122,7 +193,7 @@ const SessionListPage = () => {
                             <div className="session-details-header">
                                 <h3 className="session-details-title">
                                     <FaCalendarAlt />
-                                    Détails de la session
+                                    {t.sessionDetails}
                                 </h3>
                             </div>
                             <div className="session-details-content">
@@ -133,19 +204,14 @@ const SessionListPage = () => {
                                                 <FaCalendarAlt />
                                             </div>
                                             <div className="session-details-field-content">
-                                                <span className="session-details-label">Date</span>
+                                                <span className="session-details-label">{t.date}</span>
                                                 <span className="session-details-value">
-                                                    {new Date(selectedSession.date).toLocaleDateString('fr-FR', {
-                                                        weekday: 'long',
-                                                        day: 'numeric',
-                                                        month: 'long',
-                                                        year: 'numeric'
-                                                    })}
+                                                    {formatFullDate(selectedSession.date)}
                                                 </span>
                                             </div>
                                         </div>
                                         <div className={`session-details-status ${selectedSession.status.toLowerCase()}`}>
-                                            {selectedSession.status}
+                                            {getTranslatedStatus(selectedSession.status)}
                                         </div>
                                     </div>
                                 </div>
@@ -153,7 +219,7 @@ const SessionListPage = () => {
                                 <div className="session-details-section">
                                     <h4 className="session-details-section-title">
                                         <FaUser />
-                                        Information du Bénévole
+                                        {t.volunteerInfo}
                                     </h4>
                                     {selectedSession.volunteer ? (
                                         <div className="session-details-grid">
@@ -162,7 +228,7 @@ const SessionListPage = () => {
                                                     <FaUser />
                                                 </div>
                                                 <div className="session-details-field-content">
-                                                    <span className="session-details-label">Nom d'utilisateur</span>
+                                                    <span className="session-details-label">{t.username}</span>
                                                     <span className="session-details-value">
                                                         {selectedSession.volunteer.username || 'N/A'}
                                                     </span>
@@ -173,9 +239,9 @@ const SessionListPage = () => {
                                                     <FaEnvelope />
                                                 </div>
                                                 <div className="session-details-field-content">
-                                                    <span className="session-details-label">Email</span>
+                                                    <span className="session-details-label">{t.email}</span>
                                                     <span className="session-details-value">
-                                                        {selectedSession.volunteer.email || 'Non fourni'}
+                                                        {selectedSession.volunteer.email || t.notProvided}
                                                     </span>
                                                 </div>
                                             </div>
@@ -184,23 +250,23 @@ const SessionListPage = () => {
                                                     <FaPhone />
                                                 </div>
                                                 <div className="session-details-field-content">
-                                                    <span className="session-details-label">Téléphone</span>
+                                                    <span className="session-details-label">{t.phone}</span>
                                                     <span className="session-details-value">
-                                                        {selectedSession.volunteer.phoneNumber || 'Non fourni'}
+                                                        {selectedSession.volunteer.phoneNumber || t.notProvided}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
                                     ) : (
                                         <div className="session-details-empty">
-                                            <p>Aucun bénévole assigné</p>
+                                            <p>{t.noVolunteer}</p>
                                         </div>
                                     )}
                                 </div>
 
                                 <button className="session-details-close-btn" onClick={handleCloseModal}>
                                     <FaTimes />
-                                    Fermer
+                                    {t.close}
                                 </button>
                             </div>
                         </div>

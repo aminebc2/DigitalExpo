@@ -1,14 +1,41 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 import AssociationManagement from './AssociationManagement';
 import VolunteerManagement from './VolunteerManagement';
 import VolunteerRequests from './VolunteerRequests';
 import SessionManagement from './SessionManagement';
 import './AdminDashboard.css';
 
+// Translations object
+const translations = {
+    fr: {
+        pageTitle: "Tableau de Bord Admin",
+        backToHome: "Retour à l'Accueil",
+        tabs: {
+            associations: "Associations",
+            volunteers: "Bénévoles",
+            volunteerRequests: "Demandes de Bénévolat",
+            sessions: "Sessions"
+        }
+    },
+    en: {
+        pageTitle: "Admin Dashboard",
+        backToHome: "Back to Home",
+        tabs: {
+            associations: "Associations",
+            volunteers: "Volunteers",
+            volunteerRequests: "Volunteer Requests",
+            sessions: "Sessions"
+        }
+    }
+};
+
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('associations');
     const navigate = useNavigate();
+    const { language } = useLanguage();
+    const t = translations[language];
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -25,48 +52,53 @@ const AdminDashboard = () => {
         }
     };
 
+    const tabs = [
+        {
+            id: 'associations',
+            icon: 'fas fa-building',
+            label: t.tabs.associations
+        },
+        {
+            id: 'volunteers',
+            icon: 'fas fa-users',
+            label: t.tabs.volunteers
+        },
+        {
+            id: 'volunteerRequests',
+            icon: 'fas fa-user-plus',
+            label: t.tabs.volunteerRequests
+        },
+        {
+            id: 'sessions',
+            icon: 'fas fa-calendar-alt',
+            label: t.tabs.sessions
+        }
+    ];
+
     return (
         <div className="admin-dashboard">
             <div className="dashboard-header">
                 <h2>
                     <i className="fas fa-tachometer-alt"></i>
-                    Admin Dashboard
+                    {t.pageTitle}
                 </h2>
                 <button className="back-to-home" onClick={() => navigate('/home')}>
                     <i className="fas fa-home"></i>
-                    Back to Home
+                    {t.backToHome}
                 </button>
             </div>
 
             <div className="dashboard-tabs">
-                <div
-                    className={`tab ${activeTab === 'associations' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('associations')}
-                >
-                    <i className="fas fa-building"></i>
-                    <span>Associations</span>
-                </div>
-                <div
-                    className={`tab ${activeTab === 'volunteers' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('volunteers')}
-                >
-                    <i className="fas fa-users"></i>
-                    <span>Volunteers</span>
-                </div>
-                <div
-                    className={`tab ${activeTab === 'volunteerRequests' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('volunteerRequests')}
-                >
-                    <i className="fas fa-user-plus"></i>
-                    <span>Volunteer Requests</span>
-                </div>
-                <div
-                    className={`tab ${activeTab === 'sessions' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('sessions')}
-                >
-                    <i className="fas fa-calendar-alt"></i>
-                    <span>Sessions</span>
-                </div>
+                {tabs.map(tab => (
+                    <div
+                        key={tab.id}
+                        className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                        onClick={() => setActiveTab(tab.id)}
+                    >
+                        <i className={tab.icon}></i>
+                        <span>{tab.label}</span>
+                    </div>
+                ))}
             </div>
 
             <div className="dashboard-content">

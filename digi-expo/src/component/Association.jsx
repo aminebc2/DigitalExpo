@@ -7,8 +7,37 @@ import {
     FaHeart,
     FaRegHeart
 } from 'react-icons/fa';
+import { useLanguage } from '../context/LanguageContext';
 import GuestService from '../service/GuestService';
 import './Association.css';
+
+// Translations object
+const translations = {
+    fr: {
+        pageTitle: "Découvrir les Associations",
+        pageDescription: "Trouvez et connectez-vous avec des associations qui font la différence dans votre communauté",
+        searchPlaceholder: "Rechercher des associations...",
+        filters: "Filtres",
+        allCities: "Toutes les Villes",
+        sortByName: "Trier par Nom d'Association",
+        sortByCity: "Trier par Ville",
+        noResults: "Aucune association ne correspond à vos critères.",
+        addToFavorites: "Ajouter aux favoris",
+        removeFromFavorites: "Retirer des favoris"
+    },
+    en: {
+        pageTitle: "Discover Associations",
+        pageDescription: "Find and connect with associations making a difference in your community",
+        searchPlaceholder: "Search associations...",
+        filters: "Filters",
+        allCities: "All Cities",
+        sortByName: "Sort by Association Name",
+        sortByCity: "Sort by City",
+        noResults: "No associations found matching your criteria.",
+        addToFavorites: "Add to favorites",
+        removeFromFavorites: "Remove from favorites"
+    }
+};
 
 const Associations = () => {
     const [associations, setAssociations] = useState([]);
@@ -22,8 +51,9 @@ const Associations = () => {
     const [sortBy, setSortBy] = useState('name');
     const [favorites, setFavorites] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
+    const { language } = useLanguage();
+    const t = translations[language];
 
-    // Fetch associations
     useEffect(() => {
         const fetchAssociations = async () => {
             try {
@@ -45,7 +75,6 @@ const Associations = () => {
         fetchAssociations();
     }, []);
 
-    // Load favorites from localStorage
     useEffect(() => {
         const savedFavorites = localStorage.getItem('favoriteAssociations');
         if (savedFavorites) {
@@ -53,7 +82,6 @@ const Associations = () => {
         }
     }, []);
 
-    // Save favorites to localStorage
     const toggleFavorite = (associationId) => {
         const newFavorites = favorites.includes(associationId)
             ? favorites.filter(id => id !== associationId)
@@ -63,7 +91,6 @@ const Associations = () => {
         localStorage.setItem('favoriteAssociations', JSON.stringify(newFavorites));
     };
 
-    // Filter and sort associations
     const filteredAssociations = associations
         .filter(association => {
             const matchesSearch = association.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -83,33 +110,14 @@ const Associations = () => {
             return 0;
         });
 
-    // Get unique cities for filter
     const cities = [...new Set(associations.map(a => a.ville))];
-
-    if (loading) {
-        return (
-            <div className="associations-loading">
-                <div className="loading-spinner"></div>
-                <p>Loading associations...</p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="associations-error">
-                <p>{error}</p>
-                <button onClick={() => window.location.reload()}>Retry</button>
-            </div>
-        );
-    }
 
     return (
         <div className="associations-container">
             {/* Header Section */}
             <header className="associations-header">
-                <h1>Discover Associations</h1>
-                <p>Find and connect with associations making a difference in your community</p>
+                <h1>{t.pageTitle}</h1>
+                <p>{t.pageDescription}</p>
             </header>
 
             {/* Search and Filter Section */}
@@ -118,7 +126,7 @@ const Associations = () => {
                     <FaSearch className="search-icon" />
                     <input
                         type="text"
-                        placeholder="Search associations..."
+                        placeholder={t.searchPlaceholder}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -129,14 +137,14 @@ const Associations = () => {
                         className="filter-toggle"
                         onClick={() => setShowFilters(!showFilters)}
                     >
-                        <FaFilter /> Filters
+                        <FaFilter /> {t.filters}
                     </button>
                     <div className={`filter-dropdown ${showFilters ? 'show' : ''}`}>
                         <select
                             value={filters.city}
                             onChange={(e) => setFilters({...filters, city: e.target.value})}
                         >
-                            <option value="">All Cities</option>
+                            <option value="">{t.allCities}</option>
                             {cities.map(city => (
                                 <option key={city} value={city}>{city}</option>
                             ))}
@@ -145,8 +153,9 @@ const Associations = () => {
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                         >
-                            <option value="name">Sort by Association Name</option>
-o                        </select>
+                            <option value="name">{t.sortByName}</option>
+                            <option value="city">{t.sortByCity}</option>
+                        </select>
                     </div>
                 </div>
             </section>
@@ -155,7 +164,7 @@ o                        </select>
             <section className="associations-grid">
                 {filteredAssociations.length === 0 ? (
                     <div className="no-results">
-                        <p>No associations found matching your criteria.</p>
+                        <p>{t.noResults}</p>
                     </div>
                 ) : (
                     filteredAssociations.map(association => (
@@ -176,7 +185,7 @@ o                        </select>
                                 <button
                                     className="favorite-button"
                                     onClick={() => toggleFavorite(association.id)}
-                                    aria-label={favorites.includes(association.id) ? 'Remove from favorites' : 'Add to favorites'}
+                                    aria-label={favorites.includes(association.id) ? t.removeFromFavorites : t.addToFavorites}
                                 >
                                     {favorites.includes(association.id) ? <FaHeart /> : <FaRegHeart />}
                                 </button>

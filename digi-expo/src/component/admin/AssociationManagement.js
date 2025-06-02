@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
+import { useLanguage } from '../../context/LanguageContext';
 import './AssociationManagement.css';
 import {
     FaPlus,
@@ -21,6 +22,86 @@ import {
     FaCog
 } from 'react-icons/fa';
 
+// Translations object
+const translations = {
+    fr: {
+        addAssociation: "Ajouter une Association",
+        cancel: "Annuler",
+        loading: "Chargement des associations...",
+        networkError: "Erreur réseau ou serveur lors du chargement des associations",
+        deleteConfirm: "Êtes-vous sûr de vouloir supprimer cette association ?",
+        deleteError: "Erreur réseau ou serveur lors de la suppression de l'association",
+        passwordRequired: "Le mot de passe est requis pour créer une nouvelle association.",
+        saveSuccess: "Association enregistrée avec succès !",
+        saveFailed: "Échec de l'enregistrement de l'association",
+        saveError: "Erreur réseau ou serveur lors de l'enregistrement de l'association",
+        saving: "Enregistrement...",
+        noAssociations: "Aucune association trouvée",
+        closeForm: "Fermer le formulaire",
+        form: {
+            username: "Nom d'utilisateur",
+            email: "Email",
+            password: "Mot de passe",
+            newPassword: "Nouveau mot de passe (optionnel)",
+            name: "Nom de l'Association",
+            city: "Ville",
+            responsible: "Responsable",
+            phone: "Numéro de téléphone",
+            uploadImage: "Télécharger une image",
+            update: "Mettre à jour",
+            save: "Enregistrer"
+        },
+        table: {
+            username: "Nom d'utilisateur",
+            email: "Email",
+            name: "Nom",
+            city: "Ville",
+            responsible: "Responsable",
+            phone: "Téléphone",
+            image: "Image",
+            actions: "Actions"
+        }
+    },
+    en: {
+        addAssociation: "Add Association",
+        cancel: "Cancel",
+        loading: "Loading associations...",
+        networkError: "Network or server error while loading associations",
+        deleteConfirm: "Are you sure you want to delete this association?",
+        deleteError: "Network or server error while deleting the association",
+        passwordRequired: "Password is required for creating a new association.",
+        saveSuccess: "Association successfully saved!",
+        saveFailed: "Failed to save association",
+        saveError: "Network or server error while saving the association",
+        saving: "Saving...",
+        noAssociations: "No associations found",
+        closeForm: "Close form",
+        form: {
+            username: "Username",
+            email: "Email",
+            password: "Password",
+            newPassword: "New Password (optional)",
+            name: "Association Name",
+            city: "City",
+            responsible: "Responsible Person",
+            phone: "Phone Number",
+            uploadImage: "Upload Image",
+            update: "Update",
+            save: "Save"
+        },
+        table: {
+            username: "Username",
+            email: "Email",
+            name: "Name",
+            city: "City",
+            responsible: "Responsible",
+            phone: "Phone",
+            image: "Image",
+            actions: "Actions"
+        }
+    }
+};
+
 const AssociationManagement = () => {
     const [associations, setAssociations] = useState([]);
     const [formData, setFormData] = useState(initialFormState());
@@ -30,6 +111,8 @@ const AssociationManagement = () => {
     const [buttonLoading, setButtonLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const { language } = useLanguage();
+    const t = translations[language];
 
     function initialFormState() {
         return {
@@ -56,7 +139,7 @@ const AssociationManagement = () => {
             const response = await AdminService.getAllAssociations();
             setAssociations(response.data || []);
         } catch (err) {
-            setError(err.message || 'Network or server error while loading associations');
+            setError(t.networkError);
         } finally {
             setGlobalLoading(false);
         }
@@ -78,7 +161,7 @@ const AssociationManagement = () => {
             const { imageFile, password, ...otherData } = formData;
 
             if (!editingAssociation && !password) {
-                setError('Password is required for creating a new association.');
+                setError(t.passwordRequired);
                 setButtonLoading(false);
                 return;
             }
@@ -94,7 +177,6 @@ const AssociationManagement = () => {
                 formDataToSend.append('image', imageFile);
             }
 
-
             let response;
             if (editingAssociation) {
                 response = await AdminService.updateAssociation(editingAssociation.id, formDataToSend);
@@ -102,19 +184,18 @@ const AssociationManagement = () => {
                 response = await AdminService.createAssociation(formDataToSend);
             }
 
-
             if (response.statusCode === 200 || response.statusCode === 201) {
-                setSuccessMessage('Association successfully saved!');
+                setSuccessMessage(t.saveSuccess);
                 await fetchAssociations();
                 setShowForm(false);
                 setFormData(initialFormState());
                 setEditingAssociation(null);
             } else {
-                setError(response.message || 'Failed to save association');
+                setError(response.message || t.saveFailed);
             }
         } catch (err) {
             console.error(err);
-            setError('Network or server error while saving the association');
+            setError(t.saveError);
         } finally {
             setButtonLoading(false);
         }
@@ -137,7 +218,7 @@ const AssociationManagement = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this association?')) return;
+        if (!window.confirm(t.deleteConfirm)) return;
 
         setGlobalLoading(true);
         try {
@@ -145,7 +226,7 @@ const AssociationManagement = () => {
             await fetchAssociations();
         } catch (err) {
             console.error(err);
-            setError('Network or server error while deleting the association');
+            setError(t.deleteError);
         } finally {
             setGlobalLoading(false);
         }
@@ -166,19 +247,19 @@ const AssociationManagement = () => {
                     className="association-add-btn"
                     onClick={() => {
                         if (showForm)
-                        handleCancel();
+                            handleCancel();
                         setShowForm(prev => !prev);
                     }}
                 >
                     {showForm ? (
                         <>
                             <FaTimes />
-                            <span>Cancel</span>
+                            <span>{t.cancel}</span>
                         </>
                     ) : (
                         <>
                             <FaPlus />
-                            <span>Add Association</span>
+                            <span>{t.addAssociation}</span>
                         </>
                     )}
                 </button>
@@ -205,7 +286,7 @@ const AssociationManagement = () => {
                             <div className="form-group">
                                 <label>
                                     <FaUser />
-                                    <span>Username</span>
+                                    <span>{t.form.username}</span>
                                 </label>
                                 <div className="input-group">
                                     <input
@@ -222,7 +303,7 @@ const AssociationManagement = () => {
                             <div className="form-group">
                                 <label>
                                     <FaEnvelope />
-                                    <span>Email</span>
+                                    <span>{t.form.email}</span>
                                 </label>
                                 <div className="input-group">
                                     <input
@@ -239,7 +320,7 @@ const AssociationManagement = () => {
                             <div className="form-group">
                                 <label>
                                     <FaLock />
-                                    <span>{editingAssociation ? "New Password (optional)" : "Password"}</span>
+                                    <span>{editingAssociation ? t.form.newPassword : t.form.password}</span>
                                 </label>
                                 <div className="input-group">
                                     <input
@@ -256,7 +337,7 @@ const AssociationManagement = () => {
                             <div className="form-group">
                                 <label>
                                     <FaBuilding />
-                                    <span>Association Name</span>
+                                    <span>{t.form.name}</span>
                                 </label>
                                 <div className="input-group">
                                     <input
@@ -273,7 +354,7 @@ const AssociationManagement = () => {
                             <div className="form-group">
                                 <label>
                                     <FaCity />
-                                    <span>City</span>
+                                    <span>{t.form.city}</span>
                                 </label>
                                 <div className="input-group">
                                     <input
@@ -290,7 +371,7 @@ const AssociationManagement = () => {
                             <div className="form-group">
                                 <label>
                                     <FaUserTie />
-                                    <span>Responsible Person</span>
+                                    <span>{t.form.responsible}</span>
                                 </label>
                                 <div className="input-group">
                                     <input
@@ -307,7 +388,7 @@ const AssociationManagement = () => {
                             <div className="form-group">
                                 <label>
                                     <FaPhone />
-                                    <span>Phone Number</span>
+                                    <span>{t.form.phone}</span>
                                 </label>
                                 <div className="input-group">
                                     <input
@@ -324,7 +405,7 @@ const AssociationManagement = () => {
                             <div className="association-form-group">
                                 <label htmlFor="imageFile">
                                     <FaImage />
-                                    <span>Upload Image</span>
+                                    <span>{t.form.uploadImage}</span>
                                 </label>
                                 <input
                                     type="file"
@@ -342,18 +423,18 @@ const AssociationManagement = () => {
                                 {buttonLoading ? (
                                     <>
                                         <FaSpinner className="fa-spin" />
-                                        <span>Saving...</span>
+                                        <span>{t.saving}</span>
                                     </>
                                 ) : (
                                     <>
                                         <FaSave />
-                                        <span>{editingAssociation ? 'Update' : 'Save'}</span>
+                                        <span>{editingAssociation ? t.form.update : t.form.save}</span>
                                     </>
                                 )}
                             </button>
                             <button type="button" className="association-btn-cancel" onClick={handleCancel}>
                                 <FaTimes />
-                                <span>Close from</span>
+                                <span>{t.closeForm}</span>
                             </button>
                         </div>
                     </form>
@@ -363,7 +444,7 @@ const AssociationManagement = () => {
             {globalLoading ? (
                 <div className="association-loading">
                     <FaSpinner className="fa-spin" />
-                    <p>Loading associations...</p>
+                    <p>{t.loading}</p>
                 </div>
             ) : (
                 <div className="association-table-wrapper">
@@ -371,14 +452,14 @@ const AssociationManagement = () => {
                         <table className="association-table">
                             <thead>
                             <tr>
-                                <th><FaUser className="me-2" />Username</th>
-                                <th><FaEnvelope className="me-2" />Email</th>
-                                <th><FaBuilding className="me-2" />Name</th>
-                                <th><FaCity className="me-2" />City</th>
-                                <th><FaUserTie className="me-2" />Responsible</th>
-                                <th><FaPhone className="me-2" />Phone</th>
-                                <th><FaImage className="me-2" />Image</th>
-                                <th><FaCog className="me-2" />Actions</th>
+                                <th><FaUser className="me-2" />{t.table.username}</th>
+                                <th><FaEnvelope className="me-2" />{t.table.email}</th>
+                                <th><FaBuilding className="me-2" />{t.table.name}</th>
+                                <th><FaCity className="me-2" />{t.table.city}</th>
+                                <th><FaUserTie className="me-2" />{t.table.responsible}</th>
+                                <th><FaPhone className="me-2" />{t.table.phone}</th>
+                                <th><FaImage className="me-2" />{t.table.image}</th>
+                                <th><FaCog className="me-2" />{t.table.actions}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -422,7 +503,7 @@ const AssociationManagement = () => {
                                 <tr>
                                     <td colSpan="8" className="association-empty">
                                         <FaBuilding />
-                                        <p>No associations found</p>
+                                        <p>{t.noAssociations}</p>
                                     </td>
                                 </tr>
                             )}

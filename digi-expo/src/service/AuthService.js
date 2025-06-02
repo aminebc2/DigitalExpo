@@ -16,9 +16,7 @@ api.interceptors.request.use(config => {
 
 export const loginUser = async (loginRequest) => {
     try {
-        console.log('Attempting login with:', loginRequest);
         const response = await api.post(`${API_URL}/login`, loginRequest);
-        console.log('Login response:', response.data);
         return response.data;
     } catch (error) {
         console.error('Login error:', error);

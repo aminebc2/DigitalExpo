@@ -1,7 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import VolunteerService from "../../service/VolunteerService";
 import { FaBuilding, FaEnvelope, FaUserTie, FaPhone, FaHandshake, FaSpinner, FaCheckCircle, FaExclamationTriangle, FaArrowRight } from 'react-icons/fa';
+import { useLanguage } from '../../context/LanguageContext';
 import './AssociationList.css';
+
+// Translations object
+const translations = {
+    fr: {
+        pageTitle: "Associations",
+        loginRequired: "Vous devez être connecté pour rejoindre une association.",
+        missingVolunteerId: "ID du bénévole manquant. Veuillez vous reconnecter.",
+        loadError: "Échec du chargement des associations",
+        networkError: "Erreur réseau ou serveur lors du chargement des associations",
+        requestSuccess: "Demande envoyée avec succès.",
+        requestFailed: "Échec de l'envoi de la demande.",
+        noAssociations: "Aucune association trouvée.",
+        email: "Email",
+        noEmail: "Aucun email fourni",
+        manager: "Responsable",
+        noManager: "Aucun responsable indiqué",
+        phone: "Téléphone",
+        noPhone: "Aucun téléphone fourni",
+        sending: "Envoi en cours...",
+        requestSent: "Demande envoyée",
+        joinAssociation: "Rejoindre l'association"
+    },
+    en: {
+        pageTitle: "Associations",
+        loginRequired: "You must be logged in to join an association.",
+        missingVolunteerId: "Volunteer ID is missing. Please log in again.",
+        loadError: "Failed to load associations",
+        networkError: "Network or server error while loading associations",
+        requestSuccess: "Request sent successfully.",
+        requestFailed: "Failed to send request.",
+        noAssociations: "No associations found.",
+        email: "Email",
+        noEmail: "No email provided",
+        manager: "Manager",
+        noManager: "No manager name provided",
+        phone: "Phone",
+        noPhone: "No phone provided",
+        sending: "Sending...",
+        requestSent: "Request Sent",
+        joinAssociation: "Join Association"
+    }
+};
 
 const AssociationList = () => {
     const [associations, setAssociations] = useState([]);
@@ -9,6 +52,8 @@ const AssociationList = () => {
     const [error, setError] = useState('');
     const [joinedIds, setJoinedIds] = useState([]);
     const [loadingId, setLoadingId] = useState(null);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     const user = JSON.parse(localStorage.getItem("user"));
     const volunteerId = user?.id;
@@ -16,7 +61,7 @@ const AssociationList = () => {
     useEffect(() => {
         const fetchAssociations = async () => {
             if (!volunteerId) {
-                setError('Volunteer ID is missing. Please log in again.');
+                setError(t.missingVolunteerId);
                 return;
             }
             setError('');
@@ -25,20 +70,20 @@ const AssociationList = () => {
                 if (response.status === 200) {
                     setAssociations(response.data.associationList || []);
                 } else {
-                    setError('Failed to load associations');
+                    setError(t.loadError);
                 }
             } catch (err) {
                 console.error(err);
-                setError('Network or server error while loading associations');
+                setError(t.networkError);
             }
         };
 
         fetchAssociations();
-    }, [volunteerId]);
+    }, [volunteerId, t.missingVolunteerId, t.loadError, t.networkError]);
 
     const handleJoinAssociation = async (associationId) => {
         if (!volunteerId) {
-            setError('You must be logged in to join an association.');
+            setError(t.loginRequired);
             return;
         }
         setLoadingId(associationId);
@@ -46,10 +91,10 @@ const AssociationList = () => {
         setError('');
         try {
             const res = await VolunteerService.createRequest(volunteerId, associationId);
-            setMessage(res.message || 'Request sent successfully.');
+            setMessage(res.message || t.requestSuccess);
             setJoinedIds((prev) => [...prev, associationId]);
         } catch (err) {
-            const errMsg = err.response?.data?.message || 'Failed to send request.';
+            const errMsg = err.response?.data?.message || t.requestFailed;
             setError(errMsg);
         } finally {
             setLoadingId(null);
@@ -61,7 +106,7 @@ const AssociationList = () => {
             <div className="associations-content">
                 <h2 className="page-title">
                     <FaBuilding />
-                    <span>Associations</span>
+                    <span>{t.pageTitle}</span>
                 </h2>
 
                 {message && (
@@ -101,22 +146,22 @@ const AssociationList = () => {
                                         <div className="detail-row">
                                             <FaEnvelope className="detail-icon" />
                                             <div className="detail-content">
-                                                <span className="detail-label">Email</span>
-                                                <span className="detail-value">{assoc.email || 'No email provided'}</span>
+                                                <span className="detail-label">{t.email}</span>
+                                                <span className="detail-value">{assoc.email || t.noEmail}</span>
                                             </div>
                                         </div>
                                         <div className="detail-row">
                                             <FaUserTie className="detail-icon" />
                                             <div className="detail-content">
-                                                <span className="detail-label">Manager</span>
-                                                <span className="detail-value">{assoc.responsableName || 'No manager name provided'}</span>
+                                                <span className="detail-label">{t.manager}</span>
+                                                <span className="detail-value">{assoc.responsableName || t.noManager}</span>
                                             </div>
                                         </div>
                                         <div className="detail-row">
                                             <FaPhone className="detail-icon" />
                                             <div className="detail-content">
-                                                <span className="detail-label">Phone</span>
-                                                <span className="detail-value">{assoc.responsablePhone || 'No phone provided'}</span>
+                                                <span className="detail-label">{t.phone}</span>
+                                                <span className="detail-value">{assoc.responsablePhone || t.noPhone}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -129,17 +174,17 @@ const AssociationList = () => {
                                         {loadingId === assoc.id ? (
                                             <>
                                                 <FaSpinner className="spinner" />
-                                                <span>Sending...</span>
+                                                <span>{t.sending}</span>
                                             </>
                                         ) : joinedIds.includes(assoc.id) ? (
                                             <>
                                                 <FaCheckCircle />
-                                                <span>Request Sent</span>
+                                                <span>{t.requestSent}</span>
                                             </>
                                         ) : (
                                             <>
                                                 <FaHandshake />
-                                                <span>Join Association</span>
+                                                <span>{t.joinAssociation}</span>
                                                 <FaArrowRight className="arrow-icon" />
                                             </>
                                         )}
@@ -151,7 +196,7 @@ const AssociationList = () => {
                 ) : (
                     <div className="no-associations">
                         <FaBuilding className="empty-icon" />
-                        <p>No associations found.</p>
+                        <p>{t.noAssociations}</p>
                     </div>
                 )}
             </div>

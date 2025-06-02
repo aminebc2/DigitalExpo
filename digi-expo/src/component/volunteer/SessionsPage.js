@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VolunteerService from '../../service/VolunteerService';
+import { useLanguage } from '../../context/LanguageContext';
 import {
     FaCalendarAlt,
     FaInfoCircle,
@@ -13,12 +14,58 @@ import {
 } from 'react-icons/fa';
 import './SessionPage.css';
 
+// Translations object
+const translations = {
+    fr: {
+        pageTitle: "Mes Sessions Assignées",
+        noSessions: "Aucune session assignée.",
+        viewDetails: "Voir Détails",
+        sessionDetails: "Détails de la session",
+        close: "Fermer",
+        date: "Date",
+        associationInfo: "Information de l'Association",
+        association: "Association",
+        email: "Email",
+        manager: "Responsable",
+        phone: "Téléphone",
+        notAvailable: "N/A",
+        status: {
+            pending: "En attente",
+            confirmed: "Confirmed",
+            cancelled: "Annulé",
+            completed: "Terminé"
+        }
+    },
+    en: {
+        pageTitle: "My Assigned Sessions",
+        noSessions: "No assigned sessions.",
+        viewDetails: "View Details",
+        sessionDetails: "Session Details",
+        close: "Close",
+        date: "Date",
+        associationInfo: "Association Information",
+        association: "Association",
+        email: "Email",
+        manager: "Manager",
+        phone: "Phone",
+        notAvailable: "N/A",
+        status: {
+            pending: "Pending",
+            confirmed: "Confirmed",
+            cancelled: "Cancelled",
+            completed: "Completed"
+        }
+    }
+};
+
 const SessionPage = () => {
     const [sessions, setSessions] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedSession, setSelectedSession] = useState(null);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     const user = JSON.parse(localStorage.getItem("user"));
     const volunteerId = user?.id;
@@ -30,7 +77,12 @@ const SessionPage = () => {
                 const sessionsList = response?.data || [];
 
                 if (Array.isArray(sessionsList)) {
-                    setSessions(sessionsList);
+                    // Translate status for each session
+                    const translatedSessions = sessionsList.map(session => ({
+                        ...session,
+                        status: t.status[session.status?.toLowerCase()] || session.status
+                    }));
+                    setSessions(translatedSessions);
                 } else {
                     console.warn('sessionList is not an array:', sessionsList);
                     setSessions([]);
@@ -46,7 +98,7 @@ const SessionPage = () => {
         if (volunteerId) {
             fetchSessions();
         }
-    }, [volunteerId]);
+    }, [volunteerId, language]); // Add language dependency to update translations when language changes
 
     const handleShowDetails = (session) => {
         setSelectedSession(session);
@@ -79,7 +131,7 @@ const SessionPage = () => {
                 <div className="dashboard-header">
                     <h2 className="dashboard-title">
                         <FaCalendarAlt/>
-                        <span>Mes Sessions Assignées</span>
+                        <span>{t.pageTitle}</span>
                     </h2>
                 </div>
 
@@ -90,12 +142,7 @@ const SessionPage = () => {
                     </div>
                 )}
 
-                {loading ? (
-                    <div className="loading-box">
-                        <FaSpinner className="loading-spinner" />
-                        <p className="loading-text">Chargement des sessions...</p>
-                    </div>
-                ) : sessions.length > 0 ? (
+                {sessions.length > 0 ? (
                     <div className="sessions-layout">
                         {sessions.map((session) => (
                             <div className="session-item" key={session.id}>
@@ -113,7 +160,7 @@ const SessionPage = () => {
                                         className="view-details"
                                         onClick={() => handleShowDetails(session)}
                                     >
-                                        <span>Voir Détails</span>
+                                        <span>{t.viewDetails}</span>
                                         <FaArrowRight />
                                     </button>
                                 </div>
@@ -123,7 +170,7 @@ const SessionPage = () => {
                 ) : (
                     <div className="empty-state">
                         <FaCalendarAlt />
-                        <p>Aucune session assignée.</p>
+                        <p>{t.noSessions}</p>
                     </div>
                 )}
 
@@ -133,7 +180,7 @@ const SessionPage = () => {
                             <div className="detail-header">
                                 <h3 className="detail-title">
                                     <FaCalendarAlt />
-                                    Détails de la session
+                                    {t.sessionDetails}
                                 </h3>
                                 <button className="detail-close" onClick={handleCloseModal}>
                                     <FaTimes />
@@ -147,7 +194,7 @@ const SessionPage = () => {
                                                 <FaCalendarAlt />
                                             </div>
                                             <div className="detail-info">
-                                                <span className="detail-label">Date</span>
+                                                <span className="detail-label">{t.date}</span>
                                                 <span className="detail-value">{selectedSession.date}</span>
                                             </div>
                                         </div>
@@ -160,7 +207,7 @@ const SessionPage = () => {
                                 <div className="detail-section">
                                     <h4 className="association-title">
                                         <FaBuilding />
-                                        Information de l'Association
+                                        {t.associationInfo}
                                     </h4>
                                     <div className="association-grid">
                                         <div className="detail-field">
@@ -168,9 +215,9 @@ const SessionPage = () => {
                                                 <FaBuilding />
                                             </div>
                                             <div className="detail-info">
-                                                <span className="detail-label">Association</span>
+                                                <span className="detail-label">{t.association}</span>
                                                 <span className="detail-value">
-                                                    {selectedSession.association?.name || 'N/A'}
+                                                    {selectedSession.association?.name || t.notAvailable}
                                                 </span>
                                             </div>
                                         </div>
@@ -179,9 +226,9 @@ const SessionPage = () => {
                                                 <FaEnvelope />
                                             </div>
                                             <div className="detail-info">
-                                                <span className="detail-label">Email</span>
+                                                <span className="detail-label">{t.email}</span>
                                                 <span className="detail-value">
-                                                    {selectedSession.association?.email || 'N/A'}
+                                                    {selectedSession.association?.email || t.notAvailable}
                                                 </span>
                                             </div>
                                         </div>
@@ -190,9 +237,9 @@ const SessionPage = () => {
                                                 <FaUserTie />
                                             </div>
                                             <div className="detail-info">
-                                                <span className="detail-label">Responsable</span>
+                                                <span className="detail-label">{t.manager}</span>
                                                 <span className="detail-value">
-                                                    {selectedSession.association?.responsableName || 'N/A'}
+                                                    {selectedSession.association?.responsableName || t.notAvailable}
                                                 </span>
                                             </div>
                                         </div>
@@ -201,9 +248,9 @@ const SessionPage = () => {
                                                 <FaPhone />
                                             </div>
                                             <div className="detail-info">
-                                                <span className="detail-label">Téléphone</span>
+                                                <span className="detail-label">{t.phone}</span>
                                                 <span className="detail-value">
-                                                    {selectedSession.association?.responsablePhone || 'N/A'}
+                                                    {selectedSession.association?.responsablePhone || t.notAvailable}
                                                 </span>
                                             </div>
                                         </div>
@@ -212,7 +259,7 @@ const SessionPage = () => {
 
                                 <button className="detail-action" onClick={handleCloseModal}>
                                     <FaTimes />
-                                    Fermer
+                                    {t.close}
                                 </button>
                             </div>
                         </div>

@@ -361,6 +361,50 @@ public class AdminService implements IAdminService {
     }
 
     @Override
+    @Transactional
+    public Response deleteVolunteerRequest(Long requestId) {
+        try {
+            // Find the request by ID
+            VolunteerRequest request = volunteerRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer request not found"));
+
+            // If the request is APPROVED, we need to remove the volunteer from the association
+            if (request.getStatus() == RequestStatus.APPROVED) {
+                Volunteer volunteer = request.getVolunteer();
+                Association association = request.getAssociation();
+
+                if (volunteer != null && association != null) {
+                    // Remove the association from volunteer's associations
+                    volunteer.getAssociations().remove(association);
+                    volunteerRepository.save(volunteer);
+
+                    // Remove the volunteer from association's volunteers
+                    association.getVolunteers().remove(volunteer);
+                    associationRepository.save(association);
+
+                    // Remove volunteer from any sessions with this association
+                    List<Session> sessions = sessionRepository.findByAssociationIdAndVolunteerId(
+                            association.getId(), volunteer.getId()
+                    );
+                    for (Session session : sessions) {
+                        session.setVolunteer(null);
+                        sessionRepository.save(session);
+                    }
+                }
+            }
+
+            // Delete the request
+            volunteerRequestRepository.delete(request);
+
+            return new Response(200, "Volunteer request deleted successfully", null);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Error deleting volunteer request: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
     public Response confirmSession(Long sessionId, SessionStatus status) {
         try {
             Session session = sessionRepository.findById(sessionId)

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
 import AssignVolunteerToSession from '../admin/AssignVolunteerToSession';
+import { useLanguage } from '../../context/LanguageContext';
 import {
     FaCalendarAlt,
     FaSpinner,
@@ -17,6 +18,124 @@ import {
 } from 'react-icons/fa';
 import './SessionManagement.css';
 
+// Translations object
+const translations = {
+    fr: {
+        loading: "Chargement...",
+        fetchError: "Une erreur s'est produite lors du chargement des sessions",
+        fetchSessionError: "Échec du chargement des détails de la session",
+        updateError: "Une erreur s'est produite lors de la mise à jour de la session",
+        selectStatus: "Veuillez sélectionner un statut",
+        deleteError: "Échec de la suppression de la session. Veuillez vérifier vos autorisations.",
+        noSessions: "Aucune session trouvée",
+        notAvailable: "N/A",
+        table: {
+            date: "Date",
+            association: "Association",
+            volunteer: "Bénévole",
+            status: "Statut",
+            actions: "Actions"
+        },
+        status: {
+            pending: "PENDING",
+            confirmed: "CONFIRMED",
+            canceled: "CANCELED"
+        },
+        statusDisplay: {
+            PENDING: "EN ATTENTE",
+            CONFIRMED: "CONFIRMÉ",
+            CANCELED: "ANNULÉ"
+        },
+        buttons: {
+            edit: "Modifier",
+            assign: "Assigner",
+            delete: "Supprimer",
+            cancel: "Annuler",
+            update: "Mettre à jour",
+            confirm: "Confirmer"
+        },
+        modals: {
+            editStatus: {
+                title: "Modifier le Statut de la Session",
+                label: "Statut",
+                selectPlaceholder: "Sélectionner un Statut",
+                updating: "Mise à jour...",
+                updateStatus: "Mettre à jour le Statut"
+            },
+            assignVolunteer: {
+                title: "Assigner un Bénévole"
+            },
+            deleteSession: {
+                title: "Supprimer la Session",
+                confirmation: "Êtes-vous sûr de vouloir supprimer cette session ? Cette action ne peut pas être annulée.",
+                details: {
+                    date: "Date",
+                    association: "Association",
+                    status: "Statut"
+                },
+                deleting: "Suppression..."
+            }
+        }
+    },
+    en: {
+        loading: "Loading...",
+        fetchError: "An error occurred while fetching sessions",
+        fetchSessionError: "Failed to fetch session details",
+        updateError: "An error occurred while updating the session",
+        selectStatus: "Please select a status",
+        deleteError: "Failed to delete session. Please check your permissions.",
+        noSessions: "No sessions found",
+        notAvailable: "N/A",
+        table: {
+            date: "Date",
+            association: "Association",
+            volunteer: "Volunteer",
+            status: "Status",
+            actions: "Actions"
+        },
+        status: {
+            pending: "PENDING",
+            confirmed: "CONFIRMED",
+            canceled: "CANCELED"
+        },
+        statusDisplay: {
+            PENDING: "PENDING",
+            CONFIRMED: "CONFIRMED",
+            CANCELED: "CANCELED"
+        },
+        buttons: {
+            edit: "Edit",
+            assign: "Assign",
+            delete: "Delete",
+            cancel: "Cancel",
+            update: "Update",
+            confirm: "Confirm"
+        },
+        modals: {
+            editStatus: {
+                title: "Edit Session Status",
+                label: "Status",
+                selectPlaceholder: "Select Status",
+                updating: "Updating...",
+                updateStatus: "Update Status"
+            },
+            assignVolunteer: {
+                title: "Assign Volunteer"
+            },
+            deleteSession: {
+                title: "Delete Session",
+                confirmation: "Are you sure you want to delete this session? This action cannot be undone.",
+                details: {
+                    date: "Date",
+                    association: "Association",
+                    status: "Status"
+                },
+                deleting: "Deleting..."
+            }
+        }
+    }
+};
+
 const SessionManagement = () => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,6 +146,8 @@ const SessionManagement = () => {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     useEffect(() => {
         fetchSessions();
@@ -39,10 +160,10 @@ const SessionManagement = () => {
             if (response.statusCode === 200) {
                 setSessions(response.data);
             } else {
-                setError(response.message || 'Failed to fetch sessions');
+                setError(response.message || t.fetchError);
             }
         } catch (err) {
-            setError('An error occurred while fetching sessions');
+            setError(t.fetchError);
             console.error(err);
         } finally {
             setLoading(false);
@@ -58,7 +179,7 @@ const SessionManagement = () => {
             setUpdatedStatus(session.status);
             setShowStatusModal(true);
         } catch (err) {
-            setError('Failed to fetch session details');
+            setError(t.fetchSessionError);
             console.error(err);
         } finally {
             setLoading(false);
@@ -68,7 +189,7 @@ const SessionManagement = () => {
     const handleUpdateSession = async (e) => {
         e.preventDefault();
         if (!selectedSessionId || !updatedStatus) {
-            setError('Please select a status');
+            setError(t.selectStatus);
             return;
         }
 
@@ -76,7 +197,7 @@ const SessionManagement = () => {
         try {
             const updatedSessionData = {
                 status: updatedStatus,
-                volunteer: (updatedStatus === 'CONFIRMED') ? selectedSession.volunteer : null
+                volunteer: (updatedStatus === t.status.confirmed) ? selectedSession.volunteer : null
             };
 
             await AdminService.updateSession(selectedSessionId, updatedSessionData);
@@ -84,7 +205,7 @@ const SessionManagement = () => {
             setShowStatusModal(false);
             fetchSessions();
         } catch (err) {
-            setError('An error occurred while updating the session');
+            setError(t.updateError);
             console.error(err);
         } finally {
             setLoading(false);
@@ -109,9 +230,9 @@ const SessionManagement = () => {
 
     const getStatusBadgeClass = (status) => {
         switch (status) {
-            case 'CONFIRMED':
+            case t.status.confirmed:
                 return 'status-badge status-badge-confirmed';
-            case 'CANCELED':
+            case t.status.canceled:
                 return 'status-badge status-badge-canceled';
             default:
                 return 'status-badge status-badge-pending';
@@ -120,9 +241,9 @@ const SessionManagement = () => {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case 'CONFIRMED':
+            case t.status.confirmed:
                 return <FaCheck />;
-            case 'CANCELED':
+            case t.status.canceled:
                 return <FaTimes />;
             default:
                 return <FaClock />;
@@ -141,13 +262,13 @@ const SessionManagement = () => {
             if (response.statusCode === 200) {
                 setShowDeleteConfirmModal(false);
                 setSelectedSession(null);
-                await fetchSessions(); // Refresh the sessions list
+                await fetchSessions();
                 setError('');
             } else {
-                setError(response.message || 'Failed to delete session');
+                setError(response.message || t.deleteError);
             }
         } catch (err) {
-            setError(err.message || 'Failed to delete session. Please check your permissions.');
+            setError(err.message || t.deleteError);
             console.error(err);
         } finally {
             setLoading(false);
@@ -163,13 +284,13 @@ const SessionManagement = () => {
         return (
             <div className="session-loading">
                 <div className="spinner" />
+                <p>{t.loading}</p>
             </div>
         );
     }
 
     return (
         <div className="session-management">
-
             {error && (
                 <div className="session-alert session-alert-error">
                     <FaExclamationCircle />
@@ -182,29 +303,29 @@ const SessionManagement = () => {
                     <table className="session-table">
                         <thead>
                         <tr>
-                            <th><FaCalendarAlt className="me-2" />Date</th>
-                            <th><FaBuilding className="me-2" />Association</th>
-                            <th><FaUser className="me-2" />Volunteer</th>
-                            <th><FaClock className="me-2" />Status</th>
-                            <th><FaCog className="me-2" />Actions</th>
+                            <th><FaCalendarAlt className="me-2" />{t.table.date}</th>
+                            <th><FaBuilding className="me-2" />{t.table.association}</th>
+                            <th><FaUser className="me-2" />{t.table.volunteer}</th>
+                            <th><FaClock className="me-2" />{t.table.status}</th>
+                            <th><FaCog className="me-2" />{t.table.actions}</th>
                         </tr>
                         </thead>
                         <tbody>
                         {sessions.length > 0 ? (
                             sessions.map((session) => (
                                 <tr key={session.id}>
-                                    <td>{new Date(session.date).toLocaleDateString()}</td>
-                                    <td>{session.association?.name || 'N/A'}</td>
+                                    <td>{new Date(session.date).toLocaleDateString(language)}</td>
+                                    <td>{session.association?.name || t.notAvailable}</td>
                                     <td>
-                                        {session.status === 'CONFIRMED' && session.volunteer
+                                        {session.status === t.status.confirmed && session.volunteer
                                             ? session.volunteer.username
-                                            : 'N/A'}
+                                            : t.notAvailable}
                                     </td>
                                     <td>
-                                            <span className={getStatusBadgeClass(session.status)}>
-                                                {getStatusIcon(session.status)}
-                                                {session.status}
-                                            </span>
+                                        <span className={getStatusBadgeClass(session.status)}>
+                                            {getStatusIcon(session.status)}
+                                            {t.statusDisplay[session.status]}
+                                        </span>
                                     </td>
                                     <td>
                                         <div className="session-actions">
@@ -213,16 +334,16 @@ const SessionManagement = () => {
                                                 onClick={() => handleSessionClick(session.id)}
                                             >
                                                 <FaEdit/>
-                                                Edit
+                                                {t.buttons.edit}
                                             </button>
 
-                                            {session.status === "CONFIRMED" && (
+                                            {session.status === t.status.confirmed && (
                                                 <button
                                                     className="btn-action btn-assign"
                                                     onClick={() => handleOpenAssignModal(session)}
                                                 >
                                                     <FaUserPlus/>
-                                                    Assign
+                                                    {t.buttons.assign}
                                                 </button>
                                             )}
 
@@ -231,7 +352,7 @@ const SessionManagement = () => {
                                                 onClick={() => handleDeleteClick(session)}
                                             >
                                                 <FaTrash/>
-                                                Delete
+                                                {t.buttons.delete}
                                             </button>
                                         </div>
                                     </td>
@@ -241,7 +362,7 @@ const SessionManagement = () => {
                             <tr>
                                 <td colSpan="5" className="session-empty">
                                     <FaCalendarAlt />
-                                    <p>No sessions found</p>
+                                    <p>{t.noSessions}</p>
                                 </td>
                             </tr>
                         )}
@@ -257,7 +378,7 @@ const SessionManagement = () => {
                         <div className="manage-modal__header">
                             <h5 className="manage-modal__title">
                                 <FaCog className="manage-modal__title-icon" />
-                                Edit Session Status
+                                {t.modals.editStatus.title}
                             </h5>
                             <button className="manage-modal__close" onClick={closeStatusModal}>
                                 <FaTimes />
@@ -266,17 +387,17 @@ const SessionManagement = () => {
                         <form onSubmit={handleUpdateSession}>
                             <div className="manage-modal__content">
                                 <div className="manage-form__group">
-                                    <label className="manage-form__label">Status</label>
+                                    <label className="manage-form__label">{t.modals.editStatus.label}</label>
                                     <select
                                         className="manage-form__select"
                                         value={updatedStatus}
                                         onChange={(e) => setUpdatedStatus(e.target.value)}
                                         required
                                     >
-                                        <option value="">Select Status</option>
-                                        <option value="PENDING">Pending</option>
-                                        <option value="CONFIRMED">Confirmed</option>
-                                        <option value="CANCELED">Canceled</option>
+                                        <option value="">{t.modals.editStatus.selectPlaceholder}</option>
+                                        <option value="PENDING">{t.statusDisplay.PENDING}</option>
+                                        <option value="CONFIRMED">{t.statusDisplay.CONFIRMED}</option>
+                                        <option value="CANCELED">{t.statusDisplay.CANCELED}</option>
                                     </select>
                                 </div>
                             </div>
@@ -287,7 +408,7 @@ const SessionManagement = () => {
                                     onClick={closeStatusModal}
                                 >
                                     <FaTimes className="manage-btn__icon" />
-                                    Cancel
+                                    {t.buttons.cancel}
                                 </button>
                                 <button
                                     type="submit"
@@ -297,12 +418,12 @@ const SessionManagement = () => {
                                     {loading ? (
                                         <>
                                             <FaSpinner className="manage-spinner" />
-                                            <span>Updating...</span>
+                                            <span>{t.modals.editStatus.updating}</span>
                                         </>
                                     ) : (
                                         <>
                                             <FaCheck className="manage-btn__icon" />
-                                            <span>Update Status</span>
+                                            <span>{t.modals.editStatus.updateStatus}</span>
                                         </>
                                     )}
                                 </button>
@@ -319,7 +440,7 @@ const SessionManagement = () => {
                         <div className="manage-modal__header">
                             <h5 className="manage-modal__title">
                                 <FaUserPlus className="manage-modal__title-icon" />
-                                Assign Volunteer
+                                {t.modals.assignVolunteer.title}
                             </h5>
                             <button className="manage-modal__close" onClick={closeAssignModal}>
                                 <FaTimes />
@@ -343,18 +464,18 @@ const SessionManagement = () => {
                         <div className="manage-modal__header">
                             <h5 className="manage-modal__title">
                                 <FaTrash className="manage-modal__title-icon" />
-                                Delete Session
+                                {t.modals.deleteSession.title}
                             </h5>
                             <button className="manage-modal__close" onClick={closeDeleteModal}>
                                 <FaTimes />
                             </button>
                         </div>
                         <div className="manage-modal__content">
-                            <p>Are you sure you want to delete this session? This action cannot be undone.</p>
+                            <p>{t.modals.deleteSession.confirmation}</p>
                             <div className="session-details">
-                                <p><strong>Date:</strong> {new Date(selectedSession.date).toLocaleDateString()}</p>
-                                <p><strong>Association:</strong> {selectedSession.association?.name || 'N/A'}</p>
-                                <p><strong>Status:</strong> {selectedSession.status}</p>
+                                <p><strong>{t.modals.deleteSession.details.date}:</strong> {new Date(selectedSession.date).toLocaleDateString(language)}</p>
+                                <p><strong>{t.modals.deleteSession.details.association}:</strong> {selectedSession.association?.name || t.notAvailable}</p>
+                                <p><strong>{t.modals.deleteSession.details.status}:</strong> {selectedSession.status}</p>
                             </div>
                         </div>
                         <div className="manage-modal__footer">
@@ -364,7 +485,7 @@ const SessionManagement = () => {
                                 onClick={closeDeleteModal}
                             >
                                 <FaTimes className="manage-btn__icon" />
-                                Cancel
+                                {t.buttons.cancel}
                             </button>
                             <button
                                 type="button"
@@ -375,12 +496,12 @@ const SessionManagement = () => {
                                 {loading ? (
                                     <>
                                         <FaSpinner className="manage-spinner" />
-                                        <span>Deleting...</span>
+                                        <span>{t.modals.deleteSession.deleting}</span>
                                     </>
                                 ) : (
                                     <>
                                         <FaTrash className="manage-btn__icon" />
-                                        <span>Delete Session</span>
+                                        <span>{t.buttons.delete}</span>
                                     </>
                                 )}
                             </button>
@@ -393,4 +514,3 @@ const SessionManagement = () => {
 };
 
 export default SessionManagement;
-

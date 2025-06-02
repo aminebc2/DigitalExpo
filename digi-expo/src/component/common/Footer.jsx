@@ -30,19 +30,12 @@ const Footer = () => {
                 </div>
 
                 <div className="footer-bottom">
-                    <div className="social-links">
-                        <a href="#" aria-label="Facebook"><i className="fab fa-facebook"></i></a>
-                        <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="LinkedIn"><i className="fab fa-linkedin"></i></a>
-                        <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
-                        <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
-                    </div>
                     <div className="legal-links">
-                        <a href="/legal">Legal</a>
-                        <span>|</span>
-                        <a href="/privacy">Privacy</a>
-                        <span>|</span>
-                        <a href="/sitemap">Sitemap</a>
+                        <a href="/legal"></a>
+                        <span></span>
+                        <a href="/privacy"></a>
+                        <span></span>
+                        <a href="/sitemap"></a>
                     </div>
                     <div className="copyright">
                         © DXC Technology Company

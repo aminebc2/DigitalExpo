@@ -25,6 +25,7 @@ public interface IAdminService {
     /*Response validateVolunteerRequest(Long requestId);*/
     Response updateRequestStatus(UpdateRequestStatusDTO updateRequestStatusDTO);
     Response getAllRequests();
+    Response deleteVolunteerRequest(Long requestId);
 
 
     // Confirmer une session

@@ -1,7 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import AdminService from "../../service/AdminService";
+import { useLanguage } from '../../context/LanguageContext';
 import { FaSpinner, FaExclamationCircle, FaTimes, FaCheck } from 'react-icons/fa';
 import './AssignVolunteerToSession.css';
+
+// Translations object
+const translations = {
+    fr: {
+        loading: "Chargement...",
+        noAssociation: "Aucun ID d'association fourni",
+        noVolunteers: "Aucun bénévole trouvé pour cette association",
+        loadError: "Échec du chargement des bénévoles",
+        selectVolunteer: "Sélectionner un Bénévole",
+        chooseVolunteer: "Choisir un bénévole",
+        unknownVolunteer: "Bénévole inconnu",
+        pleaseSelect: "Veuillez sélectionner un bénévole",
+        assignError: "Échec de l'attribution du bénévole. Veuillez réessayer.",
+        cancel: "Annuler",
+        assign: "Attribuer",
+        assigning: "Attribution en cours..."
+    },
+    en: {
+        loading: "Loading...",
+        noAssociation: "No association ID provided",
+        noVolunteers: "No volunteers found for this association",
+        loadError: "Failed to load volunteers",
+        selectVolunteer: "Select Volunteer",
+        chooseVolunteer: "Choose a volunteer",
+        unknownVolunteer: "Unknown volunteer",
+        pleaseSelect: "Please select a volunteer",
+        assignError: "Failed to assign volunteer. Please try again.",
+        cancel: "Cancel",
+        assign: "Assign Volunteer",
+        assigning: "Assigning..."
+    }
+};
 
 const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
     const [volunteers, setVolunteers] = useState([]);
@@ -9,10 +42,12 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     useEffect(() => {
         if (!associationId) {
-            setError('No association ID provided');
+            setError(t.noAssociation);
             setLoading(false);
             return;
         }
@@ -30,20 +65,20 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                 if (processedVolunteers.length > 0) {
                     setVolunteers(processedVolunteers);
                 } else {
-                    setError('No volunteers found for this association');
+                    setError(t.noVolunteers);
                 }
             } catch (error) {
-                setError(error.message || 'Failed to load volunteers');
+                setError(error.message || t.loadError);
             }
             setLoading(false);
         };
 
         fetchVolunteers();
-    }, [associationId]);
+    }, [associationId, t.noAssociation, t.noVolunteers, t.loadError]);
 
     const handleAssign = async () => {
         if (!selectedVolunteerId) {
-            setError("Please select a volunteer");
+            setError(t.pleaseSelect);
             return;
         }
 
@@ -52,7 +87,7 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
             await AdminService.assignVolunteerToSession(sessionId, selectedVolunteerId);
             onClose();
         } catch (err) {
-            setError("Failed to assign volunteer. Please try again.");
+            setError(t.assignError);
             console.error('Error assigning volunteer:', err);
         } finally {
             setSubmitting(false);
@@ -63,6 +98,7 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
         return (
             <div className="assign-volunteer__loading">
                 <FaSpinner className="assign-volunteer__spinner" />
+                <span>{t.loading}</span>
             </div>
         );
     }
@@ -77,20 +113,20 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
             )}
 
             <div className="assign-volunteer__form-group">
-                <label className="assign-volunteer__label">Select Volunteer</label>
+                <label className="assign-volunteer__label">{t.selectVolunteer}</label>
                 <select
                     className="assign-volunteer__select"
                     onChange={(e) => setSelectedVolunteerId(e.target.value)}
                     value={selectedVolunteerId}
                     disabled={volunteers.length === 0}
                 >
-                    <option value="">Choose a volunteer</option>
+                    <option value="">{t.chooseVolunteer}</option>
                     {volunteers.map((volunteer, index) => (
                         <option
                             key={`volunteer-${volunteer.id}-${index}`}
                             value={volunteer.id || ''}
                         >
-                            {volunteer.username || 'Unknown volunteer'} (#{index + 1})
+                            {volunteer.username || t.unknownVolunteer} (#{index + 1})
                         </option>
                     ))}
                 </select>
@@ -103,7 +139,7 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                     type="button"
                 >
                     <FaTimes className="manage-btn__icon" />
-                    Cancel
+                    {t.cancel}
                 </button>
                 <button
                     className="manage-btn manage-btn--primary"
@@ -114,12 +150,12 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                     {submitting ? (
                         <>
                             <FaSpinner className="manage-spinner" />
-                            <span>Assigning...</span>
+                            <span>{t.assigning}</span>
                         </>
                     ) : (
                         <>
                             <FaCheck className="manage-btn__icon" />
-                            <span>Assign Volunteer</span>
+                            <span>{t.assign}</span>
                         </>
                     )}
                 </button>

@@ -2,24 +2,88 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import AssociationService from '../../service/AssociationService';
 import { AuthContext } from '../../context/AuthContext';
-import './ReserveSessionsPage.css'
+import { useLanguage } from '../../context/LanguageContext';
+import './ReserveSessionsPage.css';
+
+// Translations object
+const translations = {
+    fr: {
+        pageTitle: "Réserver des Sessions",
+        addDate: "+ Ajouter une autre date",
+        deleteDate: "Supprimer cette date",
+        dateReserved: "Cette date est déjà réservée par une autre association",
+        dateAlreadySelected: "Cette date est déjà sélectionnée. Veuillez en choisir une autre.",
+        missingAssociationId: "Identifiant de l'association manquant.",
+        reservationSuccess: "Sessions réservées avec succès.",
+        reservationError: "Erreur lors de la réservation.",
+        reserving: "Réservation...",
+        reserve: "Réserver",
+        selectedDates: "Dates Sélectionnées",
+        noDatesSelected: "Aucune date sélectionnée",
+        reservedDates: "Dates déjà réservées",
+        alreadyReserved: "Déjà réservée",
+        sessionsExist: "Sessions déjà réservées pour les dates: ",
+        someReserved: "Certaines dates sélectionnées sont déjà réservées. Veuillez les modifier.",
+        byAssociation: "Par: ",
+        dateAlreadyBooked: "Cette date est déjà réservée par {association}"
+    },
+    en: {
+        pageTitle: "Book Sessions",
+        addDate: "+ Add another date",
+        deleteDate: "Delete this date",
+        dateReserved: "This date is already reserved by another association",
+        dateAlreadySelected: "This date is already selected. Please choose another one.",
+        missingAssociationId: "Missing association ID.",
+        reservationSuccess: "Sessions booked successfully.",
+        reservationError: "Error during reservation.",
+        reserving: "Booking...",
+        reserve: "Book",
+        selectedDates: "Selected Dates",
+        noDatesSelected: "No dates selected",
+        reservedDates: "Already Reserved Dates",
+        alreadyReserved: "Already reserved",
+        sessionsExist: "Sessions already exist for dates: ",
+        someReserved: "Some selected dates are already reserved. Please modify them.",
+        byAssociation: "By: ",
+        dateAlreadyBooked: "This date is already booked by {association}"
+    }
+};
 
 const ReserveSessionsPage = () => {
     const { id: associationId } = useParams();
     const { currentUser } = useContext(AuthContext);
+    const { language } = useLanguage();
+    const t = translations[language];
     const [dates, setDates] = useState(['']);
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [reservedDates, setReservedDates] = useState([]);
+    const [globalReservedDates, setGlobalReservedDates] = useState([]);
 
     useEffect(() => {
         if (currentUser?.role === 'ASSOCIATION' && currentUser.id) {
             localStorage.setItem('associationId', currentUser.id);
-            fetchReservedDates();
+            fetchAllReservedDates();
+            fetchAssociationReservedDates();
         }
     }, [currentUser, associationId]);
 
-    const fetchReservedDates = async () => {
+    const fetchAllReservedDates = async () => {
+        try {
+            const response = await AssociationService.getAllReservedSessions();
+            if (response?.sessions) {
+                const reserved = response.sessions.map(session => ({
+                    date: session.date,
+                    associationName: session.associationName
+                }));
+                setGlobalReservedDates(reserved);
+            }
+        } catch (error) {
+            console.error("Failed to fetch global reserved dates:", error);
+        }
+    };
+
+    const fetchAssociationReservedDates = async () => {
         try {
             if (!associationId) return;
 
@@ -29,18 +93,20 @@ const ReserveSessionsPage = () => {
                 setReservedDates(reserved);
             }
         } catch (error) {
-            console.error("Failed to fetch reserved dates:", error);
+            console.error("Failed to fetch association reserved dates:", error);
         }
     };
 
     const handleDateChange = (index, value) => {
-        if (isDateReserved(value)) {
-            setMessage("Cette date est déjà réservée. Veuillez en choisir une autre.");
+        const reservedDate = globalReservedDates.find(reserved => reserved.date === value);
+        if (reservedDate) {
+            const message = t.dateAlreadyBooked.replace('{association}', reservedDate.associationName);
+            setMessage(message);
             return;
         }
 
         if (dates.some((date, i) => i !== index && date === value)) {
-            setMessage("Cette date est déjà sélectionnée. Veuillez en choisir une autre.");
+            setMessage(t.dateAlreadySelected);
             return;
         }
 
@@ -61,7 +127,7 @@ const ReserveSessionsPage = () => {
     const formatDate = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
-        return new Intl.DateTimeFormat('fr-FR', {
+        return new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -69,25 +135,30 @@ const ReserveSessionsPage = () => {
         }).format(date);
     };
 
-    const isDateReserved = (date) => {
-        return reservedDates.includes(date);
+    const isDateGloballyReserved = (date) => {
+        return globalReservedDates.some(reserved => reserved.date === date);
+    };
+
+    const getAssociationForDate = (date) => {
+        const reservation = globalReservedDates.find(reserved => reserved.date === date);
+        return reservation?.associationName || '';
     };
 
     const getDisabledDates = () => {
-        return reservedDates.join(',');
+        return globalReservedDates.map(reserved => reserved.date).join(',');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const hasReservedDates = dates.some(date => isDateReserved(date));
+        const hasReservedDates = dates.some(date => isDateGloballyReserved(date));
         if (hasReservedDates) {
-            setMessage("Certaines dates sélectionnées sont déjà réservées. Veuillez les modifier.");
+            setMessage(t.someReserved);
             return;
         }
 
         if (!associationId) {
-            setMessage("Identifiant de l'association manquant.");
+            setMessage(t.missingAssociationId);
             return;
         }
 
@@ -97,18 +168,20 @@ const ReserveSessionsPage = () => {
             const response = await AssociationService.reserveSessions(associationId, dto);
 
             if (response?.message?.includes('already exist')) {
-                setMessage(response.message.replace("Sessions already exist for dates: ", "Sessions déjà réservées pour les dates: "));
+                setMessage(t.sessionsExist + response.message.split(': ')[1]);
             } else {
-                setMessage('Sessions réservées avec succès.');
+                setMessage(t.reservationSuccess);
                 setDates(['']);
-                fetchReservedDates();
+                // Refresh both global and association-specific dates
+                fetchAllReservedDates();
+                fetchAssociationReservedDates();
             }
         } catch (error) {
             console.error("Reservation failed:", error);
             if (error.response?.message) {
-                setMessage(error.response.message.replace("Sessions already exist for dates: ", "Sessions déjà réservées pour les dates: "));
+                setMessage(t.sessionsExist + error.response.message.split(': ')[1]);
             } else {
-                setMessage('Erreur lors de la réservation.');
+                setMessage(t.reservationError);
             }
         } finally {
             setLoading(false);
@@ -119,14 +192,14 @@ const ReserveSessionsPage = () => {
         <div className="session-booking-page">
             <div className="booking-main">
                 <div className="booking-card">
-                    <h3 className="booking-title">Réserver des Sessions</h3>
+                    <h3 className="booking-title">{t.pageTitle}</h3>
                     <form onSubmit={handleSubmit} className="booking-form">
                         {dates.map((date, index) => (
                             <div key={index} className="date-field">
                                 <div className="date-input-group">
                                     <input
                                         type="date"
-                                        className={`date-picker ${isDateReserved(date) ? 'date-reserved' : ''}`}
+                                        className={`date-picker ${isDateGloballyReserved(date) ? 'date-reserved' : ''}`}
                                         value={date}
                                         onChange={(e) => handleDateChange(index, e.target.value)}
                                         min={new Date().toISOString().split('T')[0]}
@@ -138,62 +211,75 @@ const ReserveSessionsPage = () => {
                                             type="button"
                                             className="delete-date"
                                             onClick={() => removeDateInput(index)}
-                                            title="Supprimer cette date"
+                                            title={t.deleteDate}
                                         >
                                             &times;
                                         </button>
                                     )}
                                 </div>
-                                {isDateReserved(date) && (
-                                    <div className="date-error">Cette date est déjà réservée</div>
+                                {isDateGloballyReserved(date) && (
+                                    <div className="date-error">
+                                        {t.dateReserved}
+                                        <span className="association-name">
+                                            {t.byAssociation} {getAssociationForDate(date)}
+                                        </span>
+                                    </div>
                                 )}
                             </div>
                         ))}
                         <button type="button" className="add-new-date" onClick={addDateInput}>
-                            + Ajouter une autre date
+                            {t.addDate}
                         </button>
                         <button
                             type="submit"
                             className="submit-booking"
-                            disabled={loading || dates.some(date => isDateReserved(date))}
+                            disabled={loading || dates.some(date => isDateGloballyReserved(date))}
                         >
-                            {loading ? 'Réservation...' : 'Réserver'}
+                            {loading ? t.reserving : t.reserve}
                         </button>
                     </form>
-                    {message && <div className={`status-message ${message.includes('déjà') ? 'error' : 'success'}`}>
+                    {message && <div className={`status-message ${message.includes(t.sessionsExist) ? 'error' : 'success'}`}>
                         {message}
                     </div>}
                 </div>
 
                 <div className="preview-section">
-                    <h4 className="preview-title">Dates Sélectionnées</h4>
+                    <h4 className="preview-title">{t.selectedDates}</h4>
                     <div className="dates-list">
                         {dates.map((date, index) => (
                             date && (
-                                <div key={index} className={`date-card ${isDateReserved(date) ? 'date-reserved' : ''}`}>
+                                <div key={index} className={`date-card ${isDateGloballyReserved(date) ? 'date-reserved' : ''}`}>
                                     {formatDate(date)}
-                                    {isDateReserved(date) && (
-                                        <span className="reserved-badge">Déjà réservée</span>
+                                    {isDateGloballyReserved(date) && (
+                                        <div className="reserved-info">
+                                            <span className="reserved-badge">{t.alreadyReserved}</span>
+                                            <span className="association-name">
+                                                {t.byAssociation} {getAssociationForDate(date)}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
                             )
                         ))}
                         {!dates.some(date => date) && (
                             <div className="empty-dates">
-                                Aucune date sélectionnée
+                                {t.noDatesSelected}
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {reservedDates.length > 0 && (
+            {globalReservedDates.length > 0 && (
                 <div className="reserved-dates-section">
-                    <h4>Dates déjà réservées</h4>
+                    <h4>{t.reservedDates}</h4>
                     <div className="reserved-dates-list">
-                        {reservedDates.map((date, index) => (
+                        {globalReservedDates.map((reservation, index) => (
                             <div key={index} className="reserved-date-card">
-                                {formatDate(date)}
+                                {formatDate(reservation.date)}
+                                <div className="association-name">
+                                    {t.byAssociation} {reservation.associationName}
+                                </div>
                             </div>
                         ))}
                     </div>

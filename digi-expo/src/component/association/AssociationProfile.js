@@ -1,7 +1,70 @@
 import React, { useEffect, useState } from "react";
 import AssociationService from "../../service/AssociationService";
 import { FaUser, FaEnvelope, FaBuilding, FaCity, FaUserTie, FaPhone, FaCamera, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import { useLanguage } from '../../context/LanguageContext';
 import "./AssociationProfile.css";
+
+// Translations object
+const translations = {
+    fr: {
+        pageTitle: "Profil de l'Association",
+        loading: "Chargement du profil...",
+        error: "Une erreur s'est produite lors du chargement des données.",
+        noData: "Aucune donnée disponible.",
+        editProfile: "Modifier le Profil",
+        changePhoto: "Changer la Photo",
+        saveChanges: "Enregistrer",
+        cancel: "Annuler",
+        updateFailed: "La mise à jour a échoué",
+        updateSucceededNoData: "Mise à jour réussie mais aucune donnée retournée.",
+        notProvided: "Non fourni",
+        fields: {
+            username: "Nom d'utilisateur",
+            email: "Email",
+            name: "Nom",
+            ville: "Ville",
+            responsableName: "Nom du Responsable",
+            responsablePhone: "Téléphone du Responsable"
+        },
+        placeholders: {
+            username: "Entrez le nom d'utilisateur",
+            email: "Entrez l'email",
+            name: "Entrez le nom",
+            ville: "Entrez la ville",
+            responsableName: "Entrez le nom du responsable",
+            responsablePhone: "Entrez le téléphone du responsable"
+        }
+    },
+    en: {
+        pageTitle: "Association Profile",
+        loading: "Loading profile...",
+        error: "An error occurred while fetching data.",
+        noData: "No data available.",
+        editProfile: "Edit Profile",
+        changePhoto: "Change Photo",
+        saveChanges: "Save Changes",
+        cancel: "Cancel",
+        updateFailed: "Update failed",
+        updateSucceededNoData: "Update succeeded but no data returned.",
+        notProvided: "Not provided",
+        fields: {
+            username: "Username",
+            email: "Email",
+            name: "Name",
+            ville: "City",
+            responsableName: "Manager Name",
+            responsablePhone: "Manager Phone"
+        },
+        placeholders: {
+            username: "Enter username",
+            email: "Enter email",
+            name: "Enter name",
+            ville: "Enter city",
+            responsableName: "Enter manager name",
+            responsablePhone: "Enter manager phone"
+        }
+    }
+};
 
 function AssociationProfile() {
     const [association, setAssociation] = useState(null);
@@ -18,6 +81,8 @@ function AssociationProfile() {
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     const user = JSON.parse(localStorage.getItem("user"));
     const associationId = user?.id;
@@ -33,10 +98,10 @@ function AssociationProfile() {
                         setImagePreview(`http://localhost:8080/images/${response.association.imageFileName}`);
                     }
                 } else {
-                    setError(response.message || "Failed to load data");
+                    setError(response.message || t.error);
                 }
             } catch (err) {
-                setError("An error occurred while fetching data.");
+                setError(t.error);
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -46,7 +111,7 @@ function AssociationProfile() {
         if (associationId) {
             fetchData();
         }
-    }, [associationId]);
+    }, [associationId, t.error]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -88,18 +153,18 @@ function AssociationProfile() {
                 setEditMode(false);
                 setError(null);
             } else {
-                setError("Update succeeded but no data returned.");
+                setError(t.updateSucceededNoData);
             }
         } catch (err) {
             console.error(err);
-            setError("Update failed");
+            setError(t.updateFailed);
         }
     };
 
     if (loading) return (
         <div className="association-loading">
             <div className="spinner"></div>
-            <p>Loading profile...</p>
+            <p>{t.loading}</p>
         </div>
     );
 
@@ -113,17 +178,17 @@ function AssociationProfile() {
     if (!association) return (
         <div className="association-empty">
             <FaBuilding size={48} />
-            <p>No data available.</p>
+            <p>{t.noData}</p>
         </div>
     );
 
     const fields = [
-        { name: 'username', icon: <FaUser />, label: 'Username' },
-        { name: 'email', icon: <FaEnvelope />, label: 'Email' },
-        { name: 'name', icon: <FaBuilding />, label: 'Name' },
-        { name: 'ville', icon: <FaCity />, label: 'City' },
-        { name: 'responsableName', icon: <FaUserTie />, label: 'Manager Name' },
-        { name: 'responsablePhone', icon: <FaPhone />, label: 'Manager Phone' },
+        { name: 'username', icon: <FaUser />, label: t.fields.username },
+        { name: 'email', icon: <FaEnvelope />, label: t.fields.email },
+        { name: 'name', icon: <FaBuilding />, label: t.fields.name },
+        { name: 'ville', icon: <FaCity />, label: t.fields.ville },
+        { name: 'responsableName', icon: <FaUserTie />, label: t.fields.responsableName },
+        { name: 'responsablePhone', icon: <FaPhone />, label: t.fields.responsablePhone },
     ];
 
     return (
@@ -131,12 +196,12 @@ function AssociationProfile() {
             <div className="association-header">
                 <h2>
                     <FaBuilding />
-                    Association Profile
+                    {t.pageTitle}
                 </h2>
                 {!editMode && (
                     <button className="edit-button" onClick={() => setEditMode(true)}>
                         <FaEdit />
-                        Edit Profile
+                        {t.editProfile}
                     </button>
                 )}
             </div>
@@ -154,7 +219,7 @@ function AssociationProfile() {
                         {editMode && (
                             <label className="image-upload-label" htmlFor="imageFile">
                                 <FaCamera />
-                                <span>Change Photo</span>
+                                <span>{t.changePhoto}</span>
                                 <input
                                     type="file"
                                     id="imageFile"
@@ -181,7 +246,7 @@ function AssociationProfile() {
                                         name={name}
                                         value={formData[name] || ""}
                                         onChange={handleChange}
-                                        placeholder={`Enter ${label.toLowerCase()}`}
+                                        placeholder={t.placeholders[name]}
                                     />
                                 </div>
                             ))}
@@ -189,7 +254,7 @@ function AssociationProfile() {
                             <div className="form-actions">
                                 <button className="save-button" onClick={handleSave}>
                                     <FaSave />
-                                    Save Changes
+                                    {t.saveChanges}
                                 </button>
                                 <button className="cancel-button" onClick={() => {
                                     setEditMode(false);
@@ -198,7 +263,7 @@ function AssociationProfile() {
                                         `http://localhost:8080/images/${association.imageFileName}` : null);
                                 }}>
                                     <FaTimes />
-                                    Cancel
+                                    {t.cancel}
                                 </button>
                             </div>
                         </div>
@@ -208,7 +273,7 @@ function AssociationProfile() {
                                 <div key={name} className="info-item">
                                     <span className="info-icon">{icon}</span>
                                     <span className="info-label">{label}:</span>
-                                    <span className="info-value">{association[name] || 'Not provided'}</span>
+                                    <span className="info-value">{association[name] || t.notProvided}</span>
                                 </div>
                             ))}
                         </div>

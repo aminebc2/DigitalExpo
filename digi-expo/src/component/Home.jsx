@@ -6,14 +6,45 @@ import {
     FaHandsHelping,
     FaHeart, FaPhone,
 } from 'react-icons/fa';
+import { useLanguage } from '../context/LanguageContext';
 import GuestService from '../service/GuestService';
 import './HomePage.css';
+
+// Translations object
+const translations = {
+    fr: {
+        welcome: "Bienvenue à Digital Explorers",
+        connectingCommunities: "Connecter les Communautés par le Service",
+        platformDescription: "Notre plateforme réunit associations et bénévoles, créant des liens significatifs et des changements positifs dans les communautés. Nous facilitons la gestion des activités pour les associations et permettons aux bénévoles de trouver des opportunités pour faire la différence.",
+        easyCoordination: "Coordination Facile",
+        coordinationDesc: "Gestion simplifiée des sessions et affectation des bénévoles",
+        communityImpact: "Impact Communautaire",
+        impactDesc: "Faites une réelle différence dans votre communauté locale",
+        featuredAssociations: "Associations en Vedette",
+        city: "Ville",
+        phone: "Téléphone"
+    },
+    en: {
+        welcome: "Welcome to Digital Explorers",
+        connectingCommunities: "Connecting Communities Through Service",
+        platformDescription: "Our platform brings together associations and volunteers, creating meaningful connections and positive change in communities. We make it easy for associations to manage their activities and for volunteers to find opportunities to make a difference.",
+        easyCoordination: "Easy Coordination",
+        coordinationDesc: "Streamlined session management and volunteer assignment",
+        communityImpact: "Community Impact",
+        impactDesc: "Make a real difference in your local community",
+        featuredAssociations: "Featured Associations",
+        city: "City",
+        phone: "Phone"
+    }
+};
 
 const HomePage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentSlide, setCurrentSlide] = useState(0);
     const [associations, setAssociations] = useState([]);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     const platformImages = [
         '/images/1.jpg',
@@ -26,15 +57,12 @@ const HomePage = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                // Fetch all associations
                 const response = await GuestService.getAllAssociations();
                 if (response.statusCode === 200) {
                     setAssociations(response.associations || []);
                 } else {
                     setError(response.message || "Failed to load associations");
                 }
-
-
                 setError(null);
             } catch (err) {
                 setError("Failed to load data");
@@ -54,49 +82,30 @@ const HomePage = () => {
         setCurrentSlide((prev) => (prev - 1 + associations.length) % associations.length);
     };
 
-    // Auto-advance slideshow
     useEffect(() => {
-        const timer = setInterval(nextSlide, 5000); // Change slide every 5 seconds
+        const timer = setInterval(nextSlide, 5000);
         return () => clearInterval(timer);
     }, [associations.length]);
-
-    if (loading) {
-        return (
-            <div className="home-loading">
-                <div className="spinner"></div>
-                <p>Loading content...</p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="home-error">
-                <p>{error}</p>
-                <button onClick={() => window.location.reload()}>Retry</button>
-            </div>
-        );
-    }
 
     return (
         <div className="home-container">
             {/* Platform Description Section */}
             <section className="platform-description">
-                <h1>Welcome to Digital Explorers</h1>
+                <h1>{t.welcome}</h1>
                 <div className="description-content">
                     <div className="description-text">
-                        <h2>Connecting Communities Through Service</h2>
-                        <p>Our platform brings together associations and volunteers, creating meaningful connections and positive change in communities. We make it easy for associations to manage their activities and for volunteers to find opportunities to make a difference.</p>
+                        <h2>{t.connectingCommunities}</h2>
+                        <p>{t.platformDescription}</p>
                         <div className="key-features">
                             <div className="feature">
                                 <FaHandsHelping />
-                                <h3>Easy Coordination</h3>
-                                <p>Streamlined session management and volunteer assignment</p>
+                                <h3>{t.easyCoordination}</h3>
+                                <p>{t.coordinationDesc}</p>
                             </div>
                             <div className="feature">
                                 <FaHeart />
-                                <h3>Community Impact</h3>
-                                <p>Make a real difference in your local community</p>
+                                <h3>{t.communityImpact}</h3>
+                                <p>{t.impactDesc}</p>
                             </div>
                         </div>
                     </div>
@@ -115,7 +124,7 @@ const HomePage = () => {
 
             {/* Associations Slideshow */}
             <section className="associations-slideshow">
-                <h2>Featured Associations</h2>
+                <h2>{t.featuredAssociations}</h2>
                 <div className="slideshow-container">
                     <button className="slide-arrow prev" onClick={prevSlide}>
                         <FaArrowLeft />
@@ -126,11 +135,8 @@ const HomePage = () => {
                                 <div className="association-image-container">
                                     {(() => {
                                         const imageFileName = associations[currentSlide].imageFileName;
-
-                                        // Check if we need to add file extension
                                         const imageUrl = imageFileName
                                             ? `http://localhost:8080/images/${imageFileName}`: null
-
 
                                         return (
                                             <img
@@ -138,10 +144,8 @@ const HomePage = () => {
                                                 alt={associations[currentSlide].name}
                                                 className="association-image"
                                                 onError={(e) => {
-                                                    // Try fallback to direct file path
                                                     if (!e.target.src.includes('/images/default-association.jpg')) {
                                                         e.target.src = `http://localhost:8080/images/${imageFileName}`;
-                                                        // If fallback also fails, use default image
                                                         e.target.onerror = (e2) => {
                                                             e2.target.onerror = null;
                                                         };
@@ -163,10 +167,10 @@ const HomePage = () => {
                                 <div className="association-info">
                                     <h3>{associations[currentSlide].name}</h3>
                                     <p className="association-location">
-                                        <FaBuilding /> {associations[currentSlide].ville}
+                                        <FaBuilding /> {t.city}: {associations[currentSlide].ville}
                                     </p>
                                     <p className="association-phone">
-                                        <FaPhone/> {associations[currentSlide].responsablePhone}
+                                        <FaPhone/> {t.phone}: {associations[currentSlide].responsablePhone}
                                     </p>
                                 </div>
                             </div>
@@ -186,7 +190,6 @@ const HomePage = () => {
                     </div>
                 </div>
             </section>
-
         </div>
     );
 };

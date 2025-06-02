@@ -1,7 +1,64 @@
 import React, { useEffect, useState } from "react";
 import VolunteerService from "../../service/VolunteerService";
+import { useLanguage } from '../../context/LanguageContext';
 import { FaUser, FaEnvelope, FaPhone, FaCalendarAlt, FaSpinner, FaInfoCircle, FaPen, FaSave, FaTimes } from 'react-icons/fa';
 import "./VolunteerProfile.css";
+
+// Translations object
+const translations = {
+    fr: {
+        pageTitle: "Mon Profil",
+        loading: "Chargement du profil...",
+        error: "Une erreur s'est produite lors du chargement des données.",
+        noProfile: "Aucune donnée de profil disponible.",
+        username: "Nom d'utilisateur",
+        email: "Email",
+        phone: "Téléphone",
+        notSpecified: "Non renseigné",
+        availableDays: "Jours disponibles",
+        noDaysSelected: "Aucun jour sélectionné",
+        edit: "Modifier",
+        save: "Enregistrer",
+        cancel: "Annuler",
+        updateFailed: "Échec de la mise à jour : ",
+        updateError: "Échec de la mise à jour du profil",
+        days: {
+            MONDAY: "LUNDI",
+            TUESDAY: "MARDI",
+            WEDNESDAY: "MERCREDI",
+            THURSDAY: "JEUDI",
+            FRIDAY: "VENDREDI",
+            SATURDAY: "SAMEDI",
+            SUNDAY: "DIMANCHE"
+        }
+    },
+    en: {
+        pageTitle: "My Profile",
+        loading: "Loading profile...",
+        error: "An error occurred while fetching data.",
+        noProfile: "No profile data available.",
+        username: "Username",
+        email: "Email",
+        phone: "Phone",
+        notSpecified: "Not specified",
+        availableDays: "Available Days",
+        noDaysSelected: "No days selected",
+        edit: "Edit",
+        save: "Save",
+        cancel: "Cancel",
+        updateFailed: "Update failed: ",
+        updateError: "Failed to update profile",
+        days: {
+            MONDAY: "MONDAY",
+            TUESDAY: "TUESDAY",
+            WEDNESDAY: "WEDNESDAY",
+            THURSDAY: "THURSDAY",
+            FRIDAY: "FRIDAY",
+            SATURDAY: "SATURDAY",
+            SUNDAY: "SUNDAY"
+        }
+    }
+};
 
 function VolunteerProfile() {
     const [volunteer, setVolunteer] = useState(null);
@@ -9,6 +66,8 @@ function VolunteerProfile() {
     const [error, setError] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [saveLoading, setSaveLoading] = useState(false);
+    const { language } = useLanguage();
+    const t = translations[language];
 
     const availableDaysOptions = [
         "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY",
@@ -46,10 +105,10 @@ function VolunteerProfile() {
                     setVolunteer(volunteerData);
                     setFormData(volunteerData);
                 } else {
-                    setError(response.message || "Failed to load data");
+                    setError(response.message || t.updateFailed);
                 }
             } catch (err) {
-                setError("An error occurred while fetching data.");
+                setError(t.error);
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -59,7 +118,7 @@ function VolunteerProfile() {
         if (volunteerId) {
             fetchData();
         }
-    }, [volunteerId]);
+    }, [volunteerId, t.error, t.updateFailed]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -74,11 +133,11 @@ function VolunteerProfile() {
                 setVolunteer(response.data);
                 setEditMode(false);
             } else {
-                setError("Update failed: " + response.message);
+                setError(t.updateFailed + response.message);
             }
         } catch (error) {
             console.error("Update error:", error);
-            setError("Failed to update profile");
+            setError(t.updateError);
         } finally {
             setSaveLoading(false);
         }
@@ -99,7 +158,7 @@ function VolunteerProfile() {
             <div className="volunteer-profile-page">
                 <div className="loading-state">
                     <FaSpinner className="spinner" />
-                    <p>Loading profile...</p>
+                    <p>{t.loading}</p>
                 </div>
             </div>
         );
@@ -121,7 +180,7 @@ function VolunteerProfile() {
             <div className="volunteer-profile-page">
                 <div className="alert error">
                     <FaInfoCircle />
-                    <span>No profile data available.</span>
+                    <span>{t.noProfile}</span>
                 </div>
             </div>
         );
@@ -132,7 +191,7 @@ function VolunteerProfile() {
             <div className="profile-content">
                 <h2 className="page-title">
                     <FaUser />
-                    <span>Mon Profil</span>
+                    <span>{t.pageTitle}</span>
                 </h2>
 
                 <div className="profile-card">
@@ -146,7 +205,7 @@ function VolunteerProfile() {
                                         name="username"
                                         value={formData.username || ""}
                                         onChange={handleChange}
-                                        placeholder="Nom d'utilisateur"
+                                        placeholder={t.username}
                                         className="form-input"
                                     />
                                 </div>
@@ -160,7 +219,7 @@ function VolunteerProfile() {
                                         name="email"
                                         value={formData.email || ""}
                                         onChange={handleChange}
-                                        placeholder="Email"
+                                        placeholder={t.email}
                                         className="form-input"
                                     />
                                 </div>
@@ -174,7 +233,7 @@ function VolunteerProfile() {
                                         name="phoneNumber"
                                         value={formData.phoneNumber || ""}
                                         onChange={handleChange}
-                                        placeholder="Numéro de téléphone"
+                                        placeholder={t.phone}
                                         className="form-input"
                                     />
                                 </div>
@@ -183,7 +242,7 @@ function VolunteerProfile() {
                             <div className="form-group">
                                 <label className="days-label">
                                     <FaCalendarAlt className="input-icon" />
-                                    <span>Jours disponibles</span>
+                                    <span>{t.availableDays}</span>
                                 </label>
                                 <div className="days-grid">
                                     {availableDaysOptions.map((day) => (
@@ -194,7 +253,7 @@ function VolunteerProfile() {
                                                 checked={formData.availableDays?.includes(day) || false}
                                                 onChange={(e) => handleAvailableDaysChange(day, e.target.checked)}
                                             />
-                                            <span className="day-label">{day}</span>
+                                            <span className="day-label">{t.days[day]}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -211,7 +270,7 @@ function VolunteerProfile() {
                                     ) : (
                                         <>
                                             <FaSave />
-                                            <span>Enregistrer</span>
+                                            <span>{t.save}</span>
                                         </>
                                     )}
                                 </button>
@@ -221,7 +280,7 @@ function VolunteerProfile() {
                                     disabled={saveLoading}
                                 >
                                     <FaTimes />
-                                    <span>Annuler</span>
+                                    <span>{t.cancel}</span>
                                 </button>
                             </div>
                         </div>
@@ -230,7 +289,7 @@ function VolunteerProfile() {
                             <div className="info-group">
                                 <FaUser className="info-icon" />
                                 <div className="info-content">
-                                    <span className="info-label">Nom d'utilisateur</span>
+                                    <span className="info-label">{t.username}</span>
                                     <span className="info-value">{volunteer.username}</span>
                                 </div>
                             </div>
@@ -238,7 +297,7 @@ function VolunteerProfile() {
                             <div className="info-group">
                                 <FaEnvelope className="info-icon" />
                                 <div className="info-content">
-                                    <span className="info-label">Email</span>
+                                    <span className="info-label">{t.email}</span>
                                     <span className="info-value">{volunteer.email}</span>
                                 </div>
                             </div>
@@ -246,22 +305,22 @@ function VolunteerProfile() {
                             <div className="info-group">
                                 <FaPhone className="info-icon" />
                                 <div className="info-content">
-                                    <span className="info-label">Téléphone</span>
-                                    <span className="info-value">{volunteer.phoneNumber || 'Non renseigné'}</span>
+                                    <span className="info-label">{t.phone}</span>
+                                    <span className="info-value">{volunteer.phoneNumber || t.notSpecified}</span>
                                 </div>
                             </div>
 
                             <div className="info-group">
                                 <FaCalendarAlt className="info-icon" />
                                 <div className="info-content">
-                                    <span className="info-label">Jours disponibles</span>
+                                    <span className="info-label">{t.availableDays}</span>
                                     <div className="days-badges">
                                         {volunteer.availableDays?.length > 0 ? (
                                             volunteer.availableDays.map(day => (
-                                                <span key={day} className="day-badge">{day}</span>
+                                                <span key={day} className="day-badge">{t.days[day]}</span>
                                             ))
                                         ) : (
-                                            <span className="no-days">Aucun jour sélectionné</span>
+                                            <span className="no-days">{t.noDaysSelected}</span>
                                         )}
                                     </div>
                                 </div>
@@ -269,7 +328,7 @@ function VolunteerProfile() {
 
                             <button onClick={() => setEditMode(true)} className="btn-edit">
                                 <FaPen />
-                                <span>Modifier</span>
+                                <span>{t.edit}</span>
                             </button>
                         </div>
                     )}

@@ -117,6 +117,12 @@ public class AdminController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @DeleteMapping("/volunteer-request/{requestId}")
+    public ResponseEntity<Response> deleteVolunteerRequest(@PathVariable Long requestId) {
+        Response response = adminService.deleteVolunteerRequest(requestId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     //---------------- Session ---------------------------//
 
     // ✅ Update a session (Admin only)

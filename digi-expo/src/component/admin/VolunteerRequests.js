@@ -9,7 +9,8 @@ import {
     FaUser,
     FaBuilding,
     FaClock,
-    FaCog
+    FaCog,
+    FaTrash
 } from 'react-icons/fa';
 import './VolunteerRequests.css';
 
@@ -52,6 +53,33 @@ const VolunteerRequests = () => {
         } catch (err) {
             console.error('Error occurred while updating request status:', err);
             setError('An error occurred while updating the request status');
+        } finally {
+            setActionInProgress(false);
+        }
+    };
+
+    const handleDeleteRequest = async (requestId) => {
+        if (!window.confirm('Are you sure you want to delete this request? This action cannot be undone.')) {
+            return;
+        }
+
+        setActionInProgress(true);
+        try {
+            const response = await AdminService.deleteVolunteerRequest(requestId);
+            if (response.statusCode === 200) {
+                await fetchVolunteerRequests();
+                setError(''); // Clear any existing errors
+            } else {
+                setError(response.message || 'Failed to delete volunteer request');
+            }
+        } catch (err) {
+            console.error('Error occurred while deleting request:', err);
+            setError(err.message || 'An error occurred while deleting the request. Please check your permissions.');
+
+            // If it's a 403 error, you might want to handle it specially
+            if (err.response?.status === 403) {
+                setError('You do not have permission to delete volunteer requests');
+            }
         } finally {
             setActionInProgress(false);
         }
@@ -121,44 +149,54 @@ const VolunteerRequests = () => {
                                             </span>
                                     </td>
                                     <td>
-                                        {request.status === 'PENDING' ? (
-                                            <div className="action-buttons">
-                                                <button
-                                                    className="btn-action btn-approve"
-                                                    onClick={() => handleUpdateStatus(request.id, 'APPROVED')}
+                                        <div className="action-buttons">
+                                            {request.status === 'PENDING' ? (
+                                                <>
+                                                    <button
+                                                        className="btn-action btn-approve"
+                                                        onClick={() => handleUpdateStatus(request.id, 'APPROVED')}
+                                                        disabled={actionInProgress}
+                                                    >
+                                                        <FaCheck/>
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        className="btn-action btn-reject"
+                                                        onClick={() => handleUpdateStatus(request.id, 'REJECTED')}
+                                                        disabled={actionInProgress}
+                                                    >
+                                                        <FaTimes/>
+                                                        Reject
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <select
+                                                    className="status-select"
+                                                    onChange={(e) => handleUpdateStatus(request.id, e.target.value)}
+                                                    value={request.status}
                                                     disabled={actionInProgress}
                                                 >
-                                                    <FaCheck />
-                                                    Approve
-                                                </button>
-                                                <button
-                                                    className="btn-action btn-reject"
-                                                    onClick={() => handleUpdateStatus(request.id, 'REJECTED')}
-                                                    disabled={actionInProgress}
-                                                >
-                                                    <FaTimes />
-                                                    Reject
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <select
-                                                className="status-select"
-                                                onChange={(e) => handleUpdateStatus(request.id, e.target.value)}
-                                                value={request.status}
+                                                    <option value="PENDING">Pending</option>
+                                                    <option value="APPROVED">Approved</option>
+                                                    <option value="REJECTED">Rejected</option>
+                                                </select>
+                                            )}
+                                            <button
+                                                className="btn-action btn-delete"
+                                                onClick={() => handleDeleteRequest(request.id)}
                                                 disabled={actionInProgress}
                                             >
-                                                <option value="PENDING">Pending</option>
-                                                <option value="APPROVED">Approved</option>
-                                                <option value="REJECTED">Rejected</option>
-                                            </select>
-                                        )}
+                                                <FaTrash/>
+                                                Delete
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
                                 <td colSpan="4" className="volunteer-requests-empty">
-                                    <FaUserClock />
+                                    <FaUserClock/>
                                     <p>No volunteer requests found</p>
                                 </td>
                             </tr>

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route, BrowserRouter} from 'react-router-dom';
 import Login from './component/Login';
 import Register from './component/Register';
 import Navbar from './component/Navbar';
@@ -19,20 +19,21 @@ import AssociationList from "./component/volunteer/AssociationList";
 import AssociationProfile from "./component/association/AssociationProfile";
 import VolunteerProfile from "./component/volunteer/VolunteerProfile";
 import Associations from "./component/Association";
+import {LanguageProvider} from "./context/LanguageContext";
 
 function App() {
     return (
-        <AuthProvider>
-            <Router>
-                <div className="app">
-                    <Navbar />
-                    <div className="container mt-4">
+        <BrowserRouter>
+            <AuthProvider>
+                <LanguageProvider>
+                    <div className="App">
+                        <Navbar />
                         <AppRoutes />
                     </div>
-                    <Footer />
-                </div>
-            </Router>
-        </AuthProvider>
+                    <Footer/>
+                </LanguageProvider>
+            </AuthProvider>
+        </BrowserRouter>
     );
 }
 
