@@ -360,6 +360,54 @@
     font-size: 1.1rem;
 }
 
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.manage-btn--danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.manage-btn--danger:hover {
+    background-color: #c82333;
+}
+
+.session-details {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.session-details p {
+    margin: 0.5rem 0;
+}
+
+.session-alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.session-alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.session-alert svg {
+    font-size: 1.2rem;
+}
+
 /* Modal Animations */
 @keyframes sessionModalFadeIn {
     from {

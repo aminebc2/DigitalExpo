@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -127,15 +128,40 @@ public class AdminService implements IAdminService {
 
 
     @Override
+    @Transactional
     public Response deleteAssociation(Long associationId) {
         try {
-            if (!associationRepository.existsById(associationId)) {
-                throw new RuntimeException("Association not found");
+            Association association = associationRepository.findById(associationId)
+                    .orElseThrow(() -> new RuntimeException("Association not found"));
+
+            // Remove all sessions related to this association
+            List<Session> sessions = sessionRepository.findByAssociationId(associationId);
+            for (Session session : sessions) {
+                session.setVolunteer(null); // Remove volunteer reference first
+                sessionRepository.delete(session);
             }
-            associationRepository.deleteById(associationId);
+
+            // Remove all volunteer requests for this association
+            volunteerRequestRepository.deleteByAssociationId(associationId);
+
+            // Remove association from all volunteers' associations list
+            for (Volunteer volunteer : association.getVolunteers()) {
+                volunteer.getAssociations().remove(association);
+                volunteerRepository.save(volunteer);
+            }
+
+            // Clear the volunteers set in the association
+            association.getVolunteers().clear();
+            associationRepository.save(association);
+
+            // Finally, delete the association
+            associationRepository.delete(association);
+
             return new Response(200, "Association deleted successfully", null);
         } catch (RuntimeException e) {
             return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Error deleting association: " + e.getMessage(), null);
         }
     }
 
@@ -197,15 +223,36 @@ public class AdminService implements IAdminService {
     }
 
     @Override
+    @Transactional
     public Response deleteVolunteer(Long volunteerId) {
         try {
-            if (!volunteerRepository.existsById(volunteerId)) {
-                throw new RuntimeException("Volunteer not found");
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+
+            // First, remove volunteer from all sessions
+            List<Session> sessions = sessionRepository.findByVolunteerId(volunteerId);
+            for (Session session : sessions) {
+                session.setVolunteer(null);
+                sessionRepository.save(session);
             }
-            volunteerRepository.deleteById(volunteerId);
+
+            // Remove volunteer from all associations
+            for (Association association : volunteer.getAssociations()) {
+                association.getVolunteers().remove(volunteer);
+                associationRepository.save(association);
+            }
+
+            // Remove all volunteer requests
+            volunteerRequestRepository.deleteByVolunteerId(volunteerId);
+
+            // Finally, delete the volunteer
+            volunteerRepository.delete(volunteer);
+
             return new Response(200, "Volunteer deleted successfully", null);
         } catch (RuntimeException e) {
             return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Error deleting volunteer: " + e.getMessage(), null);
         }
     }
 
@@ -383,6 +430,30 @@ public class AdminService implements IAdminService {
         } catch (Exception e) {
             // Handle exceptions and return error response
             return new Response(500, "Failed to retrieve session: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Response deleteSession(Long sessionId) {
+        try {
+            // Find the session by ID
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
+
+            // Remove volunteer reference if exists
+            if (session.getVolunteer() != null) {
+                session.setVolunteer(null);
+            }
+
+            // Delete the session
+            sessionRepository.delete(session);
+
+            return new Response(200, "Session deleted successfully", null);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Error deleting session: " + e.getMessage(), null);
         }
     }
 

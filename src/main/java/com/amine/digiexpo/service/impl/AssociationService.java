@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class AssociationService implements IAssociationService {
@@ -39,6 +37,23 @@ public class AssociationService implements IAssociationService {
         try {
             Association association = associationRepository.findById(associationId)
                     .orElseThrow(() -> new RuntimeException("Association not found"));
+
+            // Check for existing sessions on the requested dates
+            List<LocalDate> conflictingDates = new ArrayList<>();
+            for (LocalDate date : dates) {
+                if (sessionRepository.existsByAssociationIdAndDate(associationId, date)) {
+                    conflictingDates.add(date);
+                }
+            }
+
+            // If there are conflicting dates, return error response
+            if (!conflictingDates.isEmpty()) {
+                String conflictDates = conflictingDates.stream()
+                        .map(LocalDate::toString)
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse("");
+                return new Response(400, "Sessions already exist for dates: " + conflictDates, null);
+            }
 
             List<Session> savedSessions = new ArrayList<>();
 

@@ -12,7 +12,8 @@ import {
     FaClock,
     FaCog,
     FaEdit,
-    FaUserPlus
+    FaUserPlus,
+    FaTrash
 } from 'react-icons/fa';
 import './SessionManagement.css';
 
@@ -25,6 +26,7 @@ const SessionManagement = () => {
     const [updatedStatus, setUpdatedStatus] = useState('');
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
+    const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
 
     useEffect(() => {
         fetchSessions();
@@ -127,6 +129,36 @@ const SessionManagement = () => {
         }
     };
 
+    const handleDeleteClick = (session) => {
+        setSelectedSession(session);
+        setShowDeleteConfirmModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        setLoading(true);
+        try {
+            const response = await AdminService.deleteSession(selectedSession.id);
+            if (response.statusCode === 200) {
+                setShowDeleteConfirmModal(false);
+                setSelectedSession(null);
+                await fetchSessions(); // Refresh the sessions list
+                setError('');
+            } else {
+                setError(response.message || 'Failed to delete session');
+            }
+        } catch (err) {
+            setError(err.message || 'Failed to delete session. Please check your permissions.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const closeDeleteModal = () => {
+        setShowDeleteConfirmModal(false);
+        setSelectedSession(null);
+    };
+
     if (loading && sessions.length === 0) {
         return (
             <div className="session-loading">
@@ -180,7 +212,7 @@ const SessionManagement = () => {
                                                 className="btn-action btn-edit"
                                                 onClick={() => handleSessionClick(session.id)}
                                             >
-                                                <FaEdit />
+                                                <FaEdit/>
                                                 Edit
                                             </button>
 
@@ -189,10 +221,18 @@ const SessionManagement = () => {
                                                     className="btn-action btn-assign"
                                                     onClick={() => handleOpenAssignModal(session)}
                                                 >
-                                                    <FaUserPlus />
+                                                    <FaUserPlus/>
                                                     Assign
                                                 </button>
                                             )}
+
+                                            <button
+                                                className="btn-action btn-delete"
+                                                onClick={() => handleDeleteClick(session)}
+                                            >
+                                                <FaTrash/>
+                                                Delete
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -291,6 +331,59 @@ const SessionManagement = () => {
                                 associationId={selectedSession.association?.id}
                                 onClose={closeAssignModal}
                             />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirmModal && selectedSession && (
+                <div className="manage-modal__overlay">
+                    <div className="manage-modal__container">
+                        <div className="manage-modal__header">
+                            <h5 className="manage-modal__title">
+                                <FaTrash className="manage-modal__title-icon" />
+                                Delete Session
+                            </h5>
+                            <button className="manage-modal__close" onClick={closeDeleteModal}>
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <div className="manage-modal__content">
+                            <p>Are you sure you want to delete this session? This action cannot be undone.</p>
+                            <div className="session-details">
+                                <p><strong>Date:</strong> {new Date(selectedSession.date).toLocaleDateString()}</p>
+                                <p><strong>Association:</strong> {selectedSession.association?.name || 'N/A'}</p>
+                                <p><strong>Status:</strong> {selectedSession.status}</p>
+                            </div>
+                        </div>
+                        <div className="manage-modal__footer">
+                            <button
+                                type="button"
+                                className="manage-btn manage-btn--secondary"
+                                onClick={closeDeleteModal}
+                            >
+                                <FaTimes className="manage-btn__icon" />
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="manage-btn manage-btn--danger"
+                                onClick={handleDeleteConfirm}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <FaSpinner className="manage-spinner" />
+                                        <span>Deleting...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaTrash className="manage-btn__icon" />
+                                        <span>Delete Session</span>
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>

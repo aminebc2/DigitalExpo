@@ -70,7 +70,7 @@ public class AuthService implements IAuthService {
 
             return new Response(200, "Login successful", data);
         } catch (Exception e) {
-            return new Response(500, "Authentication failed: " + e.getMessage(), null);
+            return new Response(500, "Email or Password not correct", null);
         }
     }
 

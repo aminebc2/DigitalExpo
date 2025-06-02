@@ -18,6 +18,7 @@ import SessionPage from "./component/volunteer/SessionsPage";
 import AssociationList from "./component/volunteer/AssociationList";
 import AssociationProfile from "./component/association/AssociationProfile";
 import VolunteerProfile from "./component/volunteer/VolunteerProfile";
+import Associations from "./component/Association";
 
 function App() {
     return (
@@ -46,6 +47,8 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/home" element={<Home />} />
+            <Route path="/associations" element={<Associations/>} />
+            {/*<Route path="/aboutus" element={<AboutUs/>}/>*/}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/unauthorized" element={<Unauthorized />} />

@@ -28,9 +28,7 @@ const HomePage = () => {
                 setLoading(true);
                 // Fetch all associations
                 const response = await GuestService.getAllAssociations();
-                console.log("Response from server:", response); // Debug log
                 if (response.statusCode === 200) {
-                    console.log("Associations data:", response.associations); // Debug log
                     setAssociations(response.associations || []);
                 } else {
                     setError(response.message || "Failed to load associations");
@@ -40,7 +38,6 @@ const HomePage = () => {
                 setError(null);
             } catch (err) {
                 setError("Failed to load data");
-                console.error("Error fetching data:", err);
             } finally {
                 setLoading(false);
             }
@@ -128,16 +125,12 @@ const HomePage = () => {
                             <div className="association-slide">
                                 <div className="association-image-container">
                                     {(() => {
-                                        console.log("Current association data:", associations[currentSlide]);
                                         const imageFileName = associations[currentSlide].imageFileName;
-                                        console.log("Image filename:", imageFileName);
 
                                         // Check if we need to add file extension
                                         const imageUrl = imageFileName
-                                            ? `http://localhost:8080/images/${imageFileName}`
-                                            : '/images/default-association.jpg';
+                                            ? `http://localhost:8080/images/${imageFileName}`: null
 
-                                        console.log("Attempting to load image from:", imageUrl);
 
                                         return (
                                             <img
@@ -145,16 +138,11 @@ const HomePage = () => {
                                                 alt={associations[currentSlide].name}
                                                 className="association-image"
                                                 onError={(e) => {
-                                                    console.log("Image failed to load:", e.target.src);
-                                                    console.log("Error details:", e);
                                                     // Try fallback to direct file path
                                                     if (!e.target.src.includes('/images/default-association.jpg')) {
-                                                        console.log("Trying fallback path...");
                                                         e.target.src = `http://localhost:8080/images/${imageFileName}`;
                                                         // If fallback also fails, use default image
                                                         e.target.onerror = (e2) => {
-                                                            console.log("Fallback also failed, using default image");
-                                                            e2.target.src = '/images/default-association.jpg';
                                                             e2.target.onerror = null;
                                                         };
                                                     } else {

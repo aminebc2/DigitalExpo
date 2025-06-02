@@ -143,6 +143,13 @@ public class AdminController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @DeleteMapping("/session/{sessionId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Response> deleteSession(@PathVariable Long sessionId) {
+        Response response = adminService.deleteSession(sessionId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
 
     // ---------------- Confirm Session ---------------- //
 

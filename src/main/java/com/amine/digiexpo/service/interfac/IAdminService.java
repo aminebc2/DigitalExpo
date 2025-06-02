@@ -33,7 +33,7 @@ public interface IAdminService {
     // Mettre à jour une session (ex: assigner un bénévole ou confirmer)
     Response updateSession(Long sessionId, SessionStatusUpdateDTO sessionStatusUpdateDTO);
     Response getSessionById(Long sessionId);
-    // Récupérer toutes les sessions
+    Response deleteSession(Long sessionId);
     Response getAllSessions();
 
     // Method to assign a volunteer to a session

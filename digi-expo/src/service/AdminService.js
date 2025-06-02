@@ -190,6 +190,21 @@ export default class AdminService {
         }
     }
 
+    static async deleteSession(sessionId) {
+        try {
+            const response = await axios.delete(`${this.API_URL}/session/${sessionId}`, {
+                headers: this.getHeader()
+            });
+            if (response.data.statusCode === 403) {
+                throw new Error('You do not have permission to delete this session');
+            }
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting session:', error.response?.data || error.message);
+            throw error.response?.data || error;
+        }
+    }
+
     static async assignVolunteerToSession(sessionId, volunteerId, associationId) {
         try {
             const payload = { sessionId, volunteerId, associationId };
