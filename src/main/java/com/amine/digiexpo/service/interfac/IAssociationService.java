@@ -13,6 +13,8 @@ public interface IAssociationService {
     // Réserver une session un jour par semaine
     Response reserveSession(Long associationId, List<LocalDate> dates);
 
+    Response getAllReservedSessions();
+
     // Consulter la liste des réservations (sessions)
     Response getSessions(Long associationId);
 

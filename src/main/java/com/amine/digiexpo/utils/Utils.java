@@ -2,6 +2,7 @@ package com.amine.digiexpo.utils;
 
 import com.amine.digiexpo.DTO.*;
 import com.amine.digiexpo.entity.*;
+import com.amine.digiexpo.enumeration.SessionStatus;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -236,6 +237,56 @@ public class Utils {
         }
 
         return dto;
+    }
+
+    public static SessionDTO convertSessionToDTO(Session session) {
+        if (session == null) return null;
+
+        SessionDTO dto = new SessionDTO();
+
+        // Set basic fields
+        dto.setId(session.getId());
+        dto.setDate(session.getDate());
+        dto.setStatus(session.getStatus() != null ? session.getStatus() : SessionStatus.PENDING);
+
+        // Set association if exists
+        if (session.getAssociation() != null) {
+            AssociationDTO associationDTO = new AssociationDTO();
+            Association association = session.getAssociation();
+            associationDTO.setId(association.getId());
+            associationDTO.setUsername(association.getUsername());
+            associationDTO.setEmail(association.getEmail());
+            associationDTO.setRole(association.getRole());
+            associationDTO.setName(association.getName());
+            associationDTO.setVille(association.getVille());
+            associationDTO.setResponsableName(association.getResponsableName());
+            associationDTO.setResponsablePhone(association.getResponsablePhone());
+            associationDTO.setImageFileName(association.getImageFileName());
+            dto.setAssociation(associationDTO);
+        }
+
+        // Set volunteer if exists
+        if (session.getVolunteer() != null) {
+            VolunteerDTO volunteerDTO = new VolunteerDTO();
+            Volunteer volunteer = session.getVolunteer();
+            volunteerDTO.setId(volunteer.getId());
+            volunteerDTO.setUsername(volunteer.getUsername());
+            volunteerDTO.setEmail(volunteer.getEmail());
+            volunteerDTO.setRole(volunteer.getRole());
+            volunteerDTO.setPhoneNumber(volunteer.getPhoneNumber());
+            volunteerDTO.setAvailableDays(volunteer.getAvailableDays());
+            dto.setVolunteer(volunteerDTO);
+        }
+
+        return dto;
+    }
+
+    // Add a list version for convenience
+    public static List<SessionDTO> convertSessionListToDTO(List<Session> sessions) {
+        if (sessions == null) return new ArrayList<>();
+        return sessions.stream()
+                .map(Utils::convertSessionToDTO)
+                .collect(Collectors.toList());
     }
 
 

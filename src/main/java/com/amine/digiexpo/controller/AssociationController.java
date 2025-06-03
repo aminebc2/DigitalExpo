@@ -29,6 +29,13 @@ public class AssociationController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @GetMapping("/sessions")
+    @PreAuthorize("hasAnyRole('ASSOCIATION')")
+    public ResponseEntity<Response> getAllReservedSessions() {
+        Response response = associationService.getAllReservedSessions();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     // 📋 Get all sessions of the association
     @GetMapping("/sessions/{associationId}")
     public ResponseEntity<Response> getSessions(@PathVariable Long associationId) {

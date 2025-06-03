@@ -13,12 +13,19 @@ import com.amine.digiexpo.entity.Volunteer;
 import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.IAssociationService;
 import com.amine.digiexpo.utils.Utils;
+import org.hibernate.service.spi.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.amine.digiexpo.utils.Utils.mapSessionListToDTOListWithAssociationDetails;
 
 @Service
 public class AssociationService implements IAssociationService {
@@ -29,8 +36,8 @@ public class AssociationService implements IAssociationService {
     @Autowired
     private SessionRepository sessionRepository;
 
-    @Autowired
-    private VolunteerRepository volunteerRepository;
+    private static final Logger logger = LoggerFactory.getLogger(AssociationService.class);
+
 
     @Override
     public Response reserveSession(Long associationId, List<LocalDate> dates) {
@@ -73,6 +80,23 @@ public class AssociationService implements IAssociationService {
             return response;
         } catch (Exception e) {
             return new Response(500, "Failed to reserve sessions: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Response getAllReservedSessions() {
+        try {
+            List<Session> sessions = sessionRepository.findAll();
+            List<SessionDTO> dtos = Utils.convertSessionListToDTO(sessions);
+            List<SessionDTO> sessionDTOs = Utils.convertSessionListToDTO(sessions);
+
+            // Return the response with the session data
+            return new Response(200, "Sessions retrieved successfully", dtos);
+
+        } catch (Exception e) {
+            logger.error("Error fetching all reserved sessions: {}", e.getMessage());
+            return new Response(500, "Failed to fetch reserved sessions", null);
         }
     }
 

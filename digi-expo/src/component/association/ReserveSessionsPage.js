@@ -61,12 +61,60 @@ const ReserveSessionsPage = () => {
     const [globalReservedDates, setGlobalReservedDates] = useState([]);
 
     useEffect(() => {
-        if (currentUser?.role === 'ASSOCIATION' && currentUser.id) {
-            localStorage.setItem('associationId', currentUser.id);
-            fetchAllReservedDates();
-            fetchAssociationReservedDates();
-        }
-    }, [currentUser, associationId]);
+        const fetchData = async () => {
+            try {
+                // Check if user is logged in
+                if (!currentUser) {
+                    setMessage("Please log in to access this page");
+                    return;
+                }
+
+                // Check if user has the ASSOCIATION role
+                if (currentUser.role !== 'ASSOCIATION') {
+                    setMessage("Access denied. Only associations can view this page.");
+                    return;
+                }
+
+                // Check if we have a valid ID
+                const id = currentUser.id || associationId;
+                if (!id) {
+                    setMessage(t.missingAssociationId);
+                    return;
+                }
+
+                // Check if token exists
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    setMessage("Please log in to access this page");
+                    return;
+                }
+
+                try {
+                    await Promise.all([
+                        fetchAllReservedDates(),
+                        fetchAssociationReservedDates()
+                    ]);
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                    if (error.response?.status === 403) {
+                        // Clear invalid token and user data
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("user");
+                        setMessage("Your session has expired. Please log in again.");
+                    } else if (error.message?.includes("Please log in")) {
+                        setMessage(error.message);
+                    } else {
+                        setMessage(t.reservationError);
+                    }
+                }
+            } catch (error) {
+                console.error("Error in initial setup:", error);
+                setMessage(t.reservationError);
+            }
+        };
+
+        fetchData();
+    }, [currentUser, associationId, t]);
 
     const fetchAllReservedDates = async () => {
         try {
@@ -80,20 +128,23 @@ const ReserveSessionsPage = () => {
             }
         } catch (error) {
             console.error("Failed to fetch global reserved dates:", error);
+            throw error; // Let the parent handle the error
         }
     };
 
     const fetchAssociationReservedDates = async () => {
         try {
-            if (!associationId) return;
+            if (!associationId && !currentUser?.id) return;
 
-            const response = await AssociationService.getSessions(associationId);
+            const id = currentUser?.id || associationId;
+            const response = await AssociationService.getSessions(id);
             if (response?.sessionList) {
                 const reserved = response.sessionList.map(session => session.date);
                 setReservedDates(reserved);
             }
         } catch (error) {
             console.error("Failed to fetch association reserved dates:", error);
+            throw error; // Let the parent handle the error
         }
     };
 
@@ -102,6 +153,9 @@ const ReserveSessionsPage = () => {
         if (reservedDate) {
             const message = t.dateAlreadyBooked.replace('{association}', reservedDate.associationName);
             setMessage(message);
+            const updatedDates = [...dates];
+            updatedDates[index] = value;
+            setDates(updatedDates);
             return;
         }
 
@@ -153,7 +207,14 @@ const ReserveSessionsPage = () => {
 
         const hasReservedDates = dates.some(date => isDateGloballyReserved(date));
         if (hasReservedDates) {
-            setMessage(t.someReserved);
+            const reservedDatesList = dates
+                .filter(date => isDateGloballyReserved(date))
+                .map(date => {
+                    const reservation = globalReservedDates.find(r => r.date === date);
+                    return `${formatDate(date)} (${t.byAssociation} ${reservation?.associationName})`;
+                })
+                .join(', ');
+            setMessage(`${t.dateReserved}\n${reservedDatesList}`);
             return;
         }
 
@@ -168,18 +229,42 @@ const ReserveSessionsPage = () => {
             const response = await AssociationService.reserveSessions(associationId, dto);
 
             if (response?.message?.includes('already exist')) {
-                setMessage(t.sessionsExist + response.message.split(': ')[1]);
+                // Extract the dates from the error message
+                const conflictingDates = response.message.split(': ')[1]
+                    .split(',')
+                    .map(date => date.trim());
+
+                // Find the association names for each conflicting date
+                const conflictingDateDetails = conflictingDates.map(date => {
+                    const reservation = globalReservedDates.find(r => r.date === date);
+                    return `${formatDate(date)}${reservation ? ` (${t.byAssociation} ${reservation.associationName})` : ''}`;
+                }).join(', ');
+
+                setMessage(`${t.dateReserved}\n${conflictingDateDetails}`);
             } else {
                 setMessage(t.reservationSuccess);
                 setDates(['']);
                 // Refresh both global and association-specific dates
-                fetchAllReservedDates();
-                fetchAssociationReservedDates();
+                await Promise.all([
+                    fetchAllReservedDates(),
+                    fetchAssociationReservedDates()
+                ]);
             }
         } catch (error) {
             console.error("Reservation failed:", error);
-            if (error.response?.message) {
-                setMessage(t.sessionsExist + error.response.message.split(': ')[1]);
+            if (error.response?.data?.message?.includes('already exist')) {
+                // Extract dates from error message
+                const conflictingDates = error.response.data.message.split(': ')[1]
+                    .split(',')
+                    .map(date => date.trim());
+
+                // Find the association names for each conflicting date
+                const conflictingDateDetails = conflictingDates.map(date => {
+                    const reservation = globalReservedDates.find(r => r.date === date);
+                    return `${formatDate(date)}${reservation ? ` (${t.byAssociation} ${reservation.associationName})` : ''}`;
+                }).join(', ');
+
+                setMessage(`${t.dateReserved}\n${conflictingDateDetails}`);
             } else {
                 setMessage(t.reservationError);
             }
@@ -238,7 +323,7 @@ const ReserveSessionsPage = () => {
                             {loading ? t.reserving : t.reserve}
                         </button>
                     </form>
-                    {message && <div className={`status-message ${message.includes(t.sessionsExist) ? 'error' : 'success'}`}>
+                    {message && <div className={`status-message ${message.includes(t.sessionsExist) || message.includes(t.someReserved) ? 'error' : 'success'}`}>
                         {message}
                     </div>}
                 </div>
