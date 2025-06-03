@@ -1,5 +1,7 @@
 import React, { useContext } from 'react';
-import {BrowserRouter as Router, Routes, Route, BrowserRouter} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ChakraProvider } from '@chakra-ui/react';
 import Login from './component/Login';
 import Register from './component/Register';
 import Navbar from './component/Navbar';
@@ -19,21 +21,37 @@ import AssociationList from "./component/volunteer/AssociationList";
 import AssociationProfile from "./component/association/AssociationProfile";
 import VolunteerProfile from "./component/volunteer/VolunteerProfile";
 import Associations from "./component/Association";
-import {LanguageProvider} from "./context/LanguageContext";
+import { LanguageProvider } from './context/LanguageContext';
+import theme from './theme/chakraTheme';
+
+// Create a client
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false,
+            retry: 1,
+            staleTime: 5 * 60 * 1000, // 5 minutes
+        },
+    },
+});
 
 function App() {
     return (
-        <BrowserRouter>
-            <AuthProvider>
-                <LanguageProvider>
-                    <div className="App">
-                        <Navbar />
-                        <AppRoutes />
-                    </div>
-                    <Footer/>
-                </LanguageProvider>
-            </AuthProvider>
-        </BrowserRouter>
+        <ChakraProvider theme={theme}>
+            <QueryClientProvider client={queryClient}>
+                <BrowserRouter>
+                    <AuthProvider>
+                        <LanguageProvider>
+                            <div className="App">
+                                <Navbar />
+                                <AppRoutes />
+                            </div>
+                            <Footer />
+                        </LanguageProvider>
+                    </AuthProvider>
+                </BrowserRouter>
+            </QueryClientProvider>
+        </ChakraProvider>
     );
 }
 
@@ -48,7 +66,7 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/home" element={<Home />} />
-            <Route path="/associations" element={<Associations/>} />
+            <Route path="/associations" element={<Associations />} />
             {/*<Route path="/aboutus" element={<AboutUs/>}/>*/}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -110,16 +128,16 @@ function AppRoutes() {
             <Route
                 path="/volunteer/all-associations"
                 element={
-                <ProtectedRoute allowedRoles={['BENEVOLE']}>
-                    <AssociationList/>
-                </ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['BENEVOLE']}>
+                        <AssociationList />
+                    </ProtectedRoute>
                 }
             />
             <Route
                 path="/volunteer/sessions"
                 element={
                     <ProtectedRoute allowedRoles={['BENEVOLE']}>
-                        <SessionPage volunteerId={loggedvolunteerId}/>
+                        <SessionPage volunteerId={loggedvolunteerId} />
                     </ProtectedRoute>
                 }
             />
@@ -131,8 +149,6 @@ function AppRoutes() {
                     </ProtectedRoute>
                 }
             />
-
-
         </Routes>
     );
 }
