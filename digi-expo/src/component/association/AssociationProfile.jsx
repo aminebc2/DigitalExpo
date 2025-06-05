@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { useNavigate } from 'react-router-dom';
 import AssociationService from "../../service/AssociationService";
 import { FaUser, FaEnvelope, FaBuilding, FaCity, FaUserTie, FaPhone, FaCamera, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
+import {AuthContext} from '../../context/AuthContext';
+
 import {
     Box,
     Container,
@@ -97,7 +100,10 @@ const translations = {
         }
     }
 };
+
 function AssociationProfile() {
+    const navigate = useNavigate();
+    const { logout } = useContext(AuthContext);
     const [association, setAssociation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -119,7 +125,7 @@ function AssociationProfile() {
     const user = JSON.parse(localStorage.getItem("user"));
     const associationId = user?.id;
 
-    // Color modes - all hooks at the top
+    // Color modes
     const bgColor = useColorModeValue('white', 'gray.800');
     const borderColor = useColorModeValue('gray.200', 'gray.700');
     const textColor = useColorModeValue('gray.700', 'white');
@@ -182,7 +188,6 @@ function AssociationProfile() {
 
                 response = await AssociationService.updateAssociationWithImage(associationId, formPayload);
             } else {
-                // Only send non-null and non-undefined values
                 const cleanFormData = Object.entries(formData).reduce((acc, [key, value]) => {
                     if (value !== null && value !== undefined) {
                         acc[key] = value;
@@ -193,34 +198,29 @@ function AssociationProfile() {
                 response = await AssociationService.updateAssociation(associationId, cleanFormData);
             }
 
-            // Check if response has the expected structure
             if (response && (response.association || response.data)) {
                 updatedAssociation = response.association || response.data;
             } else if (response && response.statusCode === 200) {
-                // If response is successful but data is in a different structure
                 updatedAssociation = response;
             }
-
             if (updatedAssociation) {
-                // Update all states with the new data
-                setAssociation(updatedAssociation);
-                setFormData(updatedAssociation);
-
-                if (updatedAssociation.imageFileName) {
-                    setImagePreview(`http://localhost:8080/images/${updatedAssociation.imageFileName}`);
-                }
-
-                setImageFile(null);
-                setEditMode(false);
-                setError(null);
-
+                // First show the success message
                 toast({
                     title: "Success",
-                    description: "Profile updated successfully",
+                    description: "Profile updated successfully. Please login again.",
                     status: "success",
                     duration: 3000,
                     isClosable: true,
                 });
+
+                // Call the logout function from your AuthContext
+                // This will clear the user and token from both state and localStorage
+                logout();
+
+                // Redirect to login page after a short delay
+                setTimeout(() => {
+                    navigate('/login');
+                }, 2000);
             } else {
                 throw new Error('No data returned from server');
             }
@@ -306,9 +306,9 @@ function AssociationProfile() {
                                     />
                                     <Box
                                         position="absolute"
-                                        left="35%"
+                                        left="50%"
                                         top="50%"
-                                        transform="translate(-45%, -30%)"
+                                        transform="translate(-50%, -30%)"
                                         textAlign="center"
                                     >
                                         <Box

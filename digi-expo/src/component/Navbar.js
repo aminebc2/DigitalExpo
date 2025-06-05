@@ -69,7 +69,7 @@ const Navbar = () => {
                         <li className="nav-item">
                             <Link
                                 className="nav-link text-purple"
-                                to={localStorage.getItem('associationId') ? `/association/reserve/${localStorage.getItem('associationId')}` : '#'}
+                                to={currentUser?.id ? `/association/reserve/${currentUser.id}` : '#'}
                                 onClick={closeMenu}
                             >
                                 {language === 'fr' ? 'Réserver' : 'Book'}

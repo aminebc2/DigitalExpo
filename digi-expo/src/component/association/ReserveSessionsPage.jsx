@@ -61,7 +61,7 @@ const dxcColors = {
 const translations = {
     fr: {
         pageTitle: "Réserver des Sessions",
-        addDate: "+ Ajouter une autre date",
+        addDate: "Ajouter une autre date",
         deleteDate: "Supprimer cette date",
         dateReserved: "Cette date est déjà réservée par vous ou une autre association",
         dateAlreadySelected: "Cette date est déjà sélectionnée. Veuillez en choisir une autre.",
@@ -85,7 +85,7 @@ const translations = {
     },
     en: {
         pageTitle: "Book Sessions",
-        addDate: "+ Add another date",
+        addDate: "Add another date",
         deleteDate: "Delete this date",
         dateReserved: "This date is already reserved by you or another association",
         dateAlreadySelected: "This date is already selected. Please choose another one.",
