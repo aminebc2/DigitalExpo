@@ -1,0 +1,707 @@
+/* Import font */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=swap');
+
+/* Main container */
+.session-booking-page {
+    min-height: calc(100vh - 80px);
+    margin-top: 80px;
+    background: linear-gradient(135deg, #fff 85%, #5f249f 85%);
+    padding: 60px 20px;
+}
+
+.booking-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    perspective: 1000px;
+}
+
+.booking-card {
+    background: white;
+    border-radius: 20px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+    padding: 40px;
+}
+
+.booking-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #5f249f;
+    border-radius: 20px;
+    transform: translateZ(-1px);
+    filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.booking-card:hover::before {
+    opacity: 0.2;
+}
+
+.booking-title {
+    font-size: 48px;
+    font-weight: 800;
+    color: #5f249f;
+    margin-bottom: 60px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.booking-title::before {
+    content: '';
+    width: 12px;
+    height: 48px;
+    background: #5f249f;
+    display: inline-block;
+    border-radius: 6px;
+}
+
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.date-field {
+    position: relative;
+}
+
+.date-input-group {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.date-input-group:hover {
+    border-color: #5f249f;
+    transform: translateY(-5px);
+}
+
+.date-picker {
+    flex: 1;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    color: #2d3748;
+    background: transparent;
+}
+
+.date-picker:focus {
+    outline: none;
+}
+
+.date-picker.date-reserved {
+    color: #ff4d4f;
+    background: rgba(255, 77, 79, 0.05);
+}
+
+.date-error {
+    color: #ff4d4f;
+    font-size: 14px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-error .association-name {
+    color: #718096;
+    font-style: italic;
+}
+
+.delete-date {
+    background: rgba(255, 77, 79, 0.1);
+    border: none;
+    color: #ff4d4f;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 20px;
+}
+
+.delete-date:hover {
+    background: rgba(255, 77, 79, 0.2);
+    transform: rotate(90deg);
+}
+
+.add-new-date {
+    background: transparent;
+    border: none;
+    color: #5f249f;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease;
+    align-self: flex-start;
+}
+
+.add-new-date::before {
+    content: '→';
+    position: absolute;
+    right: -20px;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.add-new-date:hover {
+    padding-right: 25px;
+}
+
+.add-new-date:hover::before {
+    opacity: 1;
+    transform: translateX(-20px);
+}
+
+.submit-booking {
+    background: #5f249f;
+    color: white;
+    border: none;
+    padding: 20px;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.submit-booking:hover:not(:disabled) {
+    background: #8b4fc9;
+    transform: translateY(-5px);
+}
+
+.submit-booking:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: #a0aec0;
+}
+
+.status-message {
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 16px;
+    font-weight: 500;
+    text-align: center;
+    animation: slideIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.status-message.error {
+    background: #fff2f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
+}
+
+.status-message.success {
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+}
+
+.status-message .association-name {
+    font-weight: 600;
+    color: inherit;
+}
+
+.preview-section {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+}
+
+.preview-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #5f249f;
+    border-radius: 20px;
+    transform: translateZ(-1px);
+    filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.preview-section:hover::before {
+    opacity: 0.2;
+}
+
+.preview-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #5f249f;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.preview-title::before {
+    content: '';
+    width: 8px;
+    height: 32px;
+    background: #5f249f;
+    display: inline-block;
+    border-radius: 4px;
+}
+
+.dates-list {
+    display: grid;
+    gap: 20px;
+}
+
+.date-card {
+    background: #f7fafc;
+    padding: 25px;
+    border-radius: 16px;
+    color: #2d3748;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+}
+
+.date-card:hover {
+    background: #f0f5fa;
+    border-color: #5f249f;
+    transform: translateY(-5px);
+}
+
+.date-card.date-reserved {
+    background: #fff2f0;
+    border-color: #ffccc7;
+    color: #ff4d4f;
+}
+
+.date-card .reserved-info {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.date-card .reserved-badge {
+    background: #ff4d4f;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.date-card .association-name {
+    color: #718096;
+    font-style: italic;
+}
+
+.empty-dates {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+    font-size: 18px;
+    background: #f7fafc;
+    border-radius: 16px;
+    border: 2px dashed #e2e8f0;
+}
+
+.reserved-dates-section {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(95, 36, 159, 0.1);
+}
+
+.reserved-dates-section h4 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #5f249f;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.reserved-dates-section h4::before {
+    content: '';
+    width: 8px;
+    height: 32px;
+    background: #5f249f;
+    display: inline-block;
+    border-radius: 4px;
+}
+
+.reserved-dates-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    perspective: 1000px;
+}
+
+.reserved-date-card {
+    background: #f8f0ff;
+    padding: 25px;
+    border-radius: 16px;
+    border: 2px solid #e9d5ff;
+    color: #5f249f;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    cursor: default;
+}
+
+.reserved-date-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #5f249f, #8b4fc9);
+    border-radius: 16px;
+    transform: translateZ(-1px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.reserved-date-card:hover {
+    transform: translateY(-5px) translateZ(20px);
+    border-color: #5f249f;
+}
+
+.reserved-date-card:hover::before {
+    opacity: 0.1;
+}
+
+.reserved-date-card::after {
+    content: '🔒';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 16px;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.reserved-date-card:hover::after {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.reserved-date-card .association-name {
+    margin-top: 12px;
+    color: #805ad5;
+    font-size: 14px;
+    font-style: italic;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 992px) {
+    .session-booking-page {
+        background: white;
+        padding: 30px 15px;
+    }
+
+    .booking-main {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .booking-title,
+    .preview-title {
+        font-size: 36px;
+    }
+
+    .booking-title::before {
+        height: 36px;
+        width: 8px;
+    }
+
+    .booking-card,
+    .preview-section {
+        transform: none !important;
+    }
+
+    .booking-card::before,
+    .preview-section::before {
+        display: none;
+    }
+
+    .date-input-group:hover {
+        transform: none;
+    }
+
+    .date-card:hover {
+        transform: none;
+    }
+
+    .reserved-dates-section {
+        margin: 30px 15px;
+        padding: 30px 20px;
+    }
+
+    .reserved-dates-section h4 {
+        font-size: 24px;
+    }
+
+    .reserved-dates-section h4::before {
+        height: 24px;
+        width: 6px;
+    }
+
+    .reserved-dates-list {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 15px;
+    }
+
+    .reserved-date-card {
+        padding: 20px;
+    }
+
+    .reserved-date-card:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .reserved-dates-section {
+        margin: 20px 10px;
+        padding: 20px 15px;
+    }
+
+    .reserved-dates-list {
+        grid-template-columns: 1fr;
+    }
+
+    .reserved-date-card {
+        font-size: 0.9rem;
+    }
+
+    .date-error {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Animation for reserved dates */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reserved-date-card {
+    animation: fadeInUp 0.5s ease forwards;
+    animation-delay: calc(var(--card-index) * 0.1s);
+}
+
+/* Main navbar */
+.navbar {
+    background: rgba(95, 36, 159, 0.95) !important;
+    backdrop-filter: blur(10px);
+    padding: 15px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Brand section */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+    position: relative;
+    padding: 8px 15px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-brand img {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.05);
+}
+
+/* Navigation items */
+.navbar-nav {
+    gap: 10px;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-link {
+    padding: 8px 16px !important;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::before {
+    width: 80%;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Active link */
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.15);
+    font-weight: 600;
+}
+
+/* Toggler button */
+.navbar-toggler {
+    border: none !important;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.navbar-toggler:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Container adjustments */
+.container {
+    padding: 0 20px;
+}
+
+/* Logout button */
+.btn-link.nav-link {
+    background: none;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 20px !important;
+}
+
+.btn-link.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    text-decoration: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .navbar-collapse {
+        background: rgba(95, 36, 159, 0.98);
+        backdrop-filter: blur(10px);
+        margin: 15px -20px -15px;
+        padding: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-item {
+        margin: 5px 0;
+    }
+
+    .nav-link {
+        padding: 12px 20px !important;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .navbar-brand img {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+/* Animation for mobile menu */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.navbar-collapse.show {
+    animation: slideDown 0.3s ease forwards;
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import AssociationService from '../../service/AssociationService';
 import { FaCalendarAlt, FaInfoCircle, FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
@@ -55,7 +56,8 @@ const translations = {
             confirmed: "Confirmé",
             cancelled: "Annulé",
             completed: "Terminé"
-        }
+        },
+        lastUpdate: "Dernière mise à jour: "
     },
     en: {
         pageTitle: "Sessions List",
@@ -77,7 +79,8 @@ const translations = {
             confirmed: "Confirmed",
             cancelled: "Cancelled",
             completed: "Completed"
-        }
+        },
+        lastUpdate: "Last update: "
     }
 };
 
@@ -267,10 +270,8 @@ const SessionDetailsModal = ({ isOpen, onClose, session, t, formatFullDate, getT
 };
 
 const SessionListPage = () => {
-    const [sessions, setSessions] = useState([]);
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(true);
     const [selectedSession, setSelectedSession] = useState(null);
+    const [lastUpdateTime, setLastUpdateTime] = useState(new Date());
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { language } = useLanguage();
     const t = translations[language];
@@ -278,23 +279,25 @@ const SessionListPage = () => {
     const user = JSON.parse(localStorage.getItem("user"));
     const associationId = user?.id;
 
-    useEffect(() => {
-        const fetchSessions = async () => {
-            try {
-                const response = await AssociationService.getSessions(associationId);
-                const sessionsList = response?.sessionList || [];
-                setSessions(Array.isArray(sessionsList) ? sessionsList : []);
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching sessions:', error);
-                setError(translations[language].error);
-                setSessions([]);
-                setLoading(false);
-            }
-        };
+    // Use React Query for data fetching with automatic refresh
+    const {
+        data: response,
+        isLoading,
+        error,
+        dataUpdatedAt
+    } = useQuery({
+        queryKey: ['associationSessions', associationId],
+        queryFn: () => AssociationService.getSessions(associationId),
+        enabled: !!associationId,
+        refetchInterval: 10000, // Refresh every 10 seconds
+        refetchIntervalInBackground: true, // Continue refreshing even when the tab is in the background
+        staleTime: 5000, // Consider data stale after 5 seconds
+        onSuccess: () => {
+            setLastUpdateTime(new Date());
+        }
+    });
 
-        if (associationId) fetchSessions();
-    }, [associationId, language]);
+    const sessions = response?.sessionList || [];
 
     const handleShowDetails = (session) => {
         setSelectedSession(session);
@@ -325,25 +328,40 @@ const SessionListPage = () => {
         return t.status[statusKey] || status;
     };
 
+    const formatLastUpdate = (date) => {
+        return new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        }).format(date);
+    };
+
     return (
         <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')} py={12}>
             <Container maxW="6xl">
                 <VStack spacing={8} align="stretch">
-                    <HStack spacing={3}>
-                        <Circle size={12} bg="purple.100" color="purple.500">
-                            <Icon as={FaCalendarAlt} boxSize={6} />
-                        </Circle>
-                        <Heading size="lg">{t.pageTitle}</Heading>
+                    <HStack justify="space-between" align="center">
+                        <HStack spacing={3}>
+                            <Circle size={12} bg="purple.100" color="purple.500">
+                                <Icon as={FaCalendarAlt} boxSize={6} />
+                            </Circle>
+                            <VStack align="start" spacing={0}>
+                                <Heading size="lg">{t.pageTitle}</Heading>
+                                <Text fontSize="sm" color="gray.500">
+                                    {t.lastUpdate} {formatLastUpdate(lastUpdateTime)}
+                                </Text>
+                            </VStack>
+                        </HStack>
                     </HStack>
 
                     {error && (
                         <Alert status="error" borderRadius="xl">
                             <AlertIcon />
-                            {error}
+                            {error.message || t.error}
                         </Alert>
                     )}
 
-                    {loading ? (
+                    {isLoading ? (
                         <VStack py={12} spacing={4}>
                             <Spinner size="xl" color="purple.500" thickness="4px" />
                             <Text>{t.loading}</Text>

@@ -45,25 +45,26 @@ public class AssociationService implements IAssociationService {
             Association association = associationRepository.findById(associationId)
                     .orElseThrow(() -> new RuntimeException("Association not found"));
 
-            // Check for existing sessions on the requested dates
-            List<LocalDate> conflictingDates = new ArrayList<>();
+            // Check for ANY existing sessions on the requested dates
+            List<String> conflictDetails = new ArrayList<>();
             for (LocalDate date : dates) {
-                if (sessionRepository.existsByAssociationIdAndDate(associationId, date)) {
-                    conflictingDates.add(date);
+                // Find any existing session for this date
+                Session existingSession = sessionRepository.findByDate(date);
+                if (existingSession != null) {
+                    String associationName = existingSession.getAssociation().getName();
+                    conflictDetails.add(date.toString() + " (reserved by " + associationName + ")");
                 }
             }
 
-            // If there are conflicting dates, return error response
-            if (!conflictingDates.isEmpty()) {
-                String conflictDates = conflictingDates.stream()
-                        .map(LocalDate::toString)
+            // If there are conflicting dates, return error response with details
+            if (!conflictDetails.isEmpty()) {
+                String conflictMessage = conflictDetails.stream()
                         .reduce((a, b) -> a + ", " + b)
                         .orElse("");
-                return new Response(400, "Sessions already exist for dates: " + conflictDates, null);
+                return new Response(400, "Cannot reserve: The following dates are already booked: " + conflictMessage, null);
             }
 
             List<Session> savedSessions = new ArrayList<>();
-
             for (LocalDate date : dates) {
                 Session session = new Session();
                 session.setDate(date);
