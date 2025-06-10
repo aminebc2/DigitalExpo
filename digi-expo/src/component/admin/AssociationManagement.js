@@ -1,14 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
 import { useLanguage } from '../../context/LanguageContext';
-import './AssociationManagement.css';
+import {
+    Box,
+    Button,
+    Container,
+    FormControl,
+    FormLabel,
+    Grid,
+    Heading,
+    Input,
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td,
+    useToast,
+    VStack,
+    HStack,
+    Text,
+    Image,
+    useColorModeValue,
+    IconButton,
+    Flex,
+    Drawer,
+    DrawerBody,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    useDisclosure,
+    Badge,
+    SimpleGrid,
+    Avatar,
+    AvatarBadge,
+    Stack,
+    InputGroup,
+    InputLeftElement,
+    InputRightElement,
+    Divider,
+    Tag,
+    TagLabel,
+    TagLeftIcon,
+    Tooltip,
+    Icon
+} from '@chakra-ui/react';
 import {
     FaPlus,
     FaEdit,
     FaTrash,
     FaTimes,
     FaSave,
-    FaSpinner,
     FaUser,
     FaEnvelope,
     FaLock,
@@ -17,20 +60,25 @@ import {
     FaUserTie,
     FaPhone,
     FaImage,
-    FaExclamationCircle,
-    FaCheckCircle,
-    FaCog
+    FaSearch,
+    FaFilter,
+    FaSort
 } from 'react-icons/fa';
 
 // Translations object
 const translations = {
     fr: {
+        title: "Gestion des Associations",
+        subtitle: "Gérer et surveiller vos associations",
+        searchPlaceholder: "Rechercher des associations...",
         addAssociation: "Ajouter une Association",
+        editAssociation: "Modifier l'Association",
         cancel: "Annuler",
         loading: "Chargement des associations...",
         networkError: "Erreur réseau ou serveur lors du chargement des associations",
         deleteConfirm: "Êtes-vous sûr de vouloir supprimer cette association ?",
         deleteError: "Erreur réseau ou serveur lors de la suppression de l'association",
+        deleteSuccess: "Association supprimée avec succès",
         passwordRequired: "Le mot de passe est requis pour créer une nouvelle association.",
         saveSuccess: "Association enregistrée avec succès !",
         saveFailed: "Échec de l'enregistrement de l'association",
@@ -38,6 +86,10 @@ const translations = {
         saving: "Enregistrement...",
         noAssociations: "Aucune association trouvée",
         closeForm: "Fermer le formulaire",
+        status: {
+            active: "Actif",
+            association: "Association"
+        },
         form: {
             username: "Nom d'utilisateur",
             email: "Email",
@@ -63,12 +115,17 @@ const translations = {
         }
     },
     en: {
+        title: "Association Management",
+        subtitle: "Manage and monitor your associations",
+        searchPlaceholder: "Search associations...",
         addAssociation: "Add Association",
+        editAssociation: "Edit Association",
         cancel: "Cancel",
         loading: "Loading associations...",
         networkError: "Network or server error while loading associations",
         deleteConfirm: "Are you sure you want to delete this association?",
         deleteError: "Network or server error while deleting the association",
+        deleteSuccess: "Association successfully deleted",
         passwordRequired: "Password is required for creating a new association.",
         saveSuccess: "Association successfully saved!",
         saveFailed: "Failed to save association",
@@ -76,6 +133,10 @@ const translations = {
         saving: "Saving...",
         noAssociations: "No associations found",
         closeForm: "Close form",
+        status: {
+            active: "Active",
+            association: "Association"
+        },
         form: {
             username: "Username",
             email: "Email",
@@ -106,13 +167,20 @@ const AssociationManagement = () => {
     const [associations, setAssociations] = useState([]);
     const [formData, setFormData] = useState(initialFormState());
     const [editingAssociation, setEditingAssociation] = useState(null);
-    const [showForm, setShowForm] = useState(false);
     const [globalLoading, setGlobalLoading] = useState(false);
     const [buttonLoading, setButtonLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const { language } = useLanguage();
+    const toast = useToast();
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const t = translations[language];
+
+    // Theme colors
+    const bgMain = useColorModeValue('gray.50', 'gray.900');
+    const bgCard = useColorModeValue('white', 'gray.800');
+    const borderColor = useColorModeValue('gray.200', 'gray.700');
+    const textColor = useColorModeValue('gray.800', 'white');
+    const secondaryTextColor = useColorModeValue('gray.600', 'gray.400');
 
     function initialFormState() {
         return {
@@ -134,12 +202,17 @@ const AssociationManagement = () => {
 
     const fetchAssociations = async () => {
         setGlobalLoading(true);
-        setError('');
         try {
             const response = await AdminService.getAllAssociations();
             setAssociations(response.data || []);
         } catch (err) {
-            setError(t.networkError);
+            toast({
+                title: t.networkError,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top-right'
+            });
         } finally {
             setGlobalLoading(false);
         }
@@ -153,15 +226,19 @@ const AssociationManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setButtonLoading(true);
-        setError('');
-        setSuccessMessage('');
 
         try {
             const formDataToSend = new FormData();
             const { imageFile, password, ...otherData } = formData;
 
             if (!editingAssociation && !password) {
-                setError(t.passwordRequired);
+                toast({
+                    title: t.passwordRequired,
+                    status: 'warning',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top-right'
+                });
                 setButtonLoading(false);
                 return;
             }
@@ -185,17 +262,27 @@ const AssociationManagement = () => {
             }
 
             if (response.statusCode === 200 || response.statusCode === 201) {
-                setSuccessMessage(t.saveSuccess);
+                toast({
+                    title: t.saveSuccess,
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top-right'
+                });
                 await fetchAssociations();
-                setShowForm(false);
-                setFormData(initialFormState());
-                setEditingAssociation(null);
+                handleCancel();
             } else {
-                setError(response.message || t.saveFailed);
+                throw new Error(response.message || t.saveFailed);
             }
         } catch (err) {
-            console.error(err);
-            setError(t.saveError);
+            toast({
+                title: t.saveError,
+                description: err.message,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top-right'
+            });
         } finally {
             setButtonLoading(false);
         }
@@ -214,7 +301,7 @@ const AssociationManagement = () => {
             imageFileName: assoc.imageFileName
         });
         setEditingAssociation(assoc);
-        setShowForm(true);
+        onOpen();
     };
 
     const handleDelete = async (id) => {
@@ -224,9 +311,21 @@ const AssociationManagement = () => {
         try {
             await AdminService.deleteAssociation(id);
             await fetchAssociations();
+            toast({
+                title: t.deleteSuccess,
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+                position: 'top-right'
+            });
         } catch (err) {
-            console.error(err);
-            setError(t.deleteError);
+            toast({
+                title: t.deleteError,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top-right'
+            });
         } finally {
             setGlobalLoading(false);
         }
@@ -235,284 +334,394 @@ const AssociationManagement = () => {
     const handleCancel = () => {
         setFormData(initialFormState());
         setEditingAssociation(null);
-        setShowForm(false);
-        setError('');
-        setSuccessMessage('');
+        onClose();
     };
 
+    const filteredAssociations = associations.filter(assoc =>
+        assoc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        assoc.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        assoc.ville.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <div className="association-management">
-            <div className="association-header">
-                <button
-                    className="association-add-btn"
-                    onClick={() => {
-                        if (showForm)
-                            handleCancel();
-                        setShowForm(prev => !prev);
-                    }}
+        <Container maxW="container.xl" py={8}>
+            <Box bg={bgMain} minH="100vh" borderRadius="xl" p={6}>
+                {/* Header Section */}
+                <Flex
+                    justify="space-between"
+                    align="center"
+                    mb={8}
+                    direction={{ base: "column", md: "row" }}
+                    gap={4}
                 >
-                    {showForm ? (
-                        <>
-                            <FaTimes />
-                            <span>{t.cancel}</span>
-                        </>
+                    <VStack align={{ base: "center", md: "start" }} spacing={1}>
+                        <Heading size="lg" color="purple.600">
+                            {t.title}
+                        </Heading>
+                        <Text color={secondaryTextColor}>
+                            {t.subtitle}
+                        </Text>
+                    </VStack>
+
+                    <HStack spacing={4}>
+                        <InputGroup maxW="320px">
+                            <InputLeftElement pointerEvents="none">
+                                <Icon as={FaSearch} color="gray.400" />
+                            </InputLeftElement>
+                            <Input
+                                placeholder={t.searchPlaceholder}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                bg={bgCard}
+                                borderRadius="full"
+                                _focus={{
+                                    borderColor: "purple.400",
+                                    boxShadow: "0 0 0 1px var(--chakra-colors-purple-400)"
+                                }}
+                            />
+                        </InputGroup>
+
+                        <Button
+                            leftIcon={<FaPlus />}
+                            onClick={onOpen}
+                            colorScheme="purple"
+                            size="md"
+                            borderRadius="full"
+                            px={6}
+                            _hover={{
+                                transform: "translateY(-1px)",
+                                shadow: "md"
+                            }}
+                        >
+                            {t.addAssociation}
+                        </Button>
+                    </HStack>
+                </Flex>
+
+                {/* Grid Layout */}
+                <SimpleGrid
+                    columns={{ base: 1, md: 2, lg: 3 }}
+                    spacing={6}
+                    mt={6}
+                >
+                    {globalLoading ? (
+                        <Flex justify="center" align="center" h="400px">
+                            <VStack spacing={4}>
+                                <Box className="loading-spinner" />
+                                <Text color={secondaryTextColor}>{t.loading}</Text>
+                            </VStack>
+                        </Flex>
                     ) : (
-                        <>
-                            <FaPlus />
-                            <span>{t.addAssociation}</span>
-                        </>
+                        filteredAssociations.map((assoc) => (
+                            <Box
+                                key={assoc.id}
+                                bg={bgCard}
+                                p={6}
+                                rounded="xl"
+                                shadow="sm"
+                                borderWidth="1px"
+                                borderColor={borderColor}
+                                transition="all 0.2s"
+                                _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
+                                position="relative"
+                                overflow="hidden"
+                            >
+                                {/* Top Action Buttons */}
+                                <Flex justify="flex-end" position="absolute" top={2} right={2} zIndex={2}>
+                                    <IconButton
+                                        icon={<FaEdit />}
+                                        variant="ghost"
+                                        colorScheme="purple"
+                                        onClick={() => handleEdit(assoc)}
+                                        aria-label="Edit"
+                                        size="sm"
+                                        mr={2}
+                                    />
+                                    <IconButton
+                                        icon={<FaTrash />}
+                                        variant="ghost"
+                                        colorScheme="red"
+                                        onClick={() => handleDelete(assoc.id)}
+                                        aria-label="Delete"
+                                        size="sm"
+                                    />
+                                </Flex>
+
+                                {/* Main Content */}
+                                <VStack spacing={6} align="stretch">
+                                    {/* Header with Avatar and Name */}
+                                    <Flex align="center" mb={4}>
+                                        <Avatar
+                                            size="lg"
+                                            name={assoc.name}
+                                            src={assoc.imageFileName ? `http://localhost:8080/images/${assoc.imageFileName}` : undefined}
+                                            mr={4}
+                                        />
+                                        <Box>
+                                            <Heading size="md" color={textColor} mb={1}>
+                                                {assoc.name}
+                                            </Heading>
+                                            <Text color="purple.500" fontSize="sm" fontWeight="medium">
+                                                @{assoc.username}
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+
+                                    {/* Information Grid */}
+                                    <SimpleGrid columns={2} spacing={4}>
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.table.email}
+                                            </Text>
+                                            <Flex align="center" color={textColor}>
+                                                <Icon as={FaEnvelope} mr={2} color="blue.500" />
+                                                <Text fontSize="sm" isTruncated>
+                                                    {assoc.email}
+                                                </Text>
+                                            </Flex>
+                                        </Box>
+
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.table.city}
+                                            </Text>
+                                            <Flex align="center" color={textColor}>
+                                                <Icon as={FaCity} mr={2} color="green.500" />
+                                                <Text fontSize="sm">
+                                                    {assoc.ville}
+                                                </Text>
+                                            </Flex>
+                                        </Box>
+
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.table.responsible}
+                                            </Text>
+                                            <Flex align="center" color={textColor}>
+                                                <Icon as={FaUserTie} mr={2} color="orange.500" />
+                                                <Text fontSize="sm">
+                                                    {assoc.responsableName}
+                                                </Text>
+                                            </Flex>
+                                        </Box>
+
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.table.phone}
+                                            </Text>
+                                            <Flex align="center" color={textColor}>
+                                                <Icon as={FaPhone} mr={2} color="pink.500" />
+                                                <Text fontSize="sm">
+                                                    {assoc.responsablePhone}
+                                                </Text>
+                                            </Flex>
+                                        </Box>
+                                    </SimpleGrid>
+
+                                    {/* Status Indicators */}
+                                    <Flex mt={4} gap={2} flexWrap="wrap">
+                                        <Badge colorScheme="purple" variant="subtle" px={3} py={1} borderRadius="full">
+                                            {t.status.association}
+                                        </Badge>
+                                        <Badge colorScheme="green" variant="subtle" px={3} py={1} borderRadius="full">
+                                            {t.status.active}
+                                        </Badge>
+                                    </Flex>
+                                </VStack>
+
+                                {/* Decorative Element */}
+                                <Box
+                                    position="absolute"
+                                    top={0}
+                                    left={0}
+                                    w="100%"
+                                    h="4px"
+                                    bgGradient="linear(to-r, purple.400, pink.400)"
+                                />
+                            </Box>
+                        ))
                     )}
-                </button>
-            </div>
+                </SimpleGrid>
+            </Box>
 
-            {error && (
-                <div className="association-alert association-alert-error">
-                    <FaExclamationCircle />
-                    <span>{error}</span>
-                </div>
-            )}
+            {/* Form Drawer */}
+            <Drawer isOpen={isOpen} placement="right" size="md" onClose={handleCancel}>
+                <DrawerOverlay />
+                <DrawerContent>
+                    <DrawerCloseButton />
+                    <DrawerHeader borderBottomWidth="1px" bg="purple.50">
+                        <Heading size="md" color="purple.600">
+                            {editingAssociation ? t.editAssociation : t.addAssociation}
+                        </Heading>
+                    </DrawerHeader>
 
-            {successMessage && (
-                <div className="association-alert association-alert-success">
-                    <FaCheckCircle />
-                    <span>{successMessage}</span>
-                </div>
-            )}
+                    <DrawerBody>
+                        <VStack spacing={6} as="form" onSubmit={handleSubmit} py={4}>
+                            <FormControl>
+                                <FormLabel>
+                                    <HStack spacing={2}>
+                                        <FaUser />
+                                        <Text>{t.form.username}</Text>
+                                    </HStack>
+                                </FormLabel>
+                                <Input
+                                    name="username"
+                                    value={formData.username}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </FormControl>
 
-            {showForm && (
-                <div className="association-form-card">
-                    <form onSubmit={handleSubmit}>
-                        <div className="association-form-grid">
-                            <div className="form-group">
-                                <label>
-                                    <FaUser />
-                                    <span>{t.form.username}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        name="username"
-                                        value={formData.username}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                            </div>
+                            <FormControl>
+                                <FormLabel>
+                                    <HStack spacing={2}>
+                                        <FaEnvelope />
+                                        <Text>{t.form.email}</Text>
+                                    </HStack>
+                                </FormLabel>
+                                <Input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaEnvelope />
-                                    <span>{t.form.email}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                            </div>
+                            <FormControl>
+                                <FormLabel>
+                                    <HStack spacing={2}>
+                                        <FaLock />
+                                        <Text>
+                                            {editingAssociation ? t.form.newPassword : t.form.password}
+                                        </Text>
+                                    </HStack>
+                                </FormLabel>
+                                <Input
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    required={!editingAssociation}
+                                />
+                            </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaLock />
-                                    <span>{editingAssociation ? t.form.newPassword : t.form.password}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        required={!editingAssociation}
-                                    />
-                                </div>
-                            </div>
+                            <FormControl>
+                                <FormLabel>
+                                    <HStack spacing={2}>
+                                        <FaBuilding />
+                                        <Text>{t.form.name}</Text>
+                                    </HStack>
+                                </FormLabel>
+                                <Input
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaBuilding />
-                                    <span>{t.form.name}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                            </div>
+                            <FormControl>
+                                <FormLabel>
+                                    <HStack spacing={2}>
+                                        <FaCity />
+                                        <Text>{t.form.city}</Text>
+                                    </HStack>
+                                </FormLabel>
+                                <Input
+                                    name="ville"
+                                    value={formData.ville}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaCity />
-                                    <span>{t.form.city}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        name="ville"
-                                        value={formData.ville}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                            </div>
+                            <FormControl>
+                                <FormLabel>
+                                    <HStack spacing={2}>
+                                        <FaUserTie />
+                                        <Text>{t.form.responsible}</Text>
+                                    </HStack>
+                                </FormLabel>
+                                <Input
+                                    name="responsableName"
+                                    value={formData.responsableName}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaUserTie />
-                                    <span>{t.form.responsible}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        name="responsableName"
-                                        value={formData.responsableName}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                            </div>
+                            <FormControl>
+                                <FormLabel>
+                                    <HStack spacing={2}>
+                                        <FaPhone />
+                                        <Text>{t.form.phone}</Text>
+                                    </HStack>
+                                </FormLabel>
+                                <Input
+                                    name="responsablePhone"
+                                    value={formData.responsablePhone}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaPhone />
-                                    <span>{t.form.phone}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
-                                        name="responsablePhone"
-                                        value={formData.responsablePhone}
-                                        onChange={handleInputChange}
-                                        className="form-input"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="association-form-group">
-                                <label htmlFor="imageFile">
-                                    <FaImage />
-                                    <span>{t.form.uploadImage}</span>
-                                </label>
-                                <input
+                            <FormControl>
+                                <FormLabel>
+                                    <HStack spacing={2}>
+                                        <FaImage />
+                                        <Text>{t.form.uploadImage}</Text>
+                                    </HStack>
+                                </FormLabel>
+                                <Input
                                     type="file"
-                                    id="imageFile"
-                                    name="imageFile"
-                                    className="association-file-input"
                                     accept="image/*"
                                     onChange={(e) => setFormData(prev => ({...prev, imageFile: e.target.files[0]}))}
+                                    p={1}
                                 />
-                            </div>
-                        </div>
+                            </FormControl>
 
-                        <div className="association-form-actions">
-                            <button type="submit" className="association-btn-save" disabled={buttonLoading}>
-                                {buttonLoading ? (
-                                    <>
-                                        <FaSpinner className="fa-spin" />
-                                        <span>{t.saving}</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <FaSave />
-                                        <span>{editingAssociation ? t.form.update : t.form.save}</span>
-                                    </>
-                                )}
-                            </button>
-                            <button type="button" className="association-btn-cancel" onClick={handleCancel}>
-                                <FaTimes />
-                                <span>{t.closeForm}</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+                            <HStack spacing={4} w="100%" pt={4}>
+                                <Button
+                                    colorScheme="purple"
+                                    leftIcon={buttonLoading ? <Box className="loading-spinner" /> : <FaSave />}
+                                    onClick={handleSubmit}
+                                    isLoading={buttonLoading}
+                                    flex={1}
+                                >
+                                    {editingAssociation ? t.form.update : t.form.save}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={handleCancel}
+                                    leftIcon={<FaTimes />}
+                                    flex={1}
+                                >
+                                    {t.cancel}
+                                </Button>
+                            </HStack>
+                        </VStack>
+                    </DrawerBody>
+                </DrawerContent>
+            </Drawer>
 
-            {globalLoading ? (
-                <div className="association-loading">
-                    <FaSpinner className="fa-spin" />
-                    <p>{t.loading}</p>
-                </div>
-            ) : (
-                <div className="association-table-wrapper">
-                    <div className="association-table-container">
-                        <table className="association-table">
-                            <thead>
-                            <tr>
-                                <th><FaUser className="me-2" />{t.table.username}</th>
-                                <th><FaEnvelope className="me-2" />{t.table.email}</th>
-                                <th><FaBuilding className="me-2" />{t.table.name}</th>
-                                <th><FaCity className="me-2" />{t.table.city}</th>
-                                <th><FaUserTie className="me-2" />{t.table.responsible}</th>
-                                <th><FaPhone className="me-2" />{t.table.phone}</th>
-                                <th><FaImage className="me-2" />{t.table.image}</th>
-                                <th><FaCog className="me-2" />{t.table.actions}</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {associations.length > 0 ? (
-                                associations.map((assoc) => (
-                                    <tr key={assoc.id}>
-                                        <td>{assoc.username}</td>
-                                        <td>{assoc.email}</td>
-                                        <td>{assoc.name}</td>
-                                        <td>{assoc.ville}</td>
-                                        <td>{assoc.responsableName}</td>
-                                        <td>{assoc.responsablePhone}</td>
-                                        <td>
-                                            {assoc.imageFileName && (
-                                                <img
-                                                    src={`http://localhost:8080/images/${assoc.imageFileName}`}
-                                                    alt="Association"
-                                                    className="association-img"
-                                                />
-                                            )}
-                                        </td>
-                                        <td>
-                                            <div className="association-actions">
-                                                <button
-                                                    className="association-btn-edit"
-                                                    onClick={() => handleEdit(assoc)}
-                                                >
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    className="association-btn-delete"
-                                                    onClick={() => handleDelete(assoc.id)}
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="8" className="association-empty">
-                                        <FaBuilding />
-                                        <p>{t.noAssociations}</p>
-                                    </td>
-                                </tr>
-                            )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-        </div>
+            <style jsx global>{`
+                .loading-spinner {
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid #805AD5;
+                    border-top-color: transparent;
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                }
+
+                @keyframes spin {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+            `}</style>
+        </Container>
     );
 };
 

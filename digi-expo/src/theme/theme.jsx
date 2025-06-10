@@ -1,4 +1,5 @@
 import { createTheme } from '@mui/material/styles';
+import { extendTheme } from '@chakra-ui/react';
 
 const theme = createTheme({
     palette: {
@@ -141,6 +142,62 @@ const theme = createTheme({
             },
         },
     },
+});
+
+const colors = {
+    dxc: {
+        purple: {
+            50: '#f3e6ff',
+            100: '#d9b3ff',
+            200: '#bf80ff',
+            300: '#a64dff',
+            400: '#8c1aff',
+            500: '#7300e6', // Main DXC Purple
+            600: '#5c00b8',
+            700: '#44008a',
+            800: '#2d005c',
+            900: '#15002e',
+        },
+    },
+};
+
+const components = {
+    Button: {
+        defaultProps: {
+            colorScheme: 'dxc.purple',
+        },
+        variants: {
+            solid: (props) => ({
+                bg: 'dxc.purple.500',
+                color: 'white',
+                _hover: {
+                    bg: 'dxc.purple.600',
+                },
+            }),
+            outline: (props) => ({
+                borderColor: 'dxc.purple.500',
+                color: 'dxc.purple.500',
+                _hover: {
+                    bg: 'dxc.purple.50',
+                },
+            }),
+        },
+    },
+    Select: {
+        defaultProps: {
+            focusBorderColor: 'dxc.purple.500',
+        },
+    },
+    Spinner: {
+        defaultProps: {
+            color: 'dxc.purple.500',
+        },
+    },
+};
+
+const theme = extendTheme({
+    colors,
+    components,
 });
 
 export default theme;

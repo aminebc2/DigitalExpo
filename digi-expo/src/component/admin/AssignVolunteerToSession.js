@@ -1,10 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import AdminService from "../../service/AdminService";
 import { useLanguage } from '../../context/LanguageContext';
-import { FaSpinner, FaExclamationCircle, FaTimes, FaCheck } from 'react-icons/fa';
-import './AssignVolunteerToSession.css';
+import {
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Select,
+    VStack,
+    HStack,
+    useToast,
+    Text,
+    Icon,
+    Spinner,
+    Alert,
+    AlertIcon,
+    useColorModeValue,
+    Heading,
+    Card,
+    CardHeader,
+    CardBody,
+    CardFooter,
+    Divider,
+    Tag,
+    TagLeftIcon,
+    TagLabel,
+    Tooltip
+} from '@chakra-ui/react';
+import {
+    FaUserPlus,
+    FaUsers,
+    FaTimes,
+    FaCheck,
+    FaExclamationCircle,
+    FaUserFriends
+} from 'react-icons/fa';
 
-// Translations object
 const translations = {
     fr: {
         loading: "Chargement...",
@@ -18,7 +49,11 @@ const translations = {
         assignError: "Échec de l'attribution du bénévole. Veuillez réessayer.",
         cancel: "Annuler",
         assign: "Attribuer",
-        assigning: "Attribution en cours..."
+        assigning: "Attribution en cours...",
+        totalVolunteers: "Bénévoles",
+        successTitle: "Succès",
+        errorTitle: "Erreur",
+        assignSuccess: "Bénévole attribué avec succès"
     },
     en: {
         loading: "Loading...",
@@ -31,8 +66,12 @@ const translations = {
         pleaseSelect: "Please select a volunteer",
         assignError: "Failed to assign volunteer. Please try again.",
         cancel: "Cancel",
-        assign: "Assign Volunteer",
-        assigning: "Assigning..."
+        assign: "Assign",
+        assigning: "Assigning...",
+        totalVolunteers: "Volunteers",
+        successTitle: "Success",
+        errorTitle: "Error",
+        assignSuccess: "Volunteer assigned successfully"
     }
 };
 
@@ -44,6 +83,17 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
     const [submitting, setSubmitting] = useState(false);
     const { language } = useLanguage();
     const t = translations[language];
+    const toast = useToast();
+
+    // Theme colors
+    const bgCard = useColorModeValue('white', 'gray.800');
+    const borderColor = useColorModeValue('dxc.purple.100', 'dxc.purple.800');
+    const headerBg = useColorModeValue('white', 'gray.800');
+    const textColor = useColorModeValue('gray.800', 'white');
+    const iconColor = 'dxc.purple.500';
+    const selectBg = useColorModeValue('white', 'gray.700');
+    const footerBg = useColorModeValue('gray.50', 'gray.900');
+    const mutedIconColor = 'dxc.purple.400';
 
     useEffect(() => {
         if (!associationId) {
@@ -69,99 +119,217 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                 }
             } catch (error) {
                 setError(error.message || t.loadError);
+                toast({
+                    title: t.errorTitle,
+                    description: error.message || t.loadError,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top-right'
+                });
             }
             setLoading(false);
         };
 
         fetchVolunteers();
-    }, [associationId, t.noAssociation, t.noVolunteers, t.loadError]);
+    }, [associationId, t.noAssociation, t.noVolunteers, t.loadError, toast]);
 
     const handleAssign = async () => {
         if (!selectedVolunteerId) {
-            setError(t.pleaseSelect);
+            toast({
+                title: t.errorTitle,
+                description: t.pleaseSelect,
+                status: 'warning',
+                duration: 3000,
+                isClosable: true,
+                position: 'top-right'
+            });
             return;
         }
 
         setSubmitting(true);
         try {
             await AdminService.assignVolunteerToSession(sessionId, selectedVolunteerId);
+            toast({
+                title: t.successTitle,
+                description: t.assignSuccess,
+                status: 'success',
+                duration: 3000,
+                isClosable: true,
+                position: 'top-right'
+            });
             onClose();
         } catch (err) {
-            setError(t.assignError);
+            toast({
+                title: t.errorTitle,
+                description: t.assignError,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top-right'
+            });
             console.error('Error assigning volunteer:', err);
         } finally {
             setSubmitting(false);
         }
     };
 
+    const renderLoadingState = () => (
+        <Card bg={bgCard} rounded="2xl" shadow="xl" borderWidth="1px" borderColor={borderColor} overflow="hidden">
+            <CardBody>
+                <VStack spacing={6} py={12}>
+                    <Spinner
+                        size="xl"
+                        color="dxc.purple.500"
+                        thickness="4px"
+                        speed="0.8s"
+                        emptyColor="gray.200"
+                    />
+                    <Text
+                        color={textColor}
+                        fontSize="lg"
+                        fontWeight="medium"
+                    >
+                        {t.loading}
+                    </Text>
+                </VStack>
+            </CardBody>
+        </Card>
+    );
+
     if (loading) {
-        return (
-            <div className="assign-volunteer__loading">
-                <FaSpinner className="assign-volunteer__spinner" />
-                <span>{t.loading}</span>
-            </div>
-        );
+        return renderLoadingState();
     }
 
     return (
-        <div className="assign-volunteer">
-            {error && (
-                <div className="assign-volunteer__error">
-                    <FaExclamationCircle className="assign-volunteer__error-icon" />
-                    <span>{error}</span>
-                </div>
-            )}
+        <Card
+            bg={bgCard}
+            rounded="2xl"
+            shadow="xl"
+            borderWidth="1px"
+            borderColor={borderColor}
+            overflow="hidden"
+        >
+            <CardHeader bg={headerBg} py={6} px={6} borderBottom="1px" borderColor={borderColor}>
+                <HStack spacing={4} justify="space-between">
+                    <HStack spacing={3}>
+                        <Icon as={FaUserPlus} boxSize={7} color={iconColor} />
+                        <Heading size="lg" color={textColor} fontWeight="bold">
+                            {t.selectVolunteer}
+                        </Heading>
+                    </HStack>
+                    <Tag size="lg" variant="subtle" colorScheme="purple" borderRadius="full" px={4} py={2}>
+                        <TagLeftIcon as={FaUserFriends} color={iconColor} />
+                        <TagLabel>{volunteers.length} {t.totalVolunteers}</TagLabel>
+                    </Tag>
+                </HStack>
+            </CardHeader>
 
-            <div className="assign-volunteer__form-group">
-                <label className="assign-volunteer__label">{t.selectVolunteer}</label>
-                <select
-                    className="assign-volunteer__select"
-                    onChange={(e) => setSelectedVolunteerId(e.target.value)}
-                    value={selectedVolunteerId}
-                    disabled={volunteers.length === 0}
-                >
-                    <option value="">{t.chooseVolunteer}</option>
-                    {volunteers.map((volunteer, index) => (
-                        <option
-                            key={`volunteer-${volunteer.id}-${index}`}
-                            value={volunteer.id || ''}
+            <CardBody pt={6} px={6}>
+                {error && (
+                    <Alert
+                        status="error"
+                        mb={6}
+                        borderRadius="xl"
+                        variant="left-accent"
+                        borderLeftWidth="4px"
+                    >
+                        <AlertIcon as={FaExclamationCircle} color="red.500" />
+                        <Text color={textColor} fontWeight="medium">{error}</Text>
+                    </Alert>
+                )}
+
+                <VStack spacing={6} align="stretch">
+                    <FormControl>
+                        <FormLabel>
+                            <HStack spacing={2}>
+                                <Icon as={FaUsers} color={iconColor} />
+                                <Text color={textColor} fontWeight="medium">
+                                    {t.selectVolunteer}
+                                </Text>
+                            </HStack>
+                        </FormLabel>
+                        <Tooltip
+                            label={volunteers.length === 0 ? t.noVolunteers : t.chooseVolunteer}
+                            hasArrow
+                            isDisabled={volunteers.length > 0 && !submitting}
                         >
-                            {volunteer.username || t.unknownVolunteer} (#{index + 1})
-                        </option>
-                    ))}
-                </select>
-            </div>
+                            <Select
+                                placeholder={t.chooseVolunteer}
+                                value={selectedVolunteerId}
+                                onChange={(e) => setSelectedVolunteerId(e.target.value)}
+                                isDisabled={volunteers.length === 0 || submitting}
+                                size="lg"
+                                bg={selectBg}
+                                borderRadius="xl"
+                                borderColor={borderColor}
+                                _hover={{
+                                    borderColor: 'dxc.purple.300'
+                                }}
+                                _focus={{
+                                    borderColor: 'dxc.purple.500',
+                                    boxShadow: '0 0 0 1px var(--chakra-colors-dxc-purple-500)'
+                                }}
+                            >
+                                {volunteers.map((volunteer, index) => (
+                                    <option
+                                        key={`volunteer-${volunteer.id}-${index}`}
+                                        value={volunteer.id || ''}
+                                    >
+                                        {volunteer.username || t.unknownVolunteer} (#{index + 1})
+                                    </option>
+                                ))}
+                            </Select>
+                        </Tooltip>
+                    </FormControl>
+                </VStack>
+            </CardBody>
 
-            <div className="assign-volunteer__actions">
-                <button
-                    className="manage-btn manage-btn--secondary"
-                    onClick={onClose}
-                    type="button"
-                >
-                    <FaTimes className="manage-btn__icon" />
-                    {t.cancel}
-                </button>
-                <button
-                    className="manage-btn manage-btn--primary"
-                    onClick={handleAssign}
-                    disabled={!selectedVolunteerId || submitting}
-                    type="button"
-                >
-                    {submitting ? (
-                        <>
-                            <FaSpinner className="manage-spinner" />
-                            <span>{t.assigning}</span>
-                        </>
-                    ) : (
-                        <>
-                            <FaCheck className="manage-btn__icon" />
-                            <span>{t.assign}</span>
-                        </>
-                    )}
-                </button>
-            </div>
-        </div>
+            <Divider borderColor={borderColor} />
+
+            <CardFooter bg={footerBg} py={4} px={6}>
+                <HStack spacing={4} justify="flex-end" width="100%">
+                    <Button
+                        variant="outline"
+                        onClick={onClose}
+                        leftIcon={<Icon as={FaTimes} color={iconColor} />}
+                        isDisabled={submitting}
+                        size="lg"
+                        borderRadius="xl"
+                        borderColor="dxc.purple.500"
+                        color="dxc.purple.500"
+                        _hover={{
+                            bg: 'dxc.purple.50'
+                        }}
+                        fontWeight="medium"
+                    >
+                        {t.cancel}
+                    </Button>
+                    <Button
+                        bg="dxc.purple.500"
+                        color="white"
+                        onClick={handleAssign}
+                        isLoading={submitting}
+                        loadingText={t.assigning}
+                        leftIcon={<Icon as={FaCheck} color="white" />}
+                        isDisabled={!selectedVolunteerId || submitting}
+                        size="lg"
+                        borderRadius="xl"
+                        _hover={{
+                            bg: 'dxc.purple.600'
+                        }}
+                        _active={{
+                            bg: 'dxc.purple.700'
+                        }}
+                        fontWeight="medium"
+                    >
+                        {t.assign}
+                    </Button>
+                </HStack>
+            </CardFooter>
+        </Card>
     );
 };
 
 export default AssignVolunteerToSession;
+

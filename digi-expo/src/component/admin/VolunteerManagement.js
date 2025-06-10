@@ -2,26 +2,58 @@ import React, { useState, useEffect } from 'react';
 import AdminService from '../../service/AdminService';
 import { useLanguage } from '../../context/LanguageContext';
 import {
+    Box,
+    Button,
+    Container,
+    FormControl,
+    FormLabel,
+    Grid,
+    Heading,
+    Input,
+    VStack,
+    HStack,
+    Text,
+    useColorModeValue,
+    IconButton,
+    Flex,
+    Drawer,
+    DrawerBody,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    useDisclosure,
+    SimpleGrid,
+    Avatar,
+    Stack,
+    useToast,
+    Badge,
+    Icon,
+    Checkbox,
+    CheckboxGroup,
+    Divider,
+    InputGroup,
+    InputLeftElement,
+} from '@chakra-ui/react';
+import {
     FaPlus,
     FaEdit,
     FaTrash,
     FaTimes,
     FaSave,
-    FaSpinner,
     FaUser,
     FaEnvelope,
     FaLock,
     FaPhone,
     FaCalendar,
-    FaExclamationCircle,
-    FaCheckCircle,
-    FaCog,
+    FaSearch,
     FaUserClock
 } from 'react-icons/fa';
-import './VolunteerManagement.css';
 
 const translations = {
     fr: {
+        title: "Gestion des Bénévoles",
+        subtitle: "Gérer et surveiller vos bénévoles",
         loading: "Chargement des bénévoles...",
         noVolunteers: "Aucun bénévole trouvé",
         addVolunteer: "Ajouter un Bénévole",
@@ -37,6 +69,11 @@ const translations = {
         saveFailed: "Échec de l'enregistrement du bénévole",
         passwordRequired: "Le mot de passe est requis pour créer un nouveau bénévole.",
         networkError: "Erreur réseau ou serveur lors de l'enregistrement du bénévole",
+        searchPlaceholder: "Rechercher des bénévoles...",
+        status: {
+            active: "Actif",
+            volunteer: "Bénévole"
+        },
         form: {
             username: "Nom d'utilisateur",
             email: "Email",
@@ -63,6 +100,8 @@ const translations = {
         }
     },
     en: {
+        title: "Volunteer Management",
+        subtitle: "Manage and monitor your volunteers",
         loading: "Loading volunteers...",
         noVolunteers: "No volunteers found",
         addVolunteer: "Add Volunteer",
@@ -78,6 +117,11 @@ const translations = {
         saveFailed: "Failed to save volunteer",
         passwordRequired: "Password is required for creating a new volunteer.",
         networkError: "Network or server error while saving the volunteer",
+        searchPlaceholder: "Search volunteers...",
+        status: {
+            active: "Active",
+            volunteer: "Volunteer"
+        },
         form: {
             username: "Username",
             email: "Email",
@@ -109,13 +153,20 @@ const VolunteerManagement = () => {
     const [volunteers, setVolunteers] = useState([]);
     const [formData, setFormData] = useState(initialFormState());
     const [editingVolunteer, setEditingVolunteer] = useState(null);
-    const [showForm, setShowForm] = useState(false);
     const [globalLoading, setGlobalLoading] = useState(false);
     const [buttonLoading, setButtonLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const { language } = useLanguage();
+    const toast = useToast();
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const t = translations[language];
+
+    // Theme colors
+    const bgMain = useColorModeValue('gray.50', 'gray.900');
+    const bgCard = useColorModeValue('white', 'gray.800');
+    const borderColor = useColorModeValue('gray.200', 'gray.700');
+    const textColor = useColorModeValue('gray.800', 'white');
+    const secondaryTextColor = useColorModeValue('gray.600', 'gray.400');
 
     function initialFormState() {
         return {
@@ -134,15 +185,27 @@ const VolunteerManagement = () => {
 
     const fetchVolunteers = async () => {
         setGlobalLoading(true);
-        setError('');
         try {
             const result = await AdminService.getAllVolunteers();
             setVolunteers(result.data);
             if (result.data.length === 0) {
-                setError(t.noVolunteers);
+                toast({
+                    title: t.noVolunteers,
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top-right'
+                });
             }
         } catch (err) {
-            setError(err.message || t.saveFailed);
+            toast({
+                title: t.saveFailed,
+                description: err.message,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top-right'
+            });
         } finally {
             setGlobalLoading(false);
         }
@@ -153,33 +216,16 @@ const VolunteerManagement = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleCheckboxChange = (e) => {
-        const { value, checked } = e.target;
-
-        setFormData(prevData => {
-            const currentDays = Array.isArray(prevData.availableDays) ? [...prevData.availableDays] : [];
-
-            if (checked && !currentDays.includes(value)) {
-                currentDays.push(value);
-            } else if (!checked) {
-                const index = currentDays.indexOf(value);
-                if (index > -1) {
-                    currentDays.splice(index, 1);
-                }
-            }
-
-            return {
-                ...prevData,
-                availableDays: currentDays
-            };
-        });
+    const handleCheckboxChange = (selectedDays) => {
+        setFormData(prev => ({
+            ...prev,
+            availableDays: selectedDays
+        }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setButtonLoading(true);
-        setError('');
-        setSuccessMessage('');
 
         try {
             const payload = { ...formData };
@@ -193,7 +239,13 @@ const VolunteerManagement = () => {
                 response = await AdminService.updateVolunteer(editingVolunteer.id, payload);
             } else {
                 if (!payload.password) {
-                    setError(t.passwordRequired);
+                    toast({
+                        title: t.passwordRequired,
+                        status: 'warning',
+                        duration: 5000,
+                        isClosable: true,
+                        position: 'top-right'
+                    });
                     setButtonLoading(false);
                     return;
                 }
@@ -201,18 +253,29 @@ const VolunteerManagement = () => {
             }
 
             if (response && (response.statusCode === 200 || response.statusCode === 201)) {
-                setSuccessMessage(response.message || t.saveSuccess);
+                toast({
+                    title: t.saveSuccess,
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top-right'
+                });
                 await fetchVolunteers();
-                setShowForm(false);
+                onClose();
                 setFormData(initialFormState());
                 setEditingVolunteer(null);
             } else {
-                console.error('Unexpected response:', response);
-                setError(response?.message || t.saveFailed);
+                throw new Error(response?.message || t.saveFailed);
             }
         } catch (err) {
-            console.error('Error saving volunteer:', err);
-            setError(err.response?.data?.message || err.message || t.networkError);
+            toast({
+                title: t.networkError,
+                description: err.message,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top-right'
+            });
         } finally {
             setButtonLoading(false);
         }
@@ -228,25 +291,36 @@ const VolunteerManagement = () => {
             availableDays: Array.isArray(volunteer.availableDays) ? volunteer.availableDays : []
         });
         setEditingVolunteer(volunteer);
-        setShowForm(true);
+        onOpen();
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm(t.deleteConfirm)) return;
 
         setGlobalLoading(true);
-        setError('');
         try {
             const response = await AdminService.deleteVolunteer(id);
             if (response && response.statusCode === 200) {
-                setSuccessMessage(response.message || t.deleteSuccess);
+                toast({
+                    title: t.deleteSuccess,
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top-right'
+                });
                 await fetchVolunteers();
             } else {
-                setError(response?.message || t.deleteFailed);
+                throw new Error(response?.message || t.deleteFailed);
             }
         } catch (err) {
-            console.error('Error deleting volunteer:', err);
-            setError(err.response?.data?.message || err.message || t.networkError);
+            toast({
+                title: t.networkError,
+                description: err.message,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top-right'
+            });
         } finally {
             setGlobalLoading(false);
         }
@@ -255,224 +329,331 @@ const VolunteerManagement = () => {
     const handleCancel = () => {
         setFormData(initialFormState());
         setEditingVolunteer(null);
-        setShowForm(false);
-        setError('');
-        setSuccessMessage('');
+        onClose();
     };
 
+    const filteredVolunteers = volunteers.filter(vol =>
+        vol.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vol.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vol.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <div className="volunteer-management">
-            <div className="volunteer-header">
-                <button
-                    className="volunteer-add-btn"
-                    onClick={() => {
-                        handleCancel();
-                        setShowForm(prev => !prev);
-                    }}
-                >
-                    {showForm ? (
-                        <>
-                            <FaTimes/>
-                            <span>{t.cancel}</span>
-                        </>
-                    ) : (
-                        <>
-                            <FaPlus/>
-                            <span>{t.addVolunteer}</span>
-                        </>
-                    )}
-                </button>
-            </div>
+        <Box bg={bgMain} minH="100vh" py={8}>
+            <Container maxW="container.xl">
+                {/* Header Section */}
+                <Box mb={8}>
+                    <Flex justify="space-between" align="center" mb={6}>
+                        <VStack align="start" spacing={1}>
+                            <Heading size="lg" color="purple.600">
+                                {t.title}
+                            </Heading>
+                            <Text color={secondaryTextColor}>
+                                {t.subtitle}
+                            </Text>
+                        </VStack>
+                        <Button
+                            leftIcon={<FaPlus />}
+                            onClick={onOpen}
+                            colorScheme="purple"
+                            size="lg"
+                            rounded="full"
+                            px={8}
+                        >
+                            {t.addVolunteer}
+                        </Button>
+                    </Flex>
 
-            {error && (
-                <div className="volunteer-alert volunteer-alert-error">
-                    <FaExclamationCircle />
-                    <span>{error}</span>
-                </div>
-            )}
+                    {/* Search Bar */}
+                    <InputGroup maxW="400px">
+                        <InputLeftElement pointerEvents="none">
+                            <FaSearch color="gray.300" />
+                        </InputLeftElement>
+                        <Input
+                            placeholder={t.searchPlaceholder}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            bg={bgCard}
+                            borderRadius="full"
+                        />
+                    </InputGroup>
+                </Box>
 
-            {successMessage && (
-                <div className="volunteer-alert volunteer-alert-success">
-                    <FaCheckCircle />
-                    <span>{successMessage}</span>
-                </div>
-            )}
+                {/* Volunteers Grid */}
+                {globalLoading ? (
+                    <Flex justify="center" align="center" h="400px">
+                        <VStack spacing={4}>
+                            <Box className="loading-spinner" />
+                            <Text color={secondaryTextColor}>{t.loading}</Text>
+                        </VStack>
+                    </Flex>
+                ) : (
+                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+                        {filteredVolunteers.map((vol) => (
+                            <Box
+                                key={vol.id}
+                                bg={bgCard}
+                                p={6}
+                                rounded="xl"
+                                shadow="sm"
+                                borderWidth="1px"
+                                borderColor={borderColor}
+                                transition="all 0.2s"
+                                _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
+                                position="relative"
+                                overflow="hidden"
+                            >
+                                {/* Top Action Buttons */}
+                                <Flex justify="flex-end" position="absolute" top={2} right={2} zIndex={2}>
+                                    <IconButton
+                                        icon={<FaEdit />}
+                                        variant="ghost"
+                                        colorScheme="purple"
+                                        onClick={() => handleEdit(vol)}
+                                        aria-label="Edit"
+                                        size="sm"
+                                        mr={2}
+                                    />
+                                    <IconButton
+                                        icon={<FaTrash />}
+                                        variant="ghost"
+                                        colorScheme="red"
+                                        onClick={() => handleDelete(vol.id)}
+                                        aria-label="Delete"
+                                        size="sm"
+                                    />
+                                </Flex>
 
-            {showForm && (
-                <div className="volunteer-form-card">
-                    <form onSubmit={handleSubmit}>
-                        <div className="volunteer-form-grid">
-                            <div className="form-group">
-                                <label>
-                                    <FaUser />
-                                    <span>{t.form.username}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
+                                {/* Main Content */}
+                                <VStack spacing={6} align="stretch">
+                                    {/* Header with Avatar and Name */}
+                                    <Flex align="center" mb={4}>
+                                        <Avatar
+                                            size="lg"
+                                            name={vol.username}
+                                            mr={4}
+                                        />
+                                        <Box>
+                                            <Heading size="md" color={textColor} mb={1}>
+                                                {vol.username}
+                                            </Heading>
+                                            <Text color="purple.500" fontSize="sm" fontWeight="medium">
+                                                {t.status.volunteer}
+                                            </Text>
+                                        </Box>
+                                    </Flex>
+
+                                    {/* Information Grid */}
+                                    <SimpleGrid columns={1} spacing={4}>
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.form.email}
+                                            </Text>
+                                            <Flex align="center" color={textColor}>
+                                                <Icon as={FaEnvelope} mr={2} color="blue.500" />
+                                                <Text fontSize="sm" isTruncated>
+                                                    {vol.email}
+                                                </Text>
+                                            </Flex>
+                                        </Box>
+
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.form.phone}
+                                            </Text>
+                                            <Flex align="center" color={textColor}>
+                                                <Icon as={FaPhone} mr={2} color="green.500" />
+                                                <Text fontSize="sm">
+                                                    {vol.phoneNumber}
+                                                </Text>
+                                            </Flex>
+                                        </Box>
+
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.form.availableDays}
+                                            </Text>
+                                            <Flex wrap="wrap" gap={2}>
+                                                {vol.availableDays?.map(day => (
+                                                    <Badge
+                                                        key={day}
+                                                        colorScheme="purple"
+                                                        variant="subtle"
+                                                        px={2}
+                                                        py={1}
+                                                        borderRadius="full"
+                                                        fontSize="xs"
+                                                    >
+                                                        {t.days[day]}
+                                                    </Badge>
+                                                ))}
+                                            </Flex>
+                                        </Box>
+                                    </SimpleGrid>
+
+                                    {/* Status Badge */}
+                                    <Flex mt={4} gap={2}>
+                                        <Badge colorScheme="green" variant="subtle" px={3} py={1} borderRadius="full">
+                                            {t.status.active}
+                                        </Badge>
+                                    </Flex>
+                                </VStack>
+
+                                {/* Decorative Element */}
+                                <Box
+                                    position="absolute"
+                                    top={0}
+                                    left={0}
+                                    w="100%"
+                                    h="4px"
+                                    bgGradient="linear(to-r, purple.400, pink.400)"
+                                />
+                            </Box>
+                        ))}
+                    </SimpleGrid>
+                )}
+
+                {/* Form Drawer */}
+                <Drawer isOpen={isOpen} placement="right" size="md" onClose={handleCancel}>
+                    <DrawerOverlay />
+                    <DrawerContent>
+                        <DrawerCloseButton />
+                        <DrawerHeader borderBottomWidth="1px" bg="purple.50">
+                            <Heading size="md" color="purple.600">
+                                {editingVolunteer ? t.update : t.addVolunteer}
+                            </Heading>
+                        </DrawerHeader>
+
+                        <DrawerBody>
+                            <VStack spacing={6} as="form" onSubmit={handleSubmit} py={4}>
+                                <FormControl>
+                                    <FormLabel>
+                                        <HStack spacing={2}>
+                                            <FaUser />
+                                            <Text>{t.form.username}</Text>
+                                        </HStack>
+                                    </FormLabel>
+                                    <Input
                                         name="username"
                                         value={formData.username}
                                         onChange={handleInputChange}
-                                        className="form-input"
                                         required
                                     />
-                                </div>
-                            </div>
+                                </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaEnvelope />
-                                    <span>{t.form.email}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
+                                <FormControl>
+                                    <FormLabel>
+                                        <HStack spacing={2}>
+                                            <FaEnvelope />
+                                            <Text>{t.form.email}</Text>
+                                        </HStack>
+                                    </FormLabel>
+                                    <Input
                                         type="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleInputChange}
-                                        className="form-input"
                                         required
                                     />
-                                </div>
-                            </div>
+                                </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaLock />
-                                    <span>{editingVolunteer ? t.form.newPassword : t.form.password}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
+                                <FormControl>
+                                    <FormLabel>
+                                        <HStack spacing={2}>
+                                            <FaLock />
+                                            <Text>
+                                                {editingVolunteer ? t.form.newPassword : t.form.password}
+                                            </Text>
+                                        </HStack>
+                                    </FormLabel>
+                                    <Input
                                         type="password"
                                         name="password"
                                         value={formData.password}
                                         onChange={handleInputChange}
-                                        className="form-input"
                                         required={!editingVolunteer}
                                     />
-                                </div>
-                            </div>
+                                </FormControl>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaPhone />
-                                    <span>{t.form.phone}</span>
-                                </label>
-                                <div className="input-group">
-                                    <input
-                                        type="text"
+                                <FormControl>
+                                    <FormLabel>
+                                        <HStack spacing={2}>
+                                            <FaPhone />
+                                            <Text>{t.form.phone}</Text>
+                                        </HStack>
+                                    </FormLabel>
+                                    <Input
                                         name="phoneNumber"
                                         value={formData.phoneNumber}
                                         onChange={handleInputChange}
-                                        className="form-input"
                                         required
                                     />
-                                </div>
-                            </div>
+                                </FormControl>
 
-                            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                                <label>
-                                    <FaCalendar />
-                                    <span>{t.form.availableDays}</span>
-                                </label>
-                                <div className="days-group">
-                                    {Object.keys(t.days).map(day => (
-                                        <label key={day} className="day-checkbox">
-                                            <input
-                                                type="checkbox"
-                                                name="availableDays"
-                                                value={day}
-                                                checked={Array.isArray(formData.availableDays) && formData.availableDays.includes(day)}
-                                                onChange={handleCheckboxChange}
-                                            />
-                                            <span>{t.days[day]}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                                <FormControl>
+                                    <FormLabel>
+                                        <HStack spacing={2}>
+                                            <FaCalendar />
+                                            <Text>{t.form.availableDays}</Text>
+                                        </HStack>
+                                    </FormLabel>
+                                    <CheckboxGroup
+                                        colorScheme="purple"
+                                        value={formData.availableDays}
+                                        onChange={handleCheckboxChange}
+                                    >
+                                        <SimpleGrid columns={{ base: 2, md: 3 }} spacing={4}>
+                                            {Object.entries(t.days).map(([day, label]) => (
+                                                <Checkbox key={day} value={day}>
+                                                    {label}
+                                                </Checkbox>
+                                            ))}
+                                        </SimpleGrid>
+                                    </CheckboxGroup>
+                                </FormControl>
 
-                        <div className="volunteer-form-actions">
-                            <button type="submit" className="volunteer-btn-save" disabled={buttonLoading}>
-                                {buttonLoading ? (
-                                    <>
-                                        <FaSpinner className="volunteer-spinner" />
-                                        <span>{t.saving}</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <FaSave />
-                                        <span>{editingVolunteer ? t.update : t.save}</span>
-                                    </>
-                                )}
-                            </button>
-                            <button type="button" className="volunteer-btn-cancel" onClick={handleCancel}>
-                                <FaTimes />
-                                <span>{t.closeForm}</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+                                <HStack spacing={4} w="100%" pt={4}>
+                                    <Button
+                                        colorScheme="purple"
+                                        leftIcon={buttonLoading ? <Box className="loading-spinner" /> : <FaSave />}
+                                        onClick={handleSubmit}
+                                        isLoading={buttonLoading}
+                                        flex={1}
+                                    >
+                                        {editingVolunteer ? t.update : t.save}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        onClick={handleCancel}
+                                        leftIcon={<FaTimes />}
+                                        flex={1}
+                                    >
+                                        {t.cancel}
+                                    </Button>
+                                </HStack>
+                            </VStack>
+                        </DrawerBody>
+                    </DrawerContent>
+                </Drawer>
+            </Container>
 
-            {globalLoading ? (
-                <div className="volunteer-loading">
-                    <FaSpinner className="volunteer-spinner" />
-                    <p>{t.loading}</p>
-                </div>
-            ) : (
-                <div className="volunteer-table-wrapper">
-                    <div className="volunteer-table-container">
-                        <table className="volunteer-table">
-                            <thead>
-                            <tr>
-                                <th><FaUser className="me-2" />{t.table.username}</th>
-                                <th><FaEnvelope className="me-2" />{t.table.email}</th>
-                                <th><FaPhone className="me-2" />{t.table.phone}</th>
-                                <th><FaCalendar className="me-2" />{t.table.availableDays}</th>
-                                <th><FaCog className="me-2" />{t.table.actions}</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {volunteers.length > 0 ? (
-                                volunteers.map((vol) => (
-                                    <tr key={vol.id}>
-                                        <td>{vol.username}</td>
-                                        <td>{vol.email}</td>
-                                        <td>{vol.phoneNumber}</td>
-                                        <td>{vol.availableDays?.map(day => t.days[day]).join(', ')}</td>
-                                        <td>
-                                            <div className="volunteer-actions">
-                                                <button
-                                                    className="volunteer-btn-edit"
-                                                    onClick={() => handleEdit(vol)}
-                                                >
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    className="volunteer-btn-delete"
-                                                    onClick={() => handleDelete(vol.id)}
-                                                >
-                                                    <FaTrash />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5" className="volunteer-empty">
-                                        <FaUser />
-                                        <p>{t.noVolunteers}</p>
-                                    </td>
-                                </tr>
-                            )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-        </div>
+            <style jsx global>{`
+                .loading-spinner {
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid #805AD5;
+                    border-top-color: transparent;
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                }
+
+                @keyframes spin {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+            `}</style>
+        </Box>
     );
 };
 
