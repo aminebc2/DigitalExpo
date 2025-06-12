@@ -23,6 +23,7 @@ import VolunteerProfile from "./component/volunteer/VolunteerProfile";
 import Associations from "./component/Association";
 import { LanguageProvider } from './context/LanguageContext';
 import theme from './theme/chakraTheme';
+import Aboutus from "./component/Aboutus";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -67,7 +68,7 @@ function AppRoutes() {
         <Routes>
             <Route path="/home" element={<Home />} />
             <Route path="/associations" element={<Associations />} />
-            {/*<Route path="/aboutus" element={<AboutUs/>}/>*/}
+            <Route path="/aboutus" element={<Aboutus/>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/unauthorized" element={<Unauthorized />} />

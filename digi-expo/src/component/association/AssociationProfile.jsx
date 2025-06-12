@@ -174,37 +174,14 @@ function AssociationProfile() {
 
     const handleSave = async () => {
         try {
-            let updatedAssociation;
-            let response;
+            const response = await AssociationService.updateAssociation(
+                associationId,
+                formData,
+                imageFile  // Pass the imageFile directly
+            );
 
-            if (imageFile) {
-                const formPayload = new FormData();
-                Object.entries(formData).forEach(([key, value]) => {
-                    if (value !== null && value !== undefined) {
-                        formPayload.append(key, value);
-                    }
-                });
-                formPayload.append("imageFile", imageFile);
-
-                response = await AssociationService.updateAssociationWithImage(associationId, formPayload);
-            } else {
-                const cleanFormData = Object.entries(formData).reduce((acc, [key, value]) => {
-                    if (value !== null && value !== undefined) {
-                        acc[key] = value;
-                    }
-                    return acc;
-                }, {});
-
-                response = await AssociationService.updateAssociation(associationId, cleanFormData);
-            }
-
-            if (response && (response.association || response.data)) {
-                updatedAssociation = response.association || response.data;
-            } else if (response && response.statusCode === 200) {
-                updatedAssociation = response;
-            }
-            if (updatedAssociation) {
-                // First show the success message
+            if (response && response.statusCode === 200) {
+                // Show success message
                 toast({
                     title: "Success",
                     description: "Profile updated successfully. Please login again.",
@@ -213,8 +190,7 @@ function AssociationProfile() {
                     isClosable: true,
                 });
 
-                // Call the logout function from your AuthContext
-                // This will clear the user and token from both state and localStorage
+                // Call the logout function from AuthContext
                 logout();
 
                 // Redirect to login page after a short delay
@@ -222,11 +198,10 @@ function AssociationProfile() {
                     navigate('/login');
                 }, 2000);
             } else {
-                throw new Error('No data returned from server');
+                throw new Error('Update failed');
             }
         } catch (err) {
             console.error('Update error:', err);
-            setError(t.updateFailed);
             toast({
                 title: "Error",
                 description: t.updateFailed,

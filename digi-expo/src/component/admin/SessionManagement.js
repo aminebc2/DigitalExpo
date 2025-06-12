@@ -85,7 +85,7 @@ const colors = {
         orange: '#F97316',
         gold: '#F59E0B',
         yellow: '#EAB308',
-        red: '#d30000'
+        red: '#c80e0e'
     }
 };
 
@@ -312,7 +312,7 @@ const SessionManagement = () => {
             case t.status.canceled:
                 return { bg: colors.accents.red, color: 'white' };
             default:
-                return { bg: colors.accents.orange, color: 'white' };
+                return { bg: colors.accents.yellow, color: 'white' };
         }
     };
 
@@ -406,7 +406,7 @@ const SessionManagement = () => {
                     <Alert
                         status="error"
                         borderRadius="lg"
-                        bg={colors.accents.orange}
+                        bg={colors.accents.yellow}
                         color="white"
                         border="none"
                     >
@@ -750,7 +750,7 @@ const SessionManagement = () => {
                     borderColor={colors.purple[200]}
                 >
                     <ModalHeader
-                        bg={colors.accents.orange}
+                        bg={colors.accents.red}
                         color="white"
                         borderTopRadius="2xl"
                         py={6}
@@ -819,7 +819,7 @@ const SessionManagement = () => {
                             </Button>
                             <Button
                                 leftIcon={loading ? <Spinner size="sm" /> : <FaTrash />}
-                                bg={colors.accents.orange}
+                                bg={colors.accents.red}
                                 color="white"
                                 _hover={{ bg: '#EA580C' }}
                                 borderRadius="lg"

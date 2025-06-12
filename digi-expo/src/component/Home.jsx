@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Container,
@@ -22,25 +23,28 @@ import {
     Wrap,
     WrapItem,
     Grid,
+    Divider,
 } from '@chakra-ui/react';
 import {
     FaBuilding,
-    FaArrowLeft,
     FaArrowRight,
     FaHandsHelping,
     FaHeart,
     FaPhone,
     FaChevronLeft,
     FaChevronRight,
+    FaLightbulb,
+    FaUsers,
+    FaStar,
+    FaArrowLeft
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { useLanguage } from '../context/LanguageContext';
-import GuestService from '../service/GuestService';
+import { useLanguage } from "../context/LanguageContext";
+import GuestService from "../service/GuestService";
 
 const MotionBox = motion(Box);
 const MotionFlex = motion(Flex);
 
-// Translations object remains the same
 const translations = {
     fr: {
         welcome: "Bienvenue à Digital Explorers",
@@ -52,7 +56,15 @@ const translations = {
         impactDesc: "Faites une réelle différence dans votre communauté locale",
         featuredAssociations: "Associations en Vedette",
         city: "Ville",
-        phone: "Téléphone"
+        phone: "Téléphone",
+        getStarted: "Commencer",
+        learnMore: "En Savoir Plus",
+        communityBuilding: "Construction Communautaire",
+        connectVolunteers: "Connectez-vous avec des bénévoles partageant les mêmes idées",
+        associations: "Associations",
+        volunteers: "Bénévoles",
+        sessions: "Sessions",
+        cities: "Villes"
     },
     en: {
         welcome: "Welcome to Digital Explorers",
@@ -64,7 +76,15 @@ const translations = {
         impactDesc: "Make a real difference in your local community",
         featuredAssociations: "Featured Associations",
         city: "City",
-        phone: "Phone"
+        phone: "Phone",
+        getStarted: "Get Started",
+        learnMore: "Learn More",
+        communityBuilding: "Community Building",
+        connectVolunteers: "Connect with like-minded volunteers",
+        associations: "Associations",
+        volunteers: "Volunteers",
+        sessions: "Sessions",
+        cities: "Cities"
     }
 };
 
@@ -75,6 +95,10 @@ const HomePage = () => {
     const [associations, setAssociations] = useState([]);
     const { language } = useLanguage();
     const t = translations[language];
+    const navigate = useNavigate();
+
+    // Add isAuthenticated check
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     // Color mode values
     const bgColor = useColorModeValue('white', 'gray.800');
@@ -90,6 +114,17 @@ const HomePage = () => {
         '/images/3.avif',
         '/images/4.jpg'
     ];
+
+    useEffect(() => {
+        // Check if user is authenticated
+        const token = localStorage.getItem('token');
+        setIsAuthenticated(!!token);
+    }, []);
+
+    // Handle login click
+    const handleLoginClick = () => {
+        navigate('/login');
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -127,7 +162,7 @@ const HomePage = () => {
 
     const isMobile = useBreakpointValue({ base: true, md: false });
 
-    // Add new animation variants
+    // Animation variants
     const containerVariants = {
         hidden: { opacity: 0 },
         show: {
@@ -143,312 +178,380 @@ const HomePage = () => {
         show: { opacity: 1, y: 0 }
     };
 
+    // Enhanced purple color scheme
+    const colors = {
+        purple: {
+            50: '#F8F5FF',
+            100: '#E9E3FF',
+            200: '#D1C2FF',
+            300: '#B49AFF',
+            400: '#9C74FF',
+            500: '#8445FF',
+            600: '#7028FF',
+            700: '#5B1AE6',
+            800: '#4A15BF',
+            900: '#3A1299',
+        }
+    };
+
     return (
-        <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>
+        <Box>
             {/* Hero Section */}
             <Box
+                bgGradient="linear(to-r, purple.800, purple.600)"
+                pt={24}
+                pb={32}
                 position="relative"
-                bg={headerBg}
-                py={20}
                 overflow="hidden"
             >
+                {/* Animated Background Elements */}
                 <Box
                     position="absolute"
-                    top={0}
-                    left={0}
-                    right={0}
-                    bottom={0}
-                    bgGradient="linear(to-r, purple.500, purple.600)"
-                    opacity={0.1}
-                />
-                <Container maxW="container.xl" position="relative">
+                    top="0"
+                    left="0"
+                    right="0"
+                    bottom="0"
+                    overflow="hidden"
+                    zIndex="0"
+                >
+                    {[...Array(5)].map((_, i) => (
+                        <Circle
+                            key={i}
+                            position="absolute"
+                            bg={`rgba(255, 255, 255, ${0.03 + i * 0.01})`}
+                            w={`${300 + i * 100}px`}
+                            h={`${300 + i * 100}px`}
+                            top={`${-50 + i * 20}%`}
+                            left={`${-20 + i * 30}%`}
+                            transform="rotate(-45deg)"
+                            filter="blur(60px)"
+                        />
+                    ))}
+                </Box>
+
+                <Container maxW="container.xl" position="relative" zIndex={1}>
                     <Stack
                         direction={{ base: 'column', lg: 'row' }}
-                        spacing={12}
+                        spacing={{ base: 10, lg: 20 }}
                         align="center"
-                        justify="space-between"
                     >
                         <VStack
-                            spacing={6}
+                            spacing={8}
                             align={{ base: 'center', lg: 'start' }}
-                            maxW={{ base: 'full', lg: '45%' }}
+                            maxW={{ base: 'full', lg: '50%' }}
                             textAlign={{ base: 'center', lg: 'left' }}
                         >
-                            <Heading
-                                as="h1"
-                                size="2xl"
-                                color={accentColor}
-                                fontWeight="bold"
-                                lineHeight="shorter"
+                            <MotionBox
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
                             >
-                                {t.welcome}
-                            </Heading>
-                            <Text fontSize="xl" color={textColor}>
-                                {t.connectingCommunities}
-                            </Text>
-                            <Text color={textColor}>
-                                {t.platformDescription}
-                            </Text>
+                                <Heading
+                                    as="h1"
+                                    fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }}
+                                    fontWeight="bold"
+                                    color="white"
+                                    lineHeight="shorter"
+                                    letterSpacing="tight"
+                                >
+                                    {t.welcome}
+                                </Heading>
+                            </MotionBox>
+                            <MotionBox
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                                <Text
+                                    fontSize={{ base: 'lg', md: 'xl' }}
+                                    color="whiteAlpha.900"
+                                    maxW="600px"
+                                >
+                                    {t.platformDescription}
+                                </Text>
+                            </MotionBox>
+                            {!isAuthenticated && (
+                                <MotionBox
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.4 }}
+                                >
+                                    <Button
+                                        size="lg"
+                                        bg="white"
+                                        color="purple.600"
+                                        px={8}
+                                        h={14}
+                                        fontSize="lg"
+                                        _hover={{
+                                            transform: "translateY(-2px)",
+                                            boxShadow: "lg",
+                                        }}
+                                        transition="all 0.3s"
+                                        rightIcon={<Icon as={FaArrowRight} />}
+                                        onClick={handleLoginClick}
+                                    >
+                                        {t.getStarted}
+                                    </Button>
+                                </MotionBox>
+                            )}
                         </VStack>
 
-                        <MotionBox
-                            variants={containerVariants}
-                            initial="hidden"
-                            animate="show"
-                            maxW={{ base: 'full', lg: '50%' }}
+                        {/* Hero Image Grid with Animation */}
+                        <Grid
+                            templateColumns="repeat(2, 1fr)"
+                            gap={4}
+                            maxW={{ base: 'full', lg: '45%' }}
                             position="relative"
-                            px={4}
+                            zIndex={1}
                         >
-                            <Box
-                                position="relative"
-                                height={{ base: "450px", lg: "550px" }}
-                                overflow="hidden"
-                            >
-                                <SimpleGrid
-                                    columns={{ base: 2, md: 3 }}
-                                    spacing={4}
-                                    height="full"
-                                    position="relative"
+                            {platformImages.map((image, index) => (
+                                <MotionBox
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+                                    gridColumn={index === 0 ? 'span 2' : 'auto'}
                                 >
-                                    {platformImages.map((image, index) => {
-                                        // Calculate dynamic styles for each image
-                                        const getImageStyles = () => {
-                                            switch(index) {
-                                                case 0:
-                                                    return {
-                                                        gridColumn: { base: "1 / 3", md: "1 / 3" },
-                                                        height: { base: "200px", md: "280px" },
-                                                        transform: "translateY(0px)"
-                                                    };
-                                                case 1:
-                                                    return {
-                                                        gridColumn: { base: "2", md: "3" },
-                                                        height: { base: "180px", md: "220px" },
-                                                        transform: "translateY(30px)"
-                                                    };
-                                                case 2:
-                                                    return {
-                                                        gridColumn: { base: "1", md: "1" },
-                                                        height: { base: "160px", md: "200px" },
-                                                        transform: "translateY(-20px)"
-                                                    };
-                                                case 3:
-                                                    return {
-                                                        gridColumn: { base: "2", md: "2 / 4" },
-                                                        height: { base: "180px", md: "240px" },
-                                                        transform: "translateY(-40px)"
-                                                    };
-                                                default:
-                                                    return {};
-                                            }
-                                        };
-
-                                        const styles = getImageStyles();
-
-                                        return (
-                                            <MotionBox
-                                                key={index}
-                                                variants={itemVariants}
-                                                position="relative"
-                                                {...styles}
-                                                role="group"
-                                            >
-                                                <Box
-                                                    position="relative"
-                                                    height="full"
-                                                    borderRadius="2xl"
-                                                    overflow="hidden"
-                                                    boxShadow={`0 4px 20px ${shadowColor}`}
-                                                    transition="all 0.3s ease"
-                                                    _hover={{
-                                                        transform: 'translateY(-8px)',
-                                                        boxShadow: `0 12px 28px ${shadowColor}`
-                                                    }}
-                                                >
-                                                    <Image
-                                                        src={image}
-                                                        alt={`Platform showcase ${index + 1}`}
-                                                        objectFit="cover"
-                                                        w="full"
-                                                        h="full"
-                                                        transition="transform 0.3s ease"
-                                                        _groupHover={{
-                                                            transform: 'scale(1.05)'
-                                                        }}
-                                                    />
-                                                    <Box
-                                                        position="absolute"
-                                                        inset="0"
-                                                        bg="blackAlpha.200"
-                                                        transition="all 0.3s ease"
-                                                        _groupHover={{
-                                                            bg: "blackAlpha.400"
-                                                        }}
-                                                    />
-                                                </Box>
-                                            </MotionBox>
-                                        );
-                                    })}
-                                </SimpleGrid>
-
-                                {/* Decorative Elements */}
-                                <Circle
-                                    size="60px"
-                                    bg="purple.100"
-                                    position="absolute"
-                                    top="-20px"
-                                    right="-30px"
-                                    zIndex={-1}
-                                />
-                                <Circle
-                                    size="40px"
-                                    bg="purple.50"
-                                    position="absolute"
-                                    bottom="40px"
-                                    left="-20px"
-                                    zIndex={-1}
-                                />
-                                <Box
-                                    position="absolute"
-                                    width="120px"
-                                    height="120px"
-                                    border="2px solid"
-                                    borderColor="purple.100"
-                                    borderRadius="xl"
-                                    bottom="-40px"
-                                    right="40px"
-                                    zIndex={-1}
-                                    transform="rotate(15deg)"
-                                />
-                            </Box>
-                        </MotionBox>
+                                    <Box
+                                        height={index === 0 ? '300px' : '200px'}
+                                        borderRadius="2xl"
+                                        overflow="hidden"
+                                        boxShadow="2xl"
+                                        transform={`translateY(${index * 20}px)`}
+                                        transition="transform 0.3s"
+                                        _hover={{ transform: `translateY(${index * 20 - 10}px)` }}
+                                        bg="whiteAlpha.100"
+                                        backdropFilter="blur(8px)"
+                                    >
+                                        <Image
+                                            src={image}
+                                            alt={`Platform showcase ${index + 1}`}
+                                            objectFit="cover"
+                                            w="full"
+                                            h="full"
+                                        />
+                                    </Box>
+                                </MotionBox>
+                            ))}
+                        </Grid>
                     </Stack>
                 </Container>
             </Box>
 
-            {/* Features Section */}
-            <Container maxW="container.xl" py={16}>
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={8}>
-                    <MotionBox
-                        whileHover={{ y: -4 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        <VStack
-                            bg={cardBg}
-                            p={8}
-                            borderRadius="xl"
-                            spacing={4}
-                            align="start"
-                            boxShadow={`0 4px 20px ${shadowColor}`}
-                        >
-                            <Circle size={12} bg="purple.100">
-                                <Icon as={FaHandsHelping} boxSize={6} color="purple.500" />
-                            </Circle>
-                            <Heading size="md" color={accentColor}>
-                                {t.easyCoordination}
-                            </Heading>
-                            <Text color={textColor}>
-                                {t.coordinationDesc}
-                            </Text>
-                        </VStack>
-                    </MotionBox>
-
-                    <MotionBox
-                        whileHover={{ y: -4 }}
-                        transition={{ duration: 0.2 }}
-                    >
-                        <VStack
-                            bg={cardBg}
-                            p={8}
-                            borderRadius="xl"
-                            spacing={4}
-                            align="start"
-                            boxShadow={`0 4px 20px ${shadowColor}`}
-                        >
-                            <Circle size={12} bg="purple.100">
-                                <Icon as={FaHeart} boxSize={6} color="purple.500" />
-                            </Circle>
-                            <Heading size="md" color={accentColor}>
-                                {t.communityImpact}
-                            </Heading>
-                            <Text color={textColor}>
-                                {t.impactDesc}
-                            </Text>
-                        </VStack>
-                    </MotionBox>
-                </SimpleGrid>
-            </Container>
-
-            {/* Featured Associations Section - Enhanced Image Display */}
-            <Box bg={headerBg} py={16}>
+            {/* Stats Section - Now positioned to overlap the hero section */}
+            <Box
+                transform="translateY(-100px)"
+                position="relative"
+                zIndex={1}
+                px={4}
+            >
                 <Container maxW="container.xl">
-                    <VStack spacing={12}>
-                        <Heading
-                            textAlign="center"
-                            color={accentColor}
-                            size="xl"
-                            mb={8}
-                        >
-                            {t.featuredAssociations}
-                        </Heading>
-
-                        {associations.length > 0 && (
-                            <Box position="relative" w="full">
-                                <Flex
-                                    direction={{ base: 'column', md: 'row' }}
-                                    align="center"
-                                    justify="center"
-                                    gap={8}
+                    <SimpleGrid
+                        columns={{ base: 2, md: 4 }}
+                        spacing={8}
+                        bg="white"
+                        p={8}
+                        borderRadius="2xl"
+                        boxShadow="xl"
+                    >
+                        {[
+                            { number: '8+', label: t.associations, icon: FaBuilding },
+                            { number: '200+', label: t.volunteers, icon: FaUsers },
+                            { number: '400+', label: t.sessions, icon: FaLightbulb },
+                            { number: '7', label: t.cities, icon: FaStar },
+                        ].map((stat, index) => (
+                            <MotionBox
+                                key={index}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                            >
+                                <VStack
+                                    spacing={4}
+                                    p={6}
+                                    borderRadius="xl"
+                                    transition="all 0.3s"
+                                    _hover={{
+                                        transform: 'translateY(-5px)',
+                                        boxShadow: 'lg',
+                                    }}
                                 >
-                                    <IconButton
-                                        icon={<FaChevronLeft />}
-                                        onClick={prevSlide}
-                                        position={{ base: 'relative', md: 'absolute' }}
-                                        left={{ md: -12 }}
-                                        top={{ md: '50%' }}
-                                        transform={{ md: 'translateY(-50%)' }}
-                                        colorScheme="purple"
-                                        variant="ghost"
-                                        fontSize="24px"
-                                        isRound
-                                        zIndex={2}
-                                    />
+                                    <Icon as={stat.icon} boxSize={8} color="purple.500" />
+                                    <Heading size="2xl" color="purple.700">
+                                        {stat.number}
+                                    </Heading>
+                                    <Text fontSize="lg" color="purple.600" fontWeight="medium">
+                                        {stat.label}
+                                    </Text>
+                                </VStack>
+                            </MotionBox>
+                        ))}
+                    </SimpleGrid>
+                </Container>
+            </Box>
 
-                                    <ScaleFade in={true} initialScale={0.9}>
+            {/* Features Section */}
+            <Box py={20} bg={colors.purple[50]}>
+                <Container maxW="container.xl">
+                    <VStack spacing={16}>
+                        <MotionBox
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            textAlign="center"
+                        >
+                            <Heading
+                                size="2xl"
+                                color={colors.purple[800]}
+                                mb={4}
+                            >
+                                {t.connectingCommunities}
+                            </Heading>
+                            <Text
+                                fontSize="xl"
+                                color={colors.purple[800    ]}
+                                maxW="2xl"
+                                mx="auto"
+                            >
+                                {t.platformDescription}
+                            </Text>
+                        </MotionBox>
+
+                        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
+                            {[
+                                {
+                                    icon: FaLightbulb,
+                                    title: t.easyCoordination,
+                                    description: t.coordinationDesc,
+                                },
+                                {
+                                    icon: FaUsers,
+                                    title: t.communityBuilding,
+                                    description: t.connectVolunteers,
+                                },
+                                {
+                                    icon: FaStar,
+                                    title: t.communityImpact,
+                                    description: t.impactDesc,
+                                },
+                            ].map((feature, index) => (
+                                <MotionBox
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                >
+                                    <VStack
+                                        bg="white"
+                                        p={8}
+                                        borderRadius="2xl"
+                                        spacing={6}
+                                        height="full"
+                                        boxShadow="lg"
+                                        transition="all 0.3s"
+                                        _hover={{
+                                            transform: 'translateY(-8px)',
+                                            boxShadow: '2xl',
+                                        }}
+                                    >
+                                        <Circle size={16} bg={colors.purple[100]}>
+                                            <Icon as={feature.icon} color={colors.purple[500]} boxSize={8} />
+                                        </Circle>
+                                        <Heading size="md" color={colors.purple[800]}>
+                                            {feature.title}
+                                        </Heading>
+                                        <Text color="gray.600" textAlign="center">
+                                            {feature.description}
+                                        </Text>
+                                    </VStack>
+                                </MotionBox>
+                            ))}
+                        </SimpleGrid>
+                    </VStack>
+                </Container>
+            </Box>
+
+            {/* Featured Associations Section */}
+            <Box py={20}>
+                <Container maxW="container.xl">
+                    <VStack spacing={16}>
+                        <MotionBox
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            textAlign="center"
+                        >
+                            <Heading
+                                size="2xl"
+                                color={colors.purple[800]}
+                                mb={4}
+                                position="relative"
+                                _after={{
+                                    content: '""',
+                                    position: 'absolute',
+                                    bottom: '-12px',
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    width: '80px',
+                                    height: '4px',
+                                    borderRadius: 'full',
+                                    bg: colors.purple[400],
+                                }}
+                            >
+                                {t.featuredAssociations}
+                            </Heading>
+                        </MotionBox>
+
+                        {/* Associations Carousel */}
+                        <Box position="relative" width="full" overflow="hidden">
+                            <Flex
+                                transition="transform 0.5s ease"
+                                transform={`translateX(-${currentSlide * 100}%)`}
+                            >
+                                {associations.map((association, index) => (
+                                    <Box
+                                        key={index}
+                                        flex="0 0 100%"
+                                        p={4}
+                                    >
                                         <MotionBox
-                                            bg={cardBg}
-                                            borderRadius="3xl"
-                                            overflow="hidden"
-                                            boxShadow={`0 4px 20px ${shadowColor}`}
-                                            maxW="800px"
-                                            w="full"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
                                             transition={{ duration: 0.5 }}
+                                            bg="white"
+                                            p={8}
+                                            borderRadius="2xl"
+                                            boxShadow="xl"
+                                            width="full"
+                                            maxW="900px"
+                                            mx="auto"
+                                            overflow="hidden"
                                         >
                                             <Stack
                                                 direction={{ base: 'column', md: 'row' }}
-                                                spacing={0}
+                                                spacing={8}
+                                                align="center"
                                             >
                                                 <Box
+                                                    width={{ base: "full", md: "300px" }}
+                                                    height={{ base: "200px", md: "250px" }}
                                                     position="relative"
-                                                    minW={{ base: "full", md: "400px" }}
-                                                    h={{ base: "300px", md: "400px" }}
+                                                    borderRadius="xl"
                                                     overflow="hidden"
+                                                    boxShadow="lg"
                                                 >
                                                     <Image
-                                                        src={associations[currentSlide].imageFileName
-                                                            ? `http://localhost:8080/images/${associations[currentSlide].imageFileName}`
+                                                        src={association.imageFileName
+                                                            ? `http://localhost:8080/images/${association.imageFileName}`
                                                             : '/images/default-association.jpg'
                                                         }
-                                                        alt={associations[currentSlide].name}
-                                                        objectFit="cover"
+                                                        alt={association.name}
+                                                        objectFit="contain"
+                                                        bg="white"
                                                         w="full"
                                                         h="full"
-                                                        transition="0.3s transform ease"
-                                                        _hover={{
-                                                            transform: 'scale(1.1)'
-                                                        }}
+                                                        p={2}
                                                         fallback={
                                                             <Flex
                                                                 w="full"
@@ -457,82 +560,92 @@ const HomePage = () => {
                                                                 align="center"
                                                                 justify="center"
                                                             >
-                                                                <Icon as={FaBuilding} boxSize={16} color="purple.200" />
+                                                                <Icon as={FaBuilding} boxSize={12} color="purple.200" />
                                                             </Flex>
                                                         }
                                                     />
-                                                    <Box
-                                                        position="absolute"
-                                                        top={0}
-                                                        left={0}
-                                                        right={0}
-                                                        h="100%"
-                                                    />
                                                 </Box>
-
                                                 <VStack
                                                     align="start"
                                                     spacing={6}
-                                                    p={8}
                                                     flex={1}
-                                                    position="relative"
-                                                    bg={cardBg}
                                                 >
-                                                    <Heading size="lg" color={accentColor}>
-                                                        {associations[currentSlide].name}
-                                                    </Heading>
-                                                    <HStack spacing={2} color={textColor}>
-                                                        <Icon as={FaBuilding} />
-                                                        <Text>{t.city}: {associations[currentSlide].ville}</Text>
-                                                    </HStack>
-                                                    <HStack spacing={2} color={textColor}>
-                                                        <Icon as={FaPhone} />
-                                                        <Text>{t.phone}: {associations[currentSlide].responsablePhone}</Text>
-                                                    </HStack>
-                                                    <Badge
-                                                        colorScheme="purple"
-                                                        fontSize="sm"
-                                                        px={4}
-                                                        py={2}
-                                                        borderRadius="full"
+                                                    <Heading
+                                                        size="xl"
+                                                        color={colors.purple[600]}
                                                     >
-                                                        Association
-                                                    </Badge>
+                                                        {association.name}
+                                                    </Heading>
+                                                    <HStack spacing={6}>
+                                                        <HStack spacing={2}>
+                                                            <Icon as={FaBuilding} color={colors.purple[500]} />
+                                                            <Text fontSize="lg">{association.ville}</Text>
+                                                        </HStack>
+                                                        <HStack spacing={2}>
+                                                            <Icon as={FaPhone} color={colors.purple[500]} />
+                                                            <Text fontSize="lg">{association.responsablePhone}</Text>
+                                                        </HStack>
+                                                    </HStack>
+                                                    <Button
+                                                        colorScheme="purple"
+                                                        size="lg"
+                                                        rightIcon={<Icon as={FaArrowRight} />}
+                                                        onClick={() => window.location.href = `/associations`}
+                                                    >
+                                                        {t.learnMore}
+                                                    </Button>
                                                 </VStack>
                                             </Stack>
                                         </MotionBox>
-                                    </ScaleFade>
+                                    </Box>
+                                ))}
+                            </Flex>
 
-                                    <IconButton
-                                        icon={<FaChevronRight />}
-                                        onClick={nextSlide}
-                                        position={{ base: 'relative', md: 'absolute' }}
-                                        right={{ md: -12 }}
-                                        top={{ md: '50%' }}
-                                        transform={{ md: 'translateY(-50%)' }}
-                                        colorScheme="purple"
-                                        variant="ghost"
-                                        fontSize="24px"
-                                        isRound
-                                        zIndex={2}
-                                    />
-                                </Flex>
-
-                                <HStack justify="center" mt={8} spacing={2}>
+                            {/* Navigation Buttons */}
+                            <HStack
+                                position="absolute"
+                                bottom="-16"
+                                left="50%"
+                                transform="translateX(-50%)"
+                                spacing={6}
+                            >
+                                <IconButton
+                                    icon={<FaChevronLeft />}
+                                    onClick={prevSlide}
+                                    isDisabled={currentSlide === 0}
+                                    colorScheme="purple"
+                                    variant="solid"
+                                    size="lg"
+                                    isRound
+                                    aria-label="Previous slide"
+                                />
+                                <HStack spacing={3}>
                                     {associations.map((_, index) => (
                                         <Circle
                                             key={index}
-                                            size={2}
-                                            bg={index === currentSlide ? 'purple.500' : 'gray.300'}
+                                            size={4}
+                                            bg={currentSlide === index ? colors.purple[500] : 'gray.300'}
                                             cursor="pointer"
                                             onClick={() => setCurrentSlide(index)}
-                                            _hover={{ transform: 'scale(1.2)' }}
                                             transition="all 0.2s"
+                                            _hover={{
+                                                transform: 'scale(1.2)',
+                                            }}
                                         />
                                     ))}
                                 </HStack>
-                            </Box>
-                        )}
+                                <IconButton
+                                    icon={<FaChevronRight />}
+                                    onClick={nextSlide}
+                                    isDisabled={currentSlide === associations.length - 1}
+                                    colorScheme="purple"
+                                    variant="solid"
+                                    size="lg"
+                                    isRound
+                                    aria-label="Next slide"
+                                />
+                            </HStack>
+                        </Box>
                     </VStack>
                 </Container>
             </Box>

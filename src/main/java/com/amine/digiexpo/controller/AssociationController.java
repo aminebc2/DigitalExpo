@@ -6,9 +6,11 @@ import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.service.interfac.IAssociationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -50,11 +52,12 @@ public class AssociationController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/update/{associationId}")
+    @PutMapping(value = "/update/{associationId}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<Response> updateAssociation(
             @PathVariable Long associationId,
-            @RequestBody AssociationDTO updatedAssociation) {
-        Response response = associationService.updateAssociation(associationId, updatedAssociation);
+            @RequestPart("association") AssociationDTO updatedAssociation,
+            @RequestPart(value = "picture", required = false) MultipartFile picture) {
+        Response response = associationService.updateAssociation(associationId, updatedAssociation, picture);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

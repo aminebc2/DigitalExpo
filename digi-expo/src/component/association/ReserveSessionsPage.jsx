@@ -53,7 +53,8 @@ const dxcColors = {
         darkTeal: '#006275', // DXC Dark Teal
         green: '#00C14F', // DXC Green
         orange: '#FF8F1C', // DXC Orange
-        gold: '#FFCD00'  // DXC Gold
+        gold: '#FFCD00' , // DXC Gold
+        red: '#9e0a0a' // DXC Red
     }
 };
 
@@ -113,7 +114,7 @@ const StatusBadge = ({ status, t }) => {
     const statusColors = {
         pending: { bg: dxcColors.accents.gold, color: 'black' },
         confirmed: { bg: dxcColors.accents.green, color: 'white' },
-        cancelled: { bg: dxcColors.accents.orange, color: 'white' },
+        cancelled: { bg: dxcColors.accents.red, color: 'white' },
         completed: { bg: dxcColors.accents.blue, color: 'white' },
     };
 
@@ -479,9 +480,9 @@ const ReserveSessionsPage = () => {
 
         if (message.includes(t.dateReserved) || message.includes('error') || message.includes('Error')) {
             return {
-                bg: `${dxcColors.accents.orange}10`,
-                borderColor: dxcColors.accents.orange,
-                color: dxcColors.accents.orange,
+                bg: `${dxcColors.accents.red}10`,
+                borderColor: dxcColors.accents.red,
+                color: dxcColors.accents.red,
                 icon: <TimeIcon />
             };
         }

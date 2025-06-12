@@ -5,6 +5,7 @@ import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
 import com.amine.digiexpo.entity.Association;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,7 +22,7 @@ public interface IAssociationService {
     // Consulter la liste des bénévoles
     Response getVolunteers(Long associationId);
 
-    Response updateAssociation(Long id, AssociationDTO dto);
+    Response updateAssociation(Long associationId, AssociationDTO updatedAssociation, MultipartFile picture);
 
     // Récupérer les détails de l'association
     Response getAssociationById(Long associationId);

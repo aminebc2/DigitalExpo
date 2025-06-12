@@ -88,13 +88,22 @@ const StatusBadge = ({ status, t }) => {
     const statusColors = {
         pending: { bg: 'yellow.400', color: 'yellow.900' },
         confirmed: { bg: 'green.400', color: 'green.900' },
-        cancelled: { bg: 'red.400', color: 'red.900' },
+        cancelled: { bg: '#9e0a0a', color: 'white' }, // Changed to red.400 for better visibility
         completed: { bg: 'blue.400', color: 'blue.900' },
     };
 
-    const defaultColor = statusColors.pending;
-    const colors = statusColors[status?.toLowerCase()] || defaultColor;
-    const translatedStatus = t.status[status?.toLowerCase()] || status;
+    const getStatusKey = (status) => {
+        // Convert status to lowercase and handle any variations
+        const normalizedStatus = status?.toLowerCase();
+        if (normalizedStatus === 'canceled' || normalizedStatus === 'cancelled') {
+            return 'cancelled'; // Normalize to one spelling
+        }
+        return normalizedStatus;
+    };
+
+    const statusKey = getStatusKey(status);
+    const colors = statusColors[statusKey] || statusColors.pending;
+    const translatedStatus = t.status[statusKey] || status;
 
     return (
         <Badge

@@ -109,9 +109,28 @@ export default class AssociationService {
         }
     }
 
-    static async updateAssociation(id, data) {
+    static async updateAssociation(id, associationData, picture) {
         try {
-            const response = await axios.put(`${this.API_URL}/update/${id}`, data, this.getHeader());
+            // Create FormData object
+            const formData = new FormData();
+
+            // Add the association data as a JSON string
+            formData.append('association', new Blob([JSON.stringify(associationData)], {
+                type: 'application/json'
+            }));
+
+            // Add the picture if provided
+            if (picture) {
+                formData.append('picture', picture);
+            }
+
+            const headers = this.getHeader().headers;
+            // Remove Content-Type as FormData will set it automatically with boundary
+            delete headers['Content-Type'];
+
+            const response = await axios.put(`${this.API_URL}/update/${id}`, formData, {
+                headers: headers
+            });
             return response.data;
         } catch (error) {
             if (error.message === "No authentication token found") {

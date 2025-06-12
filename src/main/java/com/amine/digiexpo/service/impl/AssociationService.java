@@ -13,16 +13,25 @@ import com.amine.digiexpo.entity.Volunteer;
 import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.IAssociationService;
 import com.amine.digiexpo.utils.Utils;
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.amine.digiexpo.utils.Utils.mapSessionListToDTOListWithAssociationDetails;
@@ -37,6 +46,8 @@ public class AssociationService implements IAssociationService {
     private SessionRepository sessionRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(AssociationService.class);
+
+    private static final String UPLOAD_DIR = "uploads/associations/";
 
 
     @Override
@@ -101,12 +112,13 @@ public class AssociationService implements IAssociationService {
         }
     }
 
-    @Override
-    public Response updateAssociation(Long associationId, AssociationDTO updatedAssociationDTO) {
+    @Transactional
+    public Response updateAssociation(Long associationId, AssociationDTO updatedAssociationDTO, MultipartFile picture) {
         try {
             Association existing = associationRepository.findById(associationId)
                     .orElseThrow(() -> new RuntimeException("Association not found"));
 
+            // Update basic information
             existing.setUsername(updatedAssociationDTO.getUsername());
             existing.setEmail(updatedAssociationDTO.getEmail());
             existing.setName(updatedAssociationDTO.getName());
@@ -114,11 +126,63 @@ public class AssociationService implements IAssociationService {
             existing.setResponsableName(updatedAssociationDTO.getResponsableName());
             existing.setResponsablePhone(updatedAssociationDTO.getResponsablePhone());
 
-            Association saved = associationRepository.save(existing);
+            // Handle picture upload if provided
+            if (picture != null && !picture.isEmpty()) {
+                // Delete old image if exists
+                deleteOldImage(existing.getImageFileName());
 
-            return new Response(200, "Association updated successfully", Utils.mapAssociationToDTO(saved));
+                // Save new image and update filename
+                String newFileName = saveImageFile(picture);
+                existing.setImageFileName(newFileName);
+            }
+
+            Association saved = associationRepository.save(existing);
+            AssociationDTO responseDTO = Utils.mapAssociationToDTO(saved);
+
+            // Set the image filename in the DTO if image exists
+            if (saved.getImageFileName() != null) {
+                responseDTO.setImageFileName("/images/" + saved.getImageFileName());
+            }
+
+            return new Response(200, "Association updated successfully", responseDTO);
+        } catch (IOException e) {
+            logger.error("Failed to process image upload: {}", e.getMessage());
+            return new Response(500, "Failed to process image upload: " + e.getMessage(), null);
         } catch (Exception e) {
+            logger.error("Failed to update association: {}", e.getMessage());
             return new Response(500, "Failed to update association: " + e.getMessage(), null);
+        }
+    }
+
+    private String saveImageFile(MultipartFile file) throws IOException {
+        // Create the upload directory if it doesn't exist
+        File uploadDir = new File(UPLOAD_DIR);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+
+        // Generate a unique filename
+        String originalFileName = file.getOriginalFilename();
+        String fileExtension = originalFileName != null ?
+                FilenameUtils.getExtension(originalFileName) : "jpg";
+        String newFileName = UUID.randomUUID().toString() + "." + fileExtension;
+
+        // Save the file
+        Path filePath = Paths.get(UPLOAD_DIR, newFileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return newFileName;
+    }
+
+    private void deleteOldImage(String fileName) {
+        if (fileName != null && !fileName.isEmpty()) {
+            try {
+                Path filePath = Paths.get(UPLOAD_DIR, fileName);
+                Files.deleteIfExists(filePath);
+            } catch (IOException e) {
+                // Log the error but don't throw it
+                e.printStackTrace();
+            }
         }
     }
 
