@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
-import { loginUser } from '../service/AuthService';
+import { AuthContext } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { loginUser } from '../../service/AuthService';
 import './Auth.css';
 
 // Translations object
@@ -66,7 +66,24 @@ const Login = () => {
             const response = await loginUser(credentials);
             if (response.statusCode === 200) {
                 login(response.data.user, response.data.token);
-                navigate('/home');
+
+                // Get user role from response
+                const userRole = response.data.user.role;
+
+                // Redirect based on user role
+                switch (userRole) {
+                    case 'ASSOCIATION':
+                        navigate('/association/profile');
+                        break;
+                    case 'BENEVOLE':
+                        navigate('/volunteer/profile');
+                        break;
+                    case 'ADMIN':
+                        navigate('/admin');
+                        break;
+                    default:
+                        navigate('/home');
+                }
             } else {
                 setError(response.message || t.loginFailed);
             }

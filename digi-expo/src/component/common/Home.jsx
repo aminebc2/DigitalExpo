@@ -39,8 +39,8 @@ import {
     FaArrowLeft
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { useLanguage } from "../context/LanguageContext";
-import GuestService from "../service/GuestService";
+import { useLanguage } from "../../context/LanguageContext";
+import GuestService from "../../service/GuestService";
 
 const MotionBox = motion(Box);
 const MotionFlex = motion(Flex);
@@ -403,14 +403,14 @@ const HomePage = () => {
                         >
                             <Heading
                                 size="2xl"
-                                color={colors.purple[800]}
+                                color={colors.purple[700]}
                                 mb={4}
                             >
                                 {t.connectingCommunities}
                             </Heading>
                             <Text
                                 fontSize="xl"
-                                color={colors.purple[800    ]}
+                                color={colors.purple[600]}
                                 maxW="2xl"
                                 mx="auto"
                             >
@@ -458,7 +458,7 @@ const HomePage = () => {
                                         <Circle size={16} bg={colors.purple[100]}>
                                             <Icon as={feature.icon} color={colors.purple[500]} boxSize={8} />
                                         </Circle>
-                                        <Heading size="md" color={colors.purple[800]}>
+                                        <Heading size="md" color={colors.purple[700]}>
                                             {feature.title}
                                         </Heading>
                                         <Text color="gray.600" textAlign="center">
@@ -484,7 +484,7 @@ const HomePage = () => {
                         >
                             <Heading
                                 size="2xl"
-                                color={colors.purple[800]}
+                                color={colors.purple[700]}
                                 mb={4}
                                 position="relative"
                                 _after={{
@@ -505,6 +505,24 @@ const HomePage = () => {
 
                         {/* Associations Carousel */}
                         <Box position="relative" width="full" overflow="hidden">
+                            {/* Left Arrow */}
+                            <IconButton
+                                icon={<FaChevronLeft />}
+                                onClick={prevSlide}
+                                isDisabled={currentSlide === 0}
+                                colorScheme="purple"
+                                variant="solid"
+                                size="lg"
+                                isRound
+                                aria-label="Previous slide"
+                                position="absolute"
+                                top="50%"
+                                left="4"
+                                transform="translateY(-50%)"
+                                zIndex={2}
+                                boxShadow="md"
+                            />
+                            {/* Carousel Slides */}
                             <Flex
                                 transition="transform 0.5s ease"
                                 transform={`translateX(-${currentSlide * 100}%)`}
@@ -572,7 +590,7 @@ const HomePage = () => {
                                                 >
                                                     <Heading
                                                         size="xl"
-                                                        color={colors.purple[600]}
+                                                        color={colors.purple[700]}
                                                     >
                                                         {association.name}
                                                     </Heading>
@@ -600,25 +618,32 @@ const HomePage = () => {
                                     </Box>
                                 ))}
                             </Flex>
-
-                            {/* Navigation Buttons */}
+                            {/* Right Arrow */}
+                            <IconButton
+                                icon={<FaChevronRight />}
+                                onClick={nextSlide}
+                                isDisabled={currentSlide === associations.length - 1}
+                                colorScheme="purple"
+                                variant="solid"
+                                size="lg"
+                                isRound
+                                aria-label="Next slide"
+                                position="absolute"
+                                top="50%"
+                                right="4"
+                                transform="translateY(-50%)"
+                                zIndex={2}
+                                boxShadow="md"
+                            />
+                            {/* Dots */}
                             <HStack
                                 position="absolute"
                                 bottom="-16"
                                 left="50%"
                                 transform="translateX(-50%)"
                                 spacing={6}
+                                zIndex={2}
                             >
-                                <IconButton
-                                    icon={<FaChevronLeft />}
-                                    onClick={prevSlide}
-                                    isDisabled={currentSlide === 0}
-                                    colorScheme="purple"
-                                    variant="solid"
-                                    size="lg"
-                                    isRound
-                                    aria-label="Previous slide"
-                                />
                                 <HStack spacing={3}>
                                     {associations.map((_, index) => (
                                         <Circle
@@ -634,16 +659,6 @@ const HomePage = () => {
                                         />
                                     ))}
                                 </HStack>
-                                <IconButton
-                                    icon={<FaChevronRight />}
-                                    onClick={nextSlide}
-                                    isDisabled={currentSlide === associations.length - 1}
-                                    colorScheme="purple"
-                                    variant="solid"
-                                    size="lg"
-                                    isRound
-                                    aria-label="Next slide"
-                                />
                             </HStack>
                         </Box>
                     </VStack>

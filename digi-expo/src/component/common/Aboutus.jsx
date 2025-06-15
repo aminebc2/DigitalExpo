@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react';
 import { motion, isValidMotionProp } from 'framer-motion';
 import { FaUsers, FaGlobe, FaLightbulb, FaHandsHelping } from 'react-icons/fa';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const ChakraBox = chakra(motion.div, {
     shouldForwardProp: (prop) => isValidMotionProp(prop) || prop === 'children',

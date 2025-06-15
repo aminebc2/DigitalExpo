@@ -1,15 +1,15 @@
 import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, BrowserRouter } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, BrowserRouter, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ChakraProvider } from '@chakra-ui/react';
-import Login from './component/Login';
-import Register from './component/Register';
-import Navbar from './component/Navbar';
+import Login from './component/common/Login';
+import Register from './component/common/Register';
+import Navbar from './component/common/Navbar';
 import { AuthProvider, AuthContext } from './context/AuthContext';
-import ProtectedRoute from './component/ProtectedRoute';
+import ProtectedRoute from './component/common/ProtectedRoute';
 import AdminDashboard from './component/admin/AdminDashboard';
-import Home from './component/Home';
-import Unauthorized from './component/Unauthorized';
+import Home from './component/common/Home';
+import Unauthorized from './component/common/Unauthorized';
 import Footer from './component/common/Footer';
 import AssociationDashboard from './component/association/AssociationDashboard';
 import ReserveSessionsPage from './component/association/ReserveSessionsPage';
@@ -20,10 +20,10 @@ import SessionPage from "./component/volunteer/SessionsPage";
 import AssociationList from "./component/volunteer/AssociationList";
 import AssociationProfile from "./component/association/AssociationProfile";
 import VolunteerProfile from "./component/volunteer/VolunteerProfile";
-import Associations from "./component/Association";
+import Associations from "./component/common/Association";
 import { LanguageProvider } from './context/LanguageContext';
 import theme from './theme/chakraTheme';
-import Aboutus from "./component/Aboutus";
+import Aboutus from "./component/common/Aboutus";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -66,6 +66,8 @@ function AppRoutes() {
 
     return (
         <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/associations" element={<Associations />} />
             <Route path="/aboutus" element={<Aboutus/>} />
@@ -73,7 +75,7 @@ function AppRoutes() {
             <Route path="/register" element={<Register />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* Admin-only routes */}
+            {/* Admin routes */}
             <Route
                 path="/admin"
                 element={
@@ -83,9 +85,17 @@ function AppRoutes() {
                 }
             />
 
-            {/* Association routes */}
+            {/* Association routes - Profile first */}
             <Route
-                path="/association"
+                path="/association/profile"
+                element={
+                    <ProtectedRoute allowedRoles={['ASSOCIATION']}>
+                        <AssociationProfile />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/association/dashboard"
                 element={
                     <ProtectedRoute allowedRoles={['ASSOCIATION']}>
                         <AssociationDashboard />
@@ -113,14 +123,6 @@ function AppRoutes() {
                 element={
                     <ProtectedRoute allowedRoles={['ASSOCIATION']}>
                         <VolunteerListPage associationId={loggedAssociationId} />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/association/profile"
-                element={
-                    <ProtectedRoute allowedRoles={['ASSOCIATION']}>
-                        <AssociationProfile />
                     </ProtectedRoute>
                 }
             />

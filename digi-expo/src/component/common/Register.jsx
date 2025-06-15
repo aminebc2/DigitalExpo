@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
-import { registerUser } from '../service/AuthService';
+import { useLanguage } from '../../context/LanguageContext';
+import { registerUser } from '../../service/AuthService';
 import './Auth.css';
 
 // Translations object

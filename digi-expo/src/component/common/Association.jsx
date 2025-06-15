@@ -43,8 +43,8 @@ import {
     FaBuilding
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
-import { useLanguage } from '../context/LanguageContext';
-import GuestService from '../service/GuestService';
+import { useLanguage } from '../../context/LanguageContext';
+import GuestService from '../../service/GuestService';
 
 const MotionBox = motion(Box);
 const MotionGrid = motion(SimpleGrid);

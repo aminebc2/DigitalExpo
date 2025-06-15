@@ -35,7 +35,7 @@ import {
     Icon
 } from '@chakra-ui/react';
 import AdminService from '../../service/AdminService';
-import AssignVolunteerToSession from '../admin/AssignVolunteerToSession';
+import AssignVolunteerToSession from './AssignVolunteerToSession';
 import { useLanguage } from '../../context/LanguageContext';
 import {
     FaCalendarAlt,

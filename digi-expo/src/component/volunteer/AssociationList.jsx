@@ -9,15 +9,15 @@ import {
     Text,
     Button,
     Image,
-    Spinner,
-    useToast,
     Icon,
     useColorModeValue,
     VStack,
     Badge,
     Flex,
     HStack,
-    Tooltip,
+    useToast,
+    Input,
+    Select,
 } from '@chakra-ui/react';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -39,26 +39,15 @@ const translations = {
         available: "Disponible",
         joined: "Membre",
         email: "Courriel",
-        noEmail: "Aucun courriel disponible",
         manager: "Responsable",
-        noManager: "Responsable non spécifié",
         phone: "Téléphone",
-        noPhone: "Numéro non disponible",
         contactInfo: "Coordonnées",
         ville: "Ville",
-        noVille: "Ville non spécifiée",
-        loading: "Chargement...",
-        errorOccurred: "Une erreur s'est produite",
-        tryAgain: "Veuillez réessayer plus tard",
-        imageAlt: "Logo de l'association",
         contactSection: "Informations de Contact",
         joinButton: "Rejoindre l'Association",
         successTitle: "Succès !",
         errorTitle: "Erreur",
-        welcomeMessage: "Bienvenue dans notre communauté d'associations",
-        requestAlreadyExists: "Une demande existe déjà pour ce bénévole et cette association",
-        requestExists: "Demande déjà existante",
-        alreadyRequested: "Vous avez déjà envoyé une demande à cette association"
+        requestAlreadyExists: "Une demande existe déjà pour ce bénévole et cette association"
     },
     en: {
         pageTitle: "Discover Associations",
@@ -77,26 +66,15 @@ const translations = {
         available: "Available",
         joined: "Member",
         email: "Email",
-        noEmail: "No email available",
         manager: "Manager",
-        noManager: "Manager not specified",
         phone: "Phone",
-        noPhone: "Number not available",
         contactInfo: "Contact Details",
         ville: "City",
-        noVille: "City not specified",
-        loading: "Loading...",
-        errorOccurred: "An error occurred",
-        tryAgain: "Please try again later",
-        imageAlt: "Association logo",
         contactSection: "Contact Information",
         joinButton: "Join Association",
         successTitle: "Success!",
         errorTitle: "Error",
-        welcomeMessage: "Welcome to our association community",
-        requestAlreadyExists: "Request already exists for this volunteer and association",
-        requestExists: "Request Exists",
-        alreadyRequested: "You have already sent a request to this association"
+        requestAlreadyExists: "Request already exists for this volunteer and association"
     }
 };
 
@@ -128,12 +106,12 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
     const { language } = useLanguage();
     const t = translations[language];
 
-    const cardBg = useColorModeValue('white', 'gray.800');
-    const headingColor = useColorModeValue('gray.800', 'white');
+    const cardBg = useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(26, 32, 44, 0.9)');
+    const headingColor = useColorModeValue('purple.800', 'white');
     const buttonScheme = isJoined ? 'green' : 'purple';
     const floatAnimation = `${float} 3s ease-in-out infinite`;
     const pulseAnimation = `${pulse} 2s ease-in-out infinite`;
-    const imageBg = useColorModeValue('gray.50', 'gray.700');
+    const imageBg = useColorModeValue('purple.50', 'purple.900');
 
     return (
         <Box
@@ -148,13 +126,13 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
                 overflow="hidden"
                 position="relative"
                 transition="all 0.3s"
-                boxShadow="lg"
+                boxShadow="2xl"
+                backdropFilter="blur(10px)"
                 _hover={{
                     transform: 'scale(1.02)',
-                    boxShadow: '2xl',
+                    boxShadow: '3xl',
                 }}
             >
-                {/* Image Container */}
                 <Box
                     position="relative"
                     height="300px"
@@ -163,7 +141,7 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
                     {association.imageFileName ? (
                         <Image
                             src={`http://localhost:8080/images/${association.imageFileName}`}
-                            alt={`${t.imageAlt} - ${association.name}`}
+                            alt={`Logo - ${association.name}`}
                             w="full"
                             h="full"
                             objectFit="contain"
@@ -202,7 +180,6 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
                     </Badge>
                 </Box>
 
-                {/* Content Container */}
                 <Box p={6}>
                     <VStack spacing={4} align="stretch">
                         <Heading
@@ -269,14 +246,11 @@ const AssociationList = () => {
     const [associations, setAssociations] = useState([]);
     const [joinedIds, setJoinedIds] = useState([]);
     const [loadingId, setLoadingId] = useState(null);
+    const [search, setSearch] = useState('');
+    const [cityFilter, setCityFilter] = useState('');
     const { language } = useLanguage();
     const t = translations[language];
     const toast = useToast();
-
-    const bgColor = useColorModeValue('gray.50', 'gray.900');
-    const headingColor = useColorModeValue('purple.600', 'purple.300');
-    const subTextColor = useColorModeValue('gray.600', 'gray.400');
-    const emptyStateBg = useColorModeValue('white', 'gray.800');
 
     const user = JSON.parse(localStorage.getItem("user"));
     const volunteerId = user?.id;
@@ -335,7 +309,7 @@ const AssociationList = () => {
             const res = await VolunteerService.createRequest(volunteerId, associationId);
             toast({
                 title: t.successTitle,
-                description: res.message || t.requestSuccess,
+                description: t.requestSuccess,
                 status: 'success',
                 duration: 3000,
                 isClosable: true,
@@ -345,7 +319,7 @@ const AssociationList = () => {
             const isRequestExistsError = err.response?.data?.message?.toLowerCase().includes('already exists');
             toast({
                 title: t.errorTitle,
-                description: isRequestExistsError ? t.requestAlreadyExists : (err.response?.data?.message || t.requestFailed),
+                description: isRequestExistsError ? t.requestAlreadyExists : t.requestFailed,
                 status: 'error',
                 duration: 3000,
                 isClosable: true,
@@ -358,40 +332,110 @@ const AssociationList = () => {
         }
     };
 
+    // Filter associations by search and city
+    const filteredAssociations = associations.filter(a => {
+        const matchesSearch =
+            a.name.toLowerCase().includes(search.toLowerCase()) ||
+            (a.ville && a.ville.toLowerCase().includes(search.toLowerCase()));
+        const matchesCity = cityFilter ? a.ville === cityFilter : true;
+        return matchesSearch && matchesCity;
+    });
+
     return (
         <Box
             minH="100vh"
-            bg={bgColor}
+            position="relative"
+            overflow="hidden"
+            css={{
+                background: 'linear-gradient(-45deg, #553C9A, #B794F4, #805AD5, #6B46C1)',
+                backgroundSize: '400% 400%',
+            }}
             pt={{ base: 10, md: 20 }}
             pb={{ base: 10, md: 20 }}
         >
-            <Container maxW="7xl">
+            {/* Decorative background elements */}
+            <Box
+                position="absolute"
+                top="0"
+                left="0"
+                right="0"
+                bottom="0"
+                overflow="hidden"
+                pointerEvents="none"
+            >
+                {[...Array(20)].map((_, i) => (
+                    <Box
+                        key={i}
+                        position="absolute"
+                        bg="whiteAlpha.200"
+                        borderRadius="full"
+                        css={{
+                            width: `${Math.random() * 300 + 50}px`,
+                            height: `${Math.random() * 300 + 50}px`,
+                            top: `${Math.random() * 100}%`,
+                            left: `${Math.random() * 100}%`,
+                            animation: `${float} ${Math.random() * 5 + 3}s ease-in-out infinite`,
+                            opacity: 0.1,
+                        }}
+                    />
+                ))}
+            </Box>
+
+            <Container maxW="7xl" position="relative">
                 <VStack spacing={6} mb={16} textAlign="center">
                     <Icon
                         as={FaBuilding}
                         boxSize={{ base: 12, md: 16 }}
-                        color="purple.400"
+                        color="white"
                         animation={`${float} 3s ease-in-out infinite`}
                     />
                     <Heading
                         as="h1"
                         fontSize={{ base: '3xl', md: '5xl' }}
                         fontWeight="bold"
-                        color={headingColor}
+                        color="white"
                         letterSpacing="tight"
+                        textShadow="2px 2px 4px rgba(0,0,0,0.2)"
                     >
                         {t.pageTitle}
                     </Heading>
                     <Text
                         fontSize={{ base: 'lg', md: 'xl' }}
-                        color={subTextColor}
+                        color="whiteAlpha.900"
                         maxW="2xl"
+                        textShadow="1px 1px 2px rgba(0,0,0,0.1)"
                     >
                         {t.pageSubtitle}
                     </Text>
                 </VStack>
 
-                {associations.length > 0 ? (
+                {/* Search and Filter Bar */}
+                <HStack mb={10} spacing={4} justify="center" flexWrap="wrap">
+                    <Input
+                        placeholder={t.pageTitle + '...'}
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        bg="white"
+                        maxW="300px"
+                        borderRadius="xl"
+                        boxShadow="md"
+                    />
+                    <Select
+                        placeholder={t.ville}
+                        value={cityFilter}
+                        onChange={e => setCityFilter(e.target.value)}
+                        bg="white"
+                        maxW="200px"
+                        borderRadius="xl"
+                        boxShadow="md"
+                    >
+                        {[...new Set(associations.map(a => a.ville).filter(Boolean))].map(city => (
+                            <option key={city} value={city}>{city}</option>
+                        ))}
+                    </Select>
+                </HStack>
+
+                {filteredAssociations.length > 0 ? (
                     <Box
                         sx={{
                             columnCount: { base: 1, md: 2, lg: 3 },
@@ -402,7 +446,7 @@ const AssociationList = () => {
                             }
                         }}
                     >
-                        {associations.map((association, index) => (
+                        {filteredAssociations.map((association, index) => (
                             <Box key={association.id}>
                                 <AssociationCard
                                     association={association}
@@ -418,9 +462,10 @@ const AssociationList = () => {
                     <VStack
                         spacing={6}
                         p={10}
-                        bg={emptyStateBg}
+                        bg="whiteAlpha.900"
                         borderRadius="3xl"
                         boxShadow="xl"
+                        backdropFilter="blur(10px)"
                         animation={`${float} 3s ease-in-out infinite`}
                     >
                         <Icon
@@ -429,10 +474,10 @@ const AssociationList = () => {
                             color="purple.400"
                             opacity={0.5}
                         />
-                        <Heading size="lg" color={headingColor}>
+                        <Heading size="lg" color="purple.600">
                             {t.noAssociations}
                         </Heading>
-                        <Text color={subTextColor}>
+                        <Text color="gray.600">
                             {t.noAssociationsDesc}
                         </Text>
                     </VStack>
