@@ -9,6 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 public class VolunteerDTO extends UserDTO {
     private String phoneNumber;
+    private String fullName;
     private List<DayOfWeek> availableDays;
     private List<AssociationDTO> associations;
     private List<SessionDTO> sessions;
@@ -17,10 +18,11 @@ public class VolunteerDTO extends UserDTO {
 
     }
 
-    public VolunteerDTO(String username, String email, String phoneNumber) {
+    public VolunteerDTO(String username, String email, String phoneNumber, String fullName) {
         this.setUsername(username);
         this.setEmail(email);
         this.setPhoneNumber(phoneNumber);
+        this.setFullName(fullName);
     }
 
     public String getPhoneNumber() {
@@ -29,6 +31,14 @@ public class VolunteerDTO extends UserDTO {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public List<DayOfWeek> getAvailableDays() {

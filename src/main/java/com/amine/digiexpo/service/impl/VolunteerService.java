@@ -106,6 +106,7 @@ public class VolunteerService implements IVolunteerService {
             existing.setUsername(updatedVolunteerDTO.getUsername());
             existing.setEmail(updatedVolunteerDTO.getEmail());
             existing.setPhoneNumber(updatedVolunteerDTO.getPhoneNumber());
+            existing.setFullName(updatedVolunteerDTO.getFullName());
             existing.setAvailableDays(updatedVolunteerDTO.getAvailableDays());
 
             Volunteer saved = volunteerRepository.save(existing);

@@ -276,7 +276,7 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                                         key={`volunteer-${volunteer.id}-${index}`}
                                         value={volunteer.id || ''}
                                     >
-                                        {volunteer.username || t.unknownVolunteer} (#{index + 1})
+                                        {volunteer.fullName || t.unknownVolunteer}
                                     </option>
                                 ))}
                             </Select>
@@ -306,7 +306,7 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                         {t.cancel}
                     </Button>
                     <Button
-                        bg="dxc.purple.500"
+                        bg="green.500"
                         color="white"
                         onClick={handleAssign}
                         isLoading={submitting}
@@ -316,10 +316,10 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                         size="lg"
                         borderRadius="xl"
                         _hover={{
-                            bg: 'dxc.purple.600'
+                            bg: 'green.600'
                         }}
                         _active={{
-                            bg: 'dxc.purple.700'
+                            bg: 'green.700'
                         }}
                         fontWeight="medium"
                     >
@@ -332,4 +332,3 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
 };
 
 export default AssignVolunteerToSession;
-

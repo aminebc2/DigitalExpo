@@ -188,6 +188,7 @@ public class AdminService implements IAdminService {
             volunteer.setPassword(passwordEncoder.encode(volunteerDTO.getPassword()));
             volunteer.setRole(volunteerDTO.getRole());
             volunteer.setPhoneNumber(volunteerDTO.getPhoneNumber());
+            volunteer.setFullName(volunteerDTO.getFullName());
             volunteer.setAvailableDays(volunteerDTO.getAvailableDays());
 
             Volunteer savedVolunteer = volunteerRepository.save(volunteer);
@@ -211,6 +212,7 @@ public class AdminService implements IAdminService {
             if (volunteerDTO.getUsername() != null) volunteer.setUsername(volunteerDTO.getUsername());
             if (volunteerDTO.getEmail() != null) volunteer.setEmail(volunteerDTO.getEmail());
             if (volunteerDTO.getPhoneNumber() != null) volunteer.setPhoneNumber(volunteerDTO.getPhoneNumber());
+            if (volunteerDTO.getFullName() != null) volunteer.setFullName(volunteerDTO.getFullName());
             if (volunteerDTO.getAvailableDays() != null) volunteer.setAvailableDays(volunteerDTO.getAvailableDays());
 
             Volunteer updatedVolunteer = volunteerRepository.save(volunteer);

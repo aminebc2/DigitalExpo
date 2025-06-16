@@ -96,6 +96,7 @@ public class Utils {
         dto.setEmail(volunteer.getEmail());
         dto.setRole(volunteer.getRole());
         dto.setPhoneNumber(volunteer.getPhoneNumber());
+        dto.setFullName(volunteer.getFullName());
         dto.setAvailableDays(volunteer.getAvailableDays());
         return dto;
     }
@@ -150,6 +151,7 @@ public class Utils {
             VolunteerDTO volDTO = new VolunteerDTO();
             volDTO.setId(session.getVolunteer().getId());
             volDTO.setUsername(session.getVolunteer().getUsername());
+            volDTO.setFullName(session.getVolunteer().getFullName());
             dto.setVolunteer(volDTO);
         }
 
@@ -169,7 +171,9 @@ public class Utils {
                 VolunteerDTO volunteerDTO = new VolunteerDTO(
                         session.getVolunteer().getUsername(),
                         session.getVolunteer().getEmail(),
-                        session.getVolunteer().getPhoneNumber());
+                        session.getVolunteer().getPhoneNumber(),
+                        session.getVolunteer().getFullName());
+
                 sessionDTO.setVolunteer(volunteerDTO);
             } else {
                 System.out.println("No volunteer assigned for session ID: " + session.getId());
@@ -274,6 +278,7 @@ public class Utils {
             volunteerDTO.setEmail(volunteer.getEmail());
             volunteerDTO.setRole(volunteer.getRole());
             volunteerDTO.setPhoneNumber(volunteer.getPhoneNumber());
+            volunteerDTO.setFullName(volunteer.getFullName());
             volunteerDTO.setAvailableDays(volunteer.getAvailableDays());
             dto.setVolunteer(volunteerDTO);
         }

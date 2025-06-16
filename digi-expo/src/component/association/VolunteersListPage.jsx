@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import AssociationService from "../../service/AssociationService";
-import { FaEnvelope, FaPhone, FaCalendarAlt, FaUser, FaUserFriends, FaChevronRight } from 'react-icons/fa';
+import {
+    FaEnvelope,
+    FaPhone,
+    FaCalendarAlt,
+    FaUser,
+    FaUserFriends,
+    FaChevronRight,
+    FaUserAlt,
+    FaUserAltSlash, FaUserCog, FaUserCircle
+} from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 import {
     Box,
@@ -162,6 +171,10 @@ const VolunteerCard = ({ volunteer, t, formatAvailableDays }) => {
                         divider={!isMobile && <Divider orientation="vertical" />}
                     >
                         <HStack spacing={3}>
+                            <Icon as={FaUser} color="#5f249f" />
+                            <Text color={mutedColor} fontSize="sm">
+                                {volunteer.fullName}
+                            </Text>
                             <Icon as={FaEnvelope} color="#5f249f" />
                             <Text color={mutedColor} fontSize="sm">
                                 {volunteer.email}

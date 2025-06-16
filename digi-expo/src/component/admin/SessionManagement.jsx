@@ -521,7 +521,7 @@ const SessionManagement = () => {
                                                 </Td>
                                                 <Td py={6} color={colors.purple[600]}>
                                                     {session.status === t.status.confirmed && session.volunteer
-                                                        ? session.volunteer.username
+                                                        ? session.volunteer.fullName
                                                         : t.notAvailable}
                                                 </Td>
                                                 <Td py={6}>

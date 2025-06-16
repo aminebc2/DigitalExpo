@@ -54,6 +54,7 @@ const translations = {
         error: "Une erreur s'est produite lors du chargement des données.",
         noProfile: "Aucune donnée de profil disponible.",
         username: "Nom d'utilisateur",
+        fullName: "Nom complet",
         email: "Email",
         phone: "Téléphone",
         notSpecified: "Non renseigné",
@@ -85,6 +86,7 @@ const translations = {
         error: "An error occurred while fetching data.",
         noProfile: "No profile data available.",
         username: "Username",
+        fullName: "fullname",
         email: "Email",
         phone: "Phone",
         notSpecified: "Not specified",
@@ -124,6 +126,7 @@ function VolunteerProfile() {
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
         username: "",
+        fullname: "",
         email: "",
         phoneNumber: "",
         availableDays: []
@@ -418,6 +421,34 @@ function VolunteerProfile() {
                                                 ) : (
                                                     <Text color={textColor} fontSize="md" pl={8}>
                                                         {volunteer.email || t.notSpecified}
+                                                    </Text>
+                                                )}
+                                            </FormControl>
+                                        </GridItem>
+
+                                        <GridItem>
+                                            <FormControl>
+                                                <FormLabel color={mutedColor}>
+                                                    <HStack spacing={2}>
+                                                        <Icon as={FaUser} color="#5f249f" />
+                                                        <Text>{t.fullName}</Text>
+                                                    </HStack>
+                                                </FormLabel>
+                                                {editMode ? (
+                                                    <Input
+                                                        name="fullName"
+                                                        value={formData.fullName || ""}
+                                                        onChange={handleChange}
+                                                        bg={inputBg}
+                                                        borderColor={borderColor}
+                                                        _focus={{
+                                                            borderColor: "#5f249f",
+                                                            boxShadow: "0 0 0 1px #5f249f",
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <Text color={textColor} fontSize="md" pl={8}>
+                                                        {volunteer.fullName || t.notSpecified}
                                                     </Text>
                                                 )}
                                             </FormControl>

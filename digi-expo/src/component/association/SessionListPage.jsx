@@ -46,6 +46,7 @@ const translations = {
         date: "Date",
         volunteerInfo: "Information du Bénévole",
         username: "Nom d'utilisateur",
+        fullName: "Nom complet",
         email: "Email",
         phone: "Téléphone",
         notProvided: "Non fourni",
@@ -69,6 +70,7 @@ const translations = {
         date: "Date",
         volunteerInfo: "Volunteer Information",
         username: "Username",
+        fullName: "fullname",
         email: "Email",
         phone: "Phone",
         notProvided: "Not provided",
@@ -245,14 +247,18 @@ const SessionDetailsModal = ({ isOpen, onClose, session, t, formatFullDate, getT
                                                 <Text fontSize="sm" color="gray.500">{t.username}</Text>
                                                 <Text>{session.volunteer.username || 'N/A'}</Text>
                                             </VStack>
+                                            <VStack align="start" spacing={1}>
+                                                <Text fontSize="sm" color="gray.500">{t.fullName}</Text>
+                                                <Text>{session.volunteer.fullName || 'N/A'}</Text>
+                                            </VStack>
                                         </GridItem>
-                                        <GridItem>
+                                        <GridItem colSpan={2}>
                                             <VStack align="start" spacing={1}>
                                                 <Text fontSize="sm" color="gray.500">{t.email}</Text>
                                                 <Text>{session.volunteer.email || t.notProvided}</Text>
                                             </VStack>
                                         </GridItem>
-                                        <GridItem colSpan={2}>
+                                        <GridItem>
                                             <VStack align="start" spacing={1}>
                                                 <Text fontSize="sm" color="gray.500">{t.phone}</Text>
                                                 <Text>{session.volunteer.phoneNumber || t.notProvided}</Text>

@@ -76,6 +76,7 @@ const translations = {
         },
         form: {
             username: "Nom d'utilisateur",
+            fullName:"Nom complet",
             email: "Email",
             password: "Mot de passe",
             newPassword: "Nouveau mot de passe (optionnel)",
@@ -93,6 +94,7 @@ const translations = {
         },
         table: {
             username: "Nom d'utilisateur",
+            fullName: "Nom complet",
             email: "Email",
             phone: "Téléphone",
             availableDays: "Jours disponibles",
@@ -124,6 +126,7 @@ const translations = {
         },
         form: {
             username: "Username",
+            fullName: "fullname",
             email: "Email",
             password: "Password",
             newPassword: "New Password (optional)",
@@ -141,6 +144,7 @@ const translations = {
         },
         table: {
             username: "Username",
+            fullName: "fullname",
             email: "Email",
             phone: "Phone",
             availableDays: "Available Days",
@@ -171,6 +175,7 @@ const VolunteerManagement = () => {
     function initialFormState() {
         return {
             username: '',
+            fullName: '',
             email: '',
             password: '',
             role: 'BENEVOLE',
@@ -284,6 +289,7 @@ const VolunteerManagement = () => {
     const handleEdit = (volunteer) => {
         setFormData({
             username: volunteer.username,
+            fullName: volunteer.fullName,
             email: volunteer.email,
             password: '',
             role: volunteer.role || 'BENEVOLE',
@@ -334,6 +340,7 @@ const VolunteerManagement = () => {
 
     const filteredVolunteers = volunteers.filter(vol =>
         vol.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        vol.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         vol.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         vol.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -447,6 +454,17 @@ const VolunteerManagement = () => {
                                     <SimpleGrid columns={1} spacing={4}>
                                         <Box>
                                             <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.form.fullName}
+                                            </Text>
+                                            <Flex align="center" color={textColor}>
+                                                <Icon as={FaUser} mr={2} color="purple.500" />
+                                                <Text fontSize="sm" isTruncated>
+                                                    {vol.fullName}
+                                                </Text>
+                                            </Flex>
+                                        </Box>
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
                                                 {t.form.email}
                                             </Text>
                                             <Flex align="center" color={textColor}>
@@ -536,6 +554,21 @@ const VolunteerManagement = () => {
                                     <Input
                                         name="username"
                                         value={formData.username}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </FormControl>
+
+                                <FormControl>
+                                    <FormLabel>
+                                        <HStack spacing={2}>
+                                            <FaUser />
+                                            <Text>{t.form.fullName}</Text>
+                                        </HStack>
+                                    </FormLabel>
+                                    <Input
+                                        name="fullName"
+                                        value={formData.fullName}
                                         onChange={handleInputChange}
                                         required
                                     />

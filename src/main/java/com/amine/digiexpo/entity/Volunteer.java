@@ -19,6 +19,8 @@ public class Volunteer extends User {
 
     private String phoneNumber;
 
+    private String fullName;
+
     @ElementCollection
     private List<DayOfWeek> availableDays;
 
@@ -35,6 +37,14 @@ public class Volunteer extends User {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public List<DayOfWeek> getAvailableDays() {
