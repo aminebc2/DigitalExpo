@@ -338,9 +338,9 @@ const AssociationManagement = () => {
     };
 
     const filteredAssociations = associations.filter(assoc =>
-        assoc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        assoc.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        assoc.ville.toLowerCase().includes(searchQuery.toLowerCase())
+        (assoc?.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (assoc?.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (assoc?.ville?.toLowerCase() || '').includes(searchQuery.toLowerCase())
     );
 
     return (

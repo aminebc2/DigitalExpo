@@ -87,6 +87,7 @@ public class AdminService implements IAdminService {
 
             if (associationDTO.getUsername() != null) association.setUsername(associationDTO.getUsername());
             if (associationDTO.getEmail() != null) association.setEmail(associationDTO.getEmail());
+            if (associationDTO.getPassword() != null) association.setPassword(passwordEncoder.encode(associationDTO.getPassword()));
             if (associationDTO.getName() != null) association.setName(associationDTO.getName());
             if (associationDTO.getVille() != null) association.setVille(associationDTO.getVille());
             if (associationDTO.getResponsableName() != null)
@@ -211,6 +212,7 @@ public class AdminService implements IAdminService {
 
             if (volunteerDTO.getUsername() != null) volunteer.setUsername(volunteerDTO.getUsername());
             if (volunteerDTO.getEmail() != null) volunteer.setEmail(volunteerDTO.getEmail());
+            if (volunteerDTO.getPassword() != null) volunteer.setPassword(passwordEncoder.encode(volunteerDTO.getPassword()));
             if (volunteerDTO.getPhoneNumber() != null) volunteer.setPhoneNumber(volunteerDTO.getPhoneNumber());
             if (volunteerDTO.getFullName() != null) volunteer.setFullName(volunteerDTO.getFullName());
             if (volunteerDTO.getAvailableDays() != null) volunteer.setAvailableDays(volunteerDTO.getAvailableDays());

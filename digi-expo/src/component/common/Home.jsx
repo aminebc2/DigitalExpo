@@ -357,7 +357,7 @@ const HomePage = () => {
                     >
                         {[
                             { number: '8+', label: t.associations, icon: FaBuilding },
-                            { number: '200+', label: t.volunteers, icon: FaUsers },
+                            { number: '100+', label: t.volunteers, icon: FaUsers },
                             { number: '400+', label: t.sessions, icon: FaLightbulb },
                             { number: '7', label: t.cities, icon: FaStar },
                         ].map((stat, index) => (

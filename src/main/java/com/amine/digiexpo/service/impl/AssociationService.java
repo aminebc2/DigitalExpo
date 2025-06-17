@@ -18,6 +18,7 @@ import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +49,8 @@ public class AssociationService implements IAssociationService {
     private static final Logger logger = LoggerFactory.getLogger(AssociationService.class);
 
     private static final String UPLOAD_DIR = "uploads/associations/";
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -121,6 +124,10 @@ public class AssociationService implements IAssociationService {
             // Update basic information
             existing.setUsername(updatedAssociationDTO.getUsername());
             existing.setEmail(updatedAssociationDTO.getEmail());
+            // Only update password if it's provided and not empty
+            if (updatedAssociationDTO.getPassword() != null && !updatedAssociationDTO.getPassword().trim().isEmpty()) {
+                existing.setPassword(passwordEncoder.encode(updatedAssociationDTO.getPassword()));
+            }
             existing.setName(updatedAssociationDTO.getName());
             existing.setVille(updatedAssociationDTO.getVille());
             existing.setResponsableName(updatedAssociationDTO.getResponsableName());

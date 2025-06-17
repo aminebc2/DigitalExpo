@@ -59,7 +59,10 @@ const translations = {
             name: "Nom",
             ville: "Ville",
             responsableName: "Nom du Responsable",
-            responsablePhone: "Téléphone du Responsable"
+            responsablePhone: "Téléphone du Responsable",
+            currentPassword: "Mot de passe actuel",
+            newPassword: "Nouveau mot de passe",
+            confirmPassword: "Confirmer le mot de passe"
         },
         placeholders: {
             username: "Entrez le nom d'utilisateur",
@@ -67,8 +70,14 @@ const translations = {
             name: "Entrez le nom",
             ville: "Entrez la ville",
             responsableName: "Entrez le nom du responsable",
-            responsablePhone: "Entrez le téléphone du responsable"
-        }
+            responsablePhone: "Entrez le téléphone du responsable",
+            currentPassword: "Entrez votre mot de passe actuel",
+            newPassword: "Entrez votre nouveau mot de passe",
+            confirmPassword: "Confirmez votre nouveau mot de passe"
+        },
+        passwordMismatch: "Les mots de passe ne correspondent pas",
+        passwordRequired: "Le mot de passe actuel est requis",
+        passwordSection: "Modification du mot de passe"
     },
     en: {
         pageTitle: "Association Profile",
@@ -88,7 +97,10 @@ const translations = {
             name: "Name",
             ville: "City",
             responsableName: "Manager Name",
-            responsablePhone: "Manager Phone"
+            responsablePhone: "Manager Phone",
+            currentPassword: "Current Password",
+            newPassword: "New Password",
+            confirmPassword: "Confirm Password"
         },
         placeholders: {
             username: "Enter username",
@@ -96,8 +108,14 @@ const translations = {
             name: "Enter name",
             ville: "Enter city",
             responsableName: "Enter manager name",
-            responsablePhone: "Enter manager phone"
-        }
+            responsablePhone: "Enter manager phone",
+            currentPassword: "Enter your current password",
+            newPassword: "Enter your new password",
+            confirmPassword: "Confirm your new password"
+        },
+        passwordMismatch: "Passwords do not match",
+        passwordRequired: "Current password is required",
+        passwordSection: "Password Change"
     }
 };
 
@@ -115,6 +133,9 @@ function AssociationProfile() {
         ville: "",
         responsableName: "",
         responsablePhone: "",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -174,37 +195,127 @@ function AssociationProfile() {
 
     const handleSave = async () => {
         try {
+            // Password validation
+            if (formData.currentPassword || formData.newPassword || formData.confirmPassword) {
+                if (!formData.currentPassword) {
+                    toast({
+                        title: "Error",
+                        description: t.passwordRequired,
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+
+                if (!formData.newPassword) {
+                    toast({
+                        title: "Error",
+                        description: "New password is required",
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+
+                if (formData.newPassword !== formData.confirmPassword) {
+                    toast({
+                        title: "Error",
+                        description: t.passwordMismatch,
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+            }
+
+            // Prepare update data
+            const updateData = {
+                username: formData.username,
+                email: formData.email,
+                name: formData.name,
+                ville: formData.ville,
+                responsableName: formData.responsableName,
+                responsablePhone: formData.responsablePhone
+            };
+
+            // Only add password fields if password is being changed
+            if (formData.currentPassword && formData.newPassword) {
+                updateData.currentPassword = formData.currentPassword;
+                updateData.newPassword = formData.newPassword;
+            }
+
+            // Create FormData object
+            const formDataToSend = new FormData();
+
+            // Add all the profile data
+            Object.keys(updateData).forEach(key => {
+                if (updateData[key] !== null && updateData[key] !== undefined) {
+                    formDataToSend.append(key, updateData[key]);
+                }
+            });
+
+            // Add the image if it exists
+            if (imageFile) {
+                formDataToSend.append('image', imageFile);
+            }
+
+            // Log the data being sent (for debugging)
+            const dataToLog = {};
+            formDataToSend.forEach((value, key) => {
+                dataToLog[key] = key.includes('password') ? '[HIDDEN]' : value;
+            });
+            console.log('Data being sent:', dataToLog);
+
             const response = await AssociationService.updateAssociation(
                 associationId,
-                formData,
-                imageFile  // Pass the imageFile directly
+                formDataToSend
             );
 
-            if (response && response.statusCode === 200) {
-                // Show success message
+            if (response?.statusCode === 200) {
                 toast({
                     title: "Success",
-                    description: "Profile updated successfully. Please login again.",
+                    description: "Profile updated successfully.",
                     status: "success",
                     duration: 3000,
                     isClosable: true,
                 });
 
-                // Call the logout function from AuthContext
-                logout();
+                // If password was changed, logout and redirect
+                if (formData.currentPassword && formData.newPassword) {
+                    toast({
+                        title: "Password Changed",
+                        description: "Please login again with your new password",
+                        status: "info",
+                        duration: 3000,
+                        isClosable: true,
+                    });
 
-                // Redirect to login page after a short delay
-                setTimeout(() => {
-                    navigate('/login');
-                }, 2000);
+                    setTimeout(() => {
+                        logout();
+                        navigate('/login');
+                    }, 2000);
+                } else {
+                    // Just refresh the data
+                    setEditMode(false);
+                    setFormData({
+                        ...response.association,
+                        currentPassword: '',
+                        newPassword: '',
+                        confirmPassword: ''
+                    });
+                    setAssociation(response.association);
+                }
             } else {
-                throw new Error('Update failed');
+                throw new Error(response?.message || 'Update failed');
             }
         } catch (err) {
             console.error('Update error:', err);
             toast({
                 title: "Error",
-                description: t.updateFailed,
+                description: err.message || t.updateFailed,
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -439,6 +550,79 @@ function AssociationProfile() {
                                             </GridItem>
                                         ))}
                                     </Grid>
+
+                                    <Divider my={6} borderColor={borderColor} />
+
+                                    {/* Password Section */}
+                                    <Stack spacing={6}>
+                                        <Heading size="md" color={textColor}>
+                                            {t.passwordSection}
+                                        </Heading>
+                                        {editMode && (
+                                            <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
+                                                <GridItem colSpan={{ base: 1, md: 2 }}>
+                                                    <FormControl isRequired>
+                                                        <FormLabel color={mutedColor}>
+                                                            {t.fields.currentPassword}
+                                                        </FormLabel>
+                                                        <Input
+                                                            name="currentPassword"
+                                                            type="password"
+                                                            value={formData.currentPassword || ""}
+                                                            onChange={handleChange}
+                                                            placeholder={t.placeholders.currentPassword}
+                                                            bg={inputBg}
+                                                            borderColor={borderColor}
+                                                            _focus={{
+                                                                borderColor: "#5f249f",
+                                                                boxShadow: "0 0 0 1px #5f249f",
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                </GridItem>
+                                                <GridItem>
+                                                    <FormControl>
+                                                        <FormLabel color={mutedColor}>
+                                                            {t.fields.newPassword}
+                                                        </FormLabel>
+                                                        <Input
+                                                            name="newPassword"
+                                                            type="password"
+                                                            value={formData.newPassword || ""}
+                                                            onChange={handleChange}
+                                                            placeholder={t.placeholders.newPassword}
+                                                            bg={inputBg}
+                                                            borderColor={borderColor}
+                                                            _focus={{
+                                                                borderColor: "#5f249f",
+                                                                boxShadow: "0 0 0 1px #5f249f",
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                </GridItem>
+                                                <GridItem>
+                                                    <FormControl>
+                                                        <FormLabel color={mutedColor}>
+                                                            {t.fields.confirmPassword}
+                                                        </FormLabel>
+                                                        <Input
+                                                            name="confirmPassword"
+                                                            type="password"
+                                                            value={formData.confirmPassword || ""}
+                                                            onChange={handleChange}
+                                                            placeholder={t.placeholders.confirmPassword}
+                                                            bg={inputBg}
+                                                            borderColor={borderColor}
+                                                            _focus={{
+                                                                borderColor: "#5f249f",
+                                                                boxShadow: "0 0 0 1px #5f249f",
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                </GridItem>
+                                            </Grid>
+                                        )}
+                                    </Stack>
                                 </Stack>
                             </CardBody>
                         </Card>

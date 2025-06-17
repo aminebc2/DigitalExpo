@@ -137,7 +137,7 @@ const SessionCard = ({ session, onViewDetails }) => {
             case 'CANCELED':
                 return {
                     bg: '#FEE2E2',
-                    color: '#991B1B',
+                    color: '#9e0a0a',
                     text: 'CANCELED'
                 };
             case 'Completed':

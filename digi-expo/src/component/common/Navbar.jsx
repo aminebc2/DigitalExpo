@@ -216,7 +216,7 @@ const Navbar = () => {
                                     fontSize={{ base: 'sm', md: 'md' }}
                                     display={{ base: 'none', md: 'block' }}
                                 >
-                                    DXC CDG DIGITAL EXPO
+                                    DIGITAL EXPLORERS
                                 </Text>
                             </Flex>
                         </Link>

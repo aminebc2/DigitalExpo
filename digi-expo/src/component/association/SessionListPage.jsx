@@ -53,10 +53,10 @@ const translations = {
         noVolunteer: "Aucun bénévole assigné",
         close: "Fermer",
         status: {
-            pending: "En attente",
-            confirmed: "Confirmé",
-            cancelled: "Annulé",
-            completed: "Terminé"
+            pending: "EN ATTENTE",
+            confirmed: "CONFIRME",
+            cancelled: "ANNULE",
+            completed: "TERMINE"
         },
         lastUpdate: "Dernière mise à jour: "
     },
@@ -77,10 +77,10 @@ const translations = {
         noVolunteer: "No volunteer assigned",
         close: "Close",
         status: {
-            pending: "Pending",
-            confirmed: "Confirmed",
-            cancelled: "Cancelled",
-            completed: "Completed"
+            pending: "PENDING",
+            confirmed: "COMFIRMED",
+            cancelled: "CANCELED",
+            completed: "COMPLETED"
         },
         lastUpdate: "Last update: "
     }

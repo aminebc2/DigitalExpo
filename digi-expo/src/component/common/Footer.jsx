@@ -20,7 +20,6 @@ import {
     FaEnvelope,
     FaPhone,
     FaMapMarkerAlt,
-    FaHeart,
 } from 'react-icons/fa';
 
 const translations = {
@@ -228,12 +227,9 @@ const Footer = () => {
                             {t.legal.terms}
                         </Button>
                     </HStack>
-                    <HStack spacing={2}>
-                        <Text fontSize="sm">
-                            {t.legal.copyright}
-                        </Text>
-                        <Icon as={FaHeart} color="red.400" boxSize={3} />
-                    </HStack>
+                    <Text fontSize="sm">
+                        {t.legal.copyright}
+                    </Text>
                 </Stack>
             </Container>
         </Box>

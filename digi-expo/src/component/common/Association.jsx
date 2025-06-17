@@ -154,24 +154,29 @@ const Associations = () => {
 
     const filteredAssociations = associations
         .filter(association => {
-            const matchesSearch = association.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                association.description?.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCity = !filters.city || association.ville.toLowerCase() === filters.city.toLowerCase();
-            const matchesCategory = !filters.category || association.category === filters.category;
+            const matchesSearch = (association?.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                (association?.description?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+
+            const matchesCity = !filters.city ||
+                (association?.ville?.toLowerCase() || '').includes(filters.city.toLowerCase());
+
+            const matchesCategory = !filters.category || association?.category === filters.category;
 
             return matchesSearch && matchesCity && matchesCategory;
         })
         .sort((a, b) => {
             if (sortBy === 'name') {
-                return a.name.localeCompare(b.name);
+                return (a?.name || '').localeCompare(b?.name || '');
             }
             if (sortBy === 'city') {
-                return a.ville.localeCompare(b.ville);
+                return (a?.ville || '').localeCompare(b?.ville || '');
             }
             return 0;
         });
 
-    const cities = [...new Set(associations.map(a => a.ville))];
+    const cities = [...new Set(associations
+        .filter(a => a?.ville) // Filter out null/undefined values
+        .map(a => a.ville))];
 
     return (
         <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>

@@ -62,7 +62,7 @@ const AboutUs = () => {
         ],
         stats: [
             {
-                number: "8",
+                number: "8+",
                 label: language === 'fr' ? 'Associations Partenaires' : 'Partner Associations'
             },
             {

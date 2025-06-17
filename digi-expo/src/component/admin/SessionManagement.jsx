@@ -85,7 +85,7 @@ const colors = {
         orange: '#F97316',
         gold: '#F59E0B',
         yellow: '#EAB308',
-        red: '#c80e0e'
+        red: '#9e0a0a'
     }
 };
 
