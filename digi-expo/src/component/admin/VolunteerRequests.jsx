@@ -56,6 +56,21 @@ import {
     FaCalendarAlt
 } from 'react-icons/fa';
 
+const customColors = {
+    purple: {
+        50: '#F3E6F5',  // Lighter shade
+        100: '#E1CCE6',
+        200: '#C299CC',
+        300: '#A366B3',
+        400: '#844D99',
+        500: '#582C83',  // Our main purple
+        600: '#4A1D6A',
+        700: '#3C0E51',
+        800: '#2E0038',
+        900: '#20001F'
+    }
+};
+
 const translations = {
     fr: {
         title: "Demandes de Bénévoles",
@@ -130,6 +145,43 @@ const translations = {
         deleteConfirmation: "Are you sure you want to delete this request?",
         deletedSuccess: "Request deleted successfully",
         errorDeleting: "Error deleting request"
+    }
+};
+
+const colors = {
+    primary: {
+        purple: '#8B5CF6',
+        lightPurple: '#A78BFA',
+        darkPurple: '#7C3AED',
+        white: '#FFFFFF'
+    },
+    purple: {
+        50: '#F5F3FF',
+        100: '#EDE9FE',
+        200: '#DDD6FE',
+        300: '#C4B5FD',
+        400: '#A78BFA',
+        500: '#8B5CF6',
+        600: '#7C3AED',
+        700: '#6D28D9',
+        800: '#5B21B6',
+        900: '#582C83'
+    },
+    neutrals: {
+        lightGray: '#F8FAFC',
+        mediumGray: '#94A3B8',
+        darkGray: '#374151',
+        black: '#000000'
+    },
+    accents: {
+        teal: '#14B8A6',
+        blue: '#3B82F6',
+        darkTeal: '#0F766E',
+        green: '#10B981',
+        orange: '#F97316',
+        gold: '#F59E0B',
+        yellow: '#EAB308',
+        red: '#9e0a0a'
     }
 };
 
@@ -444,9 +496,11 @@ const VolunteerRequests = () => {
 
     return (
         <Box
-            minH="100vh"
-            bgGradient={bgGradient}
+            maxW="full"
+            mx="auto"
             p={8}
+            bgGradient={`linear(to-br, ${colors.purple[50]}, ${colors.primary.white})`}
+            minH="100vh"
         >
             <Container maxW="1400px">
                 <Stack spacing={8}>
@@ -458,10 +512,10 @@ const VolunteerRequests = () => {
                         gap={4}
                     >
                         <VStack align="start" spacing={1}>
-                            <Heading size="lg" color="purple.600">
+                            <Heading size="lg" color="#582C83">
                                 {t.title}
                             </Heading>
-                            <Text color={mutedText}>{t.subtitle}</Text>
+                            <Text color="black">{t.subtitle}</Text>
                         </VStack>
                         <HStack spacing={4}>
                             <Button
@@ -503,7 +557,7 @@ const VolunteerRequests = () => {
                                                 </StatLabel>
                                                 <StatNumber
                                                     color={
-                                                        statKey === 'total' ? 'purple.600' :
+                                                        statKey === 'total' ? '#582C83' :
                                                             statKey === 'pending' ? 'orange.500' :
                                                                 statKey === 'approved' ? 'green.500' : 'red.500'
                                                     }
@@ -512,16 +566,15 @@ const VolunteerRequests = () => {
                                                     {stats[statKey]}
                                                 </StatNumber>
                                                 <Progress
-                                                    value={
-                                                        statKey === 'total' ? 100 :
-                                                            (stats[statKey] / stats.total) * 100
-                                                    }
+                                                    value={statKey === 'total' ? 100 : (stats[statKey] / stats.total) * 100}
                                                     size="xs"
-                                                    colorScheme={
-                                                        statKey === 'total' ? 'purple' :
-                                                            statKey === 'pending' ? 'orange' :
-                                                                statKey === 'approved' ? 'green' : 'red'
-                                                    }
+                                                    bg={statKey === 'total' ? '#582C83' : undefined}
+                                                    sx={{
+                                                        '& > div': {
+                                                            background: statKey === 'total' ? '#582C83' : statKey === 'pending' ? 'orange.500' :
+                                                                statKey === 'approved' ? 'green.500' : 'red.500'
+                                                        }
+                                                    }}
                                                     mt={2}
                                                 />
                                             </Stat>

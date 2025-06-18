@@ -69,7 +69,7 @@ const colors = {
         600: '#7C3AED',
         700: '#6D28D9',
         800: '#5B21B6',
-        900: '#4C1D95'
+        900: '#582C83'
     },
     neutrals: {
         lightGray: '#F8FAFC',
@@ -305,26 +305,48 @@ const SessionManagement = () => {
         fetchSessions();
     };
 
-    const getStatusBadgeProps = (status) => {
-        switch (status) {
-            case t.status.confirmed:
-                return { bg: colors.accents.green, color: 'white' };
-            case t.status.canceled:
-                return { bg: colors.accents.red, color: 'white' };
-            default:
-                return { bg: colors.accents.yellow, color: 'white' };
+    // Add this constant at the top of your file with other constants
+    const STATUS_CONFIG = {
+        PENDING: {
+            bg: '#FFF3E0',
+            color: '#B45309',
+            icon: FaClock,
+            fr: 'EN ATTENTE',
+            en: 'PENDING'
+        },
+        CONFIRMED: {
+            bg: '#E6F6EC',
+            color: '#166534',
+            icon: FaCheck,
+            fr: 'CONFIRMÉ',
+            en: 'CONFIRMED'
+        },
+        CANCELED: {
+            bg: '#FEE2E2',
+            color: '#9e0a0a',
+            icon: FaTimes,
+            fr: 'ANNULÉ',
+            en: 'CANCELED'
         }
     };
 
+    const getStatusBadgeProps = (status) => {
+        const normalizedStatus = status?.toUpperCase() || 'PENDING';
+        const config = STATUS_CONFIG[normalizedStatus] || STATUS_CONFIG.PENDING;
+
+        return {
+            bg: config.bg,
+            color: config.color,
+            icon: config.icon,
+            text: language === 'fr' ? config.fr : config.en
+        };
+    };
+
+    // Replace the existing getStatusIcon function with this:
     const getStatusIcon = (status) => {
-        switch (status) {
-            case t.status.confirmed:
-                return <FaCheck />;
-            case t.status.canceled:
-                return <FaTimes />;
-            default:
-                return <FaClock />;
-        }
+        const normalizedStatus = status?.toUpperCase() || 'PENDING';
+        const config = STATUS_CONFIG[normalizedStatus] || STATUS_CONFIG.PENDING;
+        return config.icon;
     };
 
     const handleDeleteClick = (session) => {
@@ -390,14 +412,14 @@ const SessionManagement = () => {
                 <Box>
                     <Heading
                         size="xl"
-                        bgGradient={`linear(to-r, ${colors.primary.purple}, ${colors.purple[700]})`}
+                        bgGradient={`linear(to-r, ${colors.purple[900]}, ${colors.purple[900]})`}
                         bgClip="text"
                         mb={2}
                         fontWeight="bold"
                     >
                         {t.sessionManagement}
                     </Heading>
-                    <Text color={colors.purple[600]} fontSize="md" fontWeight="medium">
+                    <Text color={colors.black} fontSize="md" fontWeight="medium">
                         {t.sessionManagementSubtitle}
                     </Text>
                 </Box>
@@ -435,7 +457,7 @@ const SessionManagement = () => {
                                 >
                                     <Tr>
                                         <Th
-                                            color={colors.purple[700]}
+                                            color={colors.purple[900]}
                                             fontWeight="bold"
                                             fontSize="sm"
                                             textTransform="uppercase"
@@ -443,12 +465,12 @@ const SessionManagement = () => {
                                             py={4}
                                         >
                                             <HStack spacing={3}>
-                                                <Icon as={FaCalendarAlt} color={colors.primary.purple} />
+                                                <Icon as={FaCalendarAlt} color={colors.primary[900]} />
                                                 <Text>{t.table.date}</Text>
                                             </HStack>
                                         </Th>
                                         <Th
-                                            color={colors.purple[700]}
+                                            color={colors.purple[900]}
                                             fontWeight="bold"
                                             fontSize="sm"
                                             textTransform="uppercase"
@@ -456,12 +478,12 @@ const SessionManagement = () => {
                                             py={4}
                                         >
                                             <HStack spacing={3}>
-                                                <Icon as={FaBuilding} color={colors.purple[500]} />
+                                                <Icon as={FaBuilding} color={colors.purple[900]} />
                                                 <Text>{t.table.association}</Text>
                                             </HStack>
                                         </Th>
                                         <Th
-                                            color={colors.purple[700]}
+                                            color={colors.purple[900]}
                                             fontWeight="bold"
                                             fontSize="sm"
                                             textTransform="uppercase"
@@ -469,12 +491,12 @@ const SessionManagement = () => {
                                             py={4}
                                         >
                                             <HStack spacing={3}>
-                                                <Icon as={FaUser} color={colors.purple[400]} />
+                                                <Icon as={FaUser} color={colors.purple[900]} />
                                                 <Text>{t.table.volunteer}</Text>
                                             </HStack>
                                         </Th>
                                         <Th
-                                            color={colors.purple[700]}
+                                            color={colors.purple[900]}
                                             fontWeight="bold"
                                             fontSize="sm"
                                             textTransform="uppercase"
@@ -482,12 +504,12 @@ const SessionManagement = () => {
                                             py={4}
                                         >
                                             <HStack spacing={3}>
-                                                <Icon as={FaClock} color={colors.purple[600]} />
+                                                <Icon as={FaClock} color={colors.purple[900]} />
                                                 <Text>{t.table.status}</Text>
                                             </HStack>
                                         </Th>
                                         <Th
-                                            color={colors.purple[700]}
+                                            color={colors.purple[900]}
                                             fontWeight="bold"
                                             fontSize="sm"
                                             textTransform="uppercase"
@@ -495,7 +517,7 @@ const SessionManagement = () => {
                                             py={4}
                                         >
                                             <HStack spacing={3}>
-                                                <Icon as={FaCog} color={colors.purple[500]} />
+                                                <Icon as={FaCog} color={colors.purple[900]} />
                                                 <Text>{t.table.actions}</Text>
                                             </HStack>
                                         </Th>
@@ -519,25 +541,26 @@ const SessionManagement = () => {
                                                 <Td py={6} fontWeight="medium" color={colors.neutrals.darkGray}>
                                                     {session.association?.name || t.notAvailable}
                                                 </Td>
-                                                <Td py={6} color={colors.purple[600]}>
+                                                <Td py={6} color={colors.black}>
                                                     {session.status === t.status.confirmed && session.volunteer
                                                         ? session.volunteer.fullName
                                                         : t.notAvailable}
                                                 </Td>
                                                 <Td py={6}>
                                                     <Badge
-                                                        {...getStatusBadgeProps(session.status)}
                                                         px={4}
                                                         py={2}
                                                         borderRadius="full"
+                                                        bg={getStatusBadgeProps(session.status).bg}
+                                                        color={getStatusBadgeProps(session.status).color}
                                                         fontWeight="bold"
                                                         fontSize="xs"
                                                         textTransform="uppercase"
                                                         letterSpacing="wide"
                                                     >
                                                         <HStack spacing={2}>
-                                                            {getStatusIcon(session.status)}
-                                                            <Text>{t.statusDisplay[session.status]}</Text>
+                                                            <Icon as={getStatusBadgeProps(session.status).icon} />
+                                                            <Text>{getStatusBadgeProps(session.status).text}</Text>
                                                         </HStack>
                                                     </Badge>
                                                 </Td>
@@ -545,10 +568,10 @@ const SessionManagement = () => {
                                                     <ButtonGroup size="sm" spacing={2}>
                                                         <Button
                                                             leftIcon={<FaEdit />}
-                                                            bg={colors.primary.purple}
+                                                            bg="purple.900"
                                                             color="white"
                                                             _hover={{
-                                                                bg: colors.purple[600],
+                                                                opacity: 0.8,
                                                                 transform: 'translateY(-1px)'
                                                             }}
                                                             borderRadius="lg"
@@ -561,10 +584,12 @@ const SessionManagement = () => {
                                                         {session.status === t.status.confirmed && (
                                                             <Button
                                                                 leftIcon={<FaUserPlus />}
-                                                                bg={colors.accents.green}
-                                                                color="white"
+                                                                bg={STATUS_CONFIG.CONFIRMED.bg}
+                                                                color={STATUS_CONFIG.CONFIRMED.color}
                                                                 _hover={{
-                                                                    bg: colors.accents.teal,
+                                                                    bg: STATUS_CONFIG.CONFIRMED.bg,
+                                                                    color: STATUS_CONFIG.CONFIRMED.color,
+                                                                    opacity: 0.8,
                                                                     transform: 'translateY(-1px)'
                                                                 }}
                                                                 borderRadius="lg"
@@ -577,9 +602,12 @@ const SessionManagement = () => {
 
                                                         <Button
                                                             leftIcon={<FaTrash />}
-                                                            bg={colors.accents.red}
-                                                            color="white"
+                                                            bg={STATUS_CONFIG.CANCELED.bg}
+                                                            color={STATUS_CONFIG.CANCELED.color}
                                                             _hover={{
+                                                                bg: STATUS_CONFIG.CANCELED.bg,
+                                                                color: STATUS_CONFIG.CANCELED.color,
+                                                                opacity: 0.8,
                                                                 transform: 'translateY(-1px)'
                                                             }}
                                                             borderRadius="lg"
@@ -600,10 +628,10 @@ const SessionManagement = () => {
                                                         <Icon
                                                             as={FaCalendarAlt}
                                                             boxSize={12}
-                                                            color={colors.purple[400]}
+                                                            color={colors.purple[900]}
                                                         />
                                                         <Text
-                                                            color={colors.purple[600]}
+                                                            color={colors.purple[900]}
                                                             fontSize="lg"
                                                             fontWeight="medium"
                                                         >
@@ -631,7 +659,7 @@ const SessionManagement = () => {
                     borderColor={colors.purple[200]}
                 >
                     <ModalHeader
-                        bgGradient={`linear(to-r, ${colors.primary.purple}, ${colors.purple[600]})`}
+                        bg="purple.900"
                         color="white"
                         borderTopRadius="2xl"
                         py={6}
@@ -646,7 +674,7 @@ const SessionManagement = () => {
                         <ModalBody py={8}>
                             <FormControl isRequired>
                                 <FormLabel
-                                    color={colors.purple[700]}
+                                    color="purple.900"
                                     fontWeight="bold"
                                     mb={3}
                                 >
@@ -664,12 +692,14 @@ const SessionManagement = () => {
                                     _focus={{
                                         bg: colors.primary.white,
                                         border: '2px solid',
-                                        borderColor: colors.primary.purple
+                                        borderColor: "purple.900"
                                     }}
                                 >
-                                    <option value="PENDING">{t.statusDisplay.PENDING}</option>
-                                    <option value="CONFIRMED">{t.statusDisplay.CONFIRMED}</option>
-                                    <option value="CANCELED">{t.statusDisplay.CANCELED}</option>
+                                    {Object.keys(STATUS_CONFIG).map((status) => (
+                                        <option key={status} value={status}>
+                                            {language === 'fr' ? STATUS_CONFIG[status].fr : STATUS_CONFIG[status].en}
+                                        </option>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </ModalBody>
@@ -678,9 +708,16 @@ const SessionManagement = () => {
                                 <Button
                                     leftIcon={<FaTimes />}
                                     onClick={closeStatusModal}
-                                    bg={colors.neutrals.mediumGray}
-                                    color="white"
-                                    _hover={{ bg: colors.neutrals.darkGray }}
+                                    bg="white"
+                                    color="purple.900"
+                                    border="1px solid"
+                                    borderColor="purple.900"
+                                    _hover={{
+                                        bg: "white",
+                                        color: "purple.900",
+                                        borderColor: "purple.900",
+                                        opacity: 0.8
+                                    }}
                                     borderRadius="lg"
                                     fontWeight="medium"
                                     px={6}
@@ -690,9 +727,9 @@ const SessionManagement = () => {
                                 <Button
                                     type="submit"
                                     leftIcon={loading ? <Spinner size="sm" /> : <FaCheck />}
-                                    bg={colors.primary.purple}
+                                    bg="purple.900"
                                     color="white"
-                                    _hover={{ bg: colors.purple[600] }}
+                                    _hover={{ opacity: 0.8 }}
                                     borderRadius="lg"
                                     fontWeight="medium"
                                     px={6}
@@ -714,11 +751,11 @@ const SessionManagement = () => {
                     borderRadius="2xl"
                     shadow="2xl"
                     border="2px solid"
-                    borderColor={colors.purple[200]}
+                    borderColor={colors.purple[900]}
                 >
                     <ModalHeader
-                        bg={colors.accents.green}
-                        color="white"
+                        bg={STATUS_CONFIG.CONFIRMED.bg}
+                        color={STATUS_CONFIG.CONFIRMED.color}
                         borderTopRadius="2xl"
                         py={6}
                     >
@@ -727,7 +764,7 @@ const SessionManagement = () => {
                             <Text fontWeight="bold">{t.modals.assignVolunteer.title}</Text>
                         </HStack>
                     </ModalHeader>
-                    <ModalCloseButton color="white" />
+                    <ModalCloseButton color={STATUS_CONFIG.CONFIRMED.color} />
                     <ModalBody py={8}>
                         {selectedSession && (
                             <AssignVolunteerToSession
@@ -750,8 +787,8 @@ const SessionManagement = () => {
                     borderColor={colors.purple[200]}
                 >
                     <ModalHeader
-                        bg={colors.accents.red}
-                        color="white"
+                        bg={STATUS_CONFIG.CANCELED.bg}
+                        color={STATUS_CONFIG.CANCELED.color}
                         borderTopRadius="2xl"
                         py={6}
                     >
@@ -760,14 +797,10 @@ const SessionManagement = () => {
                             <Text fontWeight="bold">{t.modals.deleteSession.title}</Text>
                         </HStack>
                     </ModalHeader>
-                    <ModalCloseButton color="white" />
+                    <ModalCloseButton color={STATUS_CONFIG.CANCELED.color} />
                     <ModalBody py={8}>
                         <VStack spacing={6} align="start">
-                            <Text
-                                color={colors.neutrals.darkGray}
-                                fontSize="md"
-                                lineHeight="tall"
-                            >
+                            <Text color={colors.neutrals.darkGray} fontSize="md" lineHeight="tall">
                                 {t.modals.deleteSession.confirmation}
                             </Text>
                             {selectedSession && (
@@ -808,9 +841,16 @@ const SessionManagement = () => {
                             <Button
                                 leftIcon={<FaTimes />}
                                 onClick={closeDeleteModal}
-                                bg={colors.neutrals.mediumGray}
-                                color="white"
-                                _hover={{ bg: colors.neutrals.darkGray }}
+                                bg="white"
+                                color={STATUS_CONFIG.CANCELED.color}
+                                border="1px solid"
+                                borderColor={STATUS_CONFIG.CANCELED.color}
+                                _hover={{
+                                    bg: "white",
+                                    color: STATUS_CONFIG.CANCELED.color,
+                                    borderColor: STATUS_CONFIG.CANCELED.color,
+                                    opacity: 0.8
+                                }}
                                 borderRadius="lg"
                                 fontWeight="medium"
                                 px={6}
@@ -819,9 +859,9 @@ const SessionManagement = () => {
                             </Button>
                             <Button
                                 leftIcon={loading ? <Spinner size="sm" /> : <FaTrash />}
-                                bg={colors.accents.red}
-                                color="white"
-                                _hover={{ bg: '#EA580C' }}
+                                bg={STATUS_CONFIG.CANCELED.bg}
+                                color={STATUS_CONFIG.CANCELED.color}
+                                _hover={{ opacity: 0.8 }}
                                 borderRadius="lg"
                                 fontWeight="medium"
                                 px={6}
@@ -835,6 +875,7 @@ const SessionManagement = () => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+
         </Box>
     );
 };

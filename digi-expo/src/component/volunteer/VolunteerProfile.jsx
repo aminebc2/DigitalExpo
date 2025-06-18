@@ -297,7 +297,7 @@ function VolunteerProfile() {
                                             bg="#f3e8ff"
                                             border="4px solid white"
                                         >
-                                            <Icon as={FaUser} boxSize={10} color="#5f249f" />
+                                            <Icon as={FaUser} boxSize={10} color="#5B21B6" />
                                         </Circle>
                                     </Box>
                                 </Box>
@@ -316,7 +316,7 @@ function VolunteerProfile() {
                                         <Button
                                             leftIcon={<Icon as={FaEdit} />}
                                             onClick={() => setEditMode(true)}
-                                            colorScheme="purple"
+                                            colorScheme="#5B21B6"
                                             variant="outline"
                                             size="sm"
                                             w="full"
@@ -339,7 +339,7 @@ function VolunteerProfile() {
                             <CardBody>
                                 <Stack spacing={6}>
                                     <HStack justify="space-between" align="center">
-                                        <Heading size="md" color={textColor}>
+                                        <Heading size="md" color="#5B21B6">
                                             {t.pageTitle}
                                         </Heading>
                                         {editMode && (
@@ -347,9 +347,9 @@ function VolunteerProfile() {
                                                 <Button
                                                     leftIcon={<Icon as={FaSave} />}
                                                     onClick={handleSave}
-                                                    bg="#5f249f"
+                                                    bg="#5B21B6"
                                                     color="white"
-                                                    _hover={{ bg: "#4a1d7f" }}
+                                                    _hover={{ bg: "#5B21B6" }}
                                                     size="sm"
                                                 >
                                                     {t.saveChanges}
@@ -374,7 +374,7 @@ function VolunteerProfile() {
                                             <FormControl>
                                                 <FormLabel color={mutedColor}>
                                                     <HStack spacing={2}>
-                                                        <Icon as={FaUser} color="#5f249f" />
+                                                        <Icon as={FaUser} color="#5B21B6" />
                                                         <Text>{t.username}</Text>
                                                     </HStack>
                                                 </FormLabel>
@@ -402,7 +402,7 @@ function VolunteerProfile() {
                                             <FormControl>
                                                 <FormLabel color={mutedColor}>
                                                     <HStack spacing={2}>
-                                                        <Icon as={FaEnvelope} color="#5f249f" />
+                                                        <Icon as={FaEnvelope} color="#5B21B6" />
                                                         <Text>{t.email}</Text>
                                                     </HStack>
                                                 </FormLabel>

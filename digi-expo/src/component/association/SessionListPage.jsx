@@ -54,9 +54,9 @@ const translations = {
         close: "Fermer",
         status: {
             pending: "EN ATTENTE",
-            confirmed: "CONFIRME",
-            cancelled: "ANNULE",
-            completed: "TERMINE"
+            confirmed: "CONFIRMÉ",
+            cancelled: "ANNULÉ",
+            completed: "TERMINÉ"
         },
         lastUpdate: "Dernière mise à jour: "
     },
@@ -88,18 +88,36 @@ const translations = {
 
 const StatusBadge = ({ status, t }) => {
     const statusColors = {
-        pending: { bg: 'yellow.400', color: 'yellow.900' },
-        confirmed: { bg: 'green.400', color: 'green.900' },
-        cancelled: { bg: '#9e0a0a', color: 'white' }, // Changed to red.400 for better visibility
-        completed: { bg: 'blue.400', color: 'blue.900' },
+        pending: {
+            bg: '#FFF3E0',  // Light orange background
+            color: '#B45309' // Orange text
+        },
+        confirmed: {
+            bg: '#E6F6EC',  // Light green background
+            color: '#166534' // Green text
+        },
+        cancelled: {
+            bg: '#FEE2E2',  // Light red background
+            color: '#9e0a0a' // Red text
+        },
+        completed: {
+            bg: '#EEF2FF',  // Light blue background
+            color: '#3730A3' // Blue text
+        }
     };
 
     const getStatusKey = (status) => {
-        // Convert status to lowercase and handle any variations
-        const normalizedStatus = status?.toLowerCase();
-        if (normalizedStatus === 'canceled' || normalizedStatus === 'cancelled') {
-            return 'cancelled'; // Normalize to one spelling
-        }
+        if (!status) return 'pending';
+
+        // Convert to lowercase for consistent comparison
+        const normalizedStatus = status.toLowerCase();
+
+        // Map common variations to standard status
+        if (normalizedStatus.includes('confirm')) return 'confirmed';
+        if (normalizedStatus.includes('cancel') || normalizedStatus.includes('annul')) return 'cancelled';
+        if (normalizedStatus.includes('complet') || normalizedStatus.includes('termin')) return 'completed';
+        if (normalizedStatus.includes('pend') || normalizedStatus.includes('attente')) return 'pending';
+
         return normalizedStatus;
     };
 
@@ -116,7 +134,7 @@ const StatusBadge = ({ status, t }) => {
             color={colors.color}
             fontWeight="medium"
             fontSize="sm"
-            textTransform="capitalize"
+            textTransform="uppercase"
         >
             {translatedStatus}
         </Badge>

@@ -107,7 +107,7 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
     const t = translations[language];
 
     const cardBg = useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(26, 32, 44, 0.9)');
-    const headingColor = useColorModeValue('purple.800', 'white');
+    const headingColor = useColorModeValue('#5B21B6', 'white');
     const buttonScheme = isJoined ? 'green' : 'purple';
     const floatAnimation = `${float} 3s ease-in-out infinite`;
     const pulseAnimation = `${pulse} 2s ease-in-out infinite`;
@@ -181,61 +181,60 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
                 </Box>
 
                 <Box p={6}>
-                    <VStack spacing={4} align="stretch">
-                        <Heading
-                            size="md"
-                            color={headingColor}
-                            noOfLines={2}
-                        >
-                            {association.name}
-                        </Heading>
+                    <Heading
+                        size="md"
+                        color="#5B21B6"
+                        noOfLines={2}
+                    >
+                        {association.name}
+                    </Heading>
 
-                        <VStack spacing={3} align="stretch">
-                            <Text
-                                fontSize="sm"
-                                fontWeight="medium"
-                                color="purple.500"
-                            >
-                                {t.contactSection}
-                            </Text>
-                            <InfoItem
-                                icon={FaEnvelope}
-                                label={t.email}
-                                value={association.email}
-                            />
-                            <InfoItem
-                                icon={FaUser}
-                                label={t.manager}
-                                value={association.responsableName}
-                            />
-                            <InfoItem
-                                icon={FaPhone}
-                                label={t.phone}
-                                value={association.responsablePhone}
-                            />
-                            <InfoItem
-                                icon={FaMapMarkerAlt}
-                                label={t.ville}
-                                value={association.ville}
-                            />
-                        </VStack>
+                    <Text
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="#5B21B6"
+                    >
+                        {t.contactSection}
+                    </Text>
+                    <InfoItem
+                        icon={FaEnvelope}
+                        color="#5B21B6"
+                        label={t.email}
+                        value={association.email}
+                    />
+                    <InfoItem
+                        icon={FaUser}
+                        label={t.manager}
+                        value={association.responsableName}
+                    />
+                    <InfoItem
+                        icon={FaPhone}
+                        label={t.phone}
+                        value={association.responsablePhone}
+                    />
+                    <InfoItem
+                        icon={FaMapMarkerAlt}
+                        label={t.ville}
+                        value={association.ville}
+                    />
 
-                        <Button
-                            colorScheme={buttonScheme}
-                            size="lg"
-                            isLoading={isLoading}
-                            onClick={() => onJoin(association.id)}
-                            isDisabled={isJoined}
-                            leftIcon={!isLoading && (isJoined ? <FaCheckCircle /> : <FaHandshake />)}
-                            rightIcon={!isJoined && !isLoading ? <FaArrowRight /> : null}
-                            borderRadius="xl"
-                            _hover={{
-                                transform: 'translateY(-2px)',
-                            }}
-                        >
-                            {isLoading ? t.sending : isJoined ? t.requestSent : t.joinButton}
-                        </Button>
-                    </VStack>
+                    <Button
+                        bg="#5B21B6"
+                        color="white"
+                        _hover={{
+                            bg: '#4C1D96',  // Slightly darker shade for hover
+                            transform: 'translateY(-2px)',
+                        }}
+                        size="lg"
+                        isLoading={isLoading}
+                        onClick={() => onJoin(association.id)}
+                        isDisabled={isJoined}
+                        leftIcon={!isLoading && (isJoined ? <FaCheckCircle /> : <FaHandshake />)}
+                        rightIcon={!isJoined && !isLoading ? <FaArrowRight /> : null}
+                        borderRadius="xl"
+                    >
+                        {isLoading ? t.sending : isJoined ? t.requestSent : t.joinButton}
+                    </Button>
                 </Box>
             </Box>
         </Box>
@@ -347,7 +346,7 @@ const AssociationList = () => {
             position="relative"
             overflow="hidden"
             css={{
-                background: 'linear-gradient(-45deg, #553C9A, #B794F4, #805AD5, #6B46C1)',
+                background: "#ffffff",
                 backgroundSize: '400% 400%',
             }}
             pt={{ base: 10, md: 20 }}
@@ -386,14 +385,14 @@ const AssociationList = () => {
                     <Icon
                         as={FaBuilding}
                         boxSize={{ base: 12, md: 16 }}
-                        color="white"
+                        color="#5B21B6"
                         animation={`${float} 3s ease-in-out infinite`}
                     />
                     <Heading
                         as="h1"
                         fontSize={{ base: '3xl', md: '5xl' }}
                         fontWeight="bold"
-                        color="white"
+                        color="#5B21B6"
                         letterSpacing="tight"
                         textShadow="2px 2px 4px rgba(0,0,0,0.2)"
                     >
@@ -401,7 +400,7 @@ const AssociationList = () => {
                     </Heading>
                     <Text
                         fontSize={{ base: 'lg', md: 'xl' }}
-                        color="whiteAlpha.900"
+                        color="black"
                         maxW="2xl"
                         textShadow="1px 1px 2px rgba(0,0,0,0.1)"
                     >

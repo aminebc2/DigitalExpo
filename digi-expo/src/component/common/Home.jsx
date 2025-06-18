@@ -198,7 +198,7 @@ const HomePage = () => {
         <Box>
             {/* Hero Section */}
             <Box
-                bgGradient="linear(to-r, purple.800, purple.600)"
+                bgGradient="linear(to-r, purple.800, #5B21B6)"
                 pt={24}
                 pb={32}
                 position="relative"
@@ -279,7 +279,7 @@ const HomePage = () => {
                                     <Button
                                         size="lg"
                                         bg="white"
-                                        color="purple.600"
+                                        color="#5B21B6"
                                         px={8}
                                         h={14}
                                         fontSize="lg"
@@ -377,11 +377,11 @@ const HomePage = () => {
                                         boxShadow: 'lg',
                                     }}
                                 >
-                                    <Icon as={stat.icon} boxSize={8} color="purple.500" />
-                                    <Heading size="2xl" color="purple.700">
+                                    <Icon as={stat.icon} boxSize={8} color="#5B21B6" />
+                                    <Heading size="2xl" color="#5B21B6">
                                         {stat.number}
                                     </Heading>
-                                    <Text fontSize="lg" color="purple.600" fontWeight="medium">
+                                    <Text fontSize="lg" color="#5B21B6" fontWeight="medium">
                                         {stat.label}
                                     </Text>
                                 </VStack>
@@ -392,7 +392,7 @@ const HomePage = () => {
             </Box>
 
             {/* Features Section */}
-            <Box py={20} bg={colors.purple[50]}>
+            <Box py={20} bg="{colors.purple[50]}">
                 <Container maxW="container.xl">
                     <VStack spacing={16}>
                         <MotionBox
@@ -403,14 +403,14 @@ const HomePage = () => {
                         >
                             <Heading
                                 size="2xl"
-                                color={colors.purple[700]}
+                                color="#5B21B6"
                                 mb={4}
                             >
                                 {t.connectingCommunities}
                             </Heading>
                             <Text
                                 fontSize="xl"
-                                color={colors.purple[600]}
+                                color="#5B21B6"
                                 maxW="2xl"
                                 mx="auto"
                             >
@@ -456,9 +456,9 @@ const HomePage = () => {
                                         }}
                                     >
                                         <Circle size={16} bg={colors.purple[100]}>
-                                            <Icon as={feature.icon} color={colors.purple[500]} boxSize={8} />
+                                            <Icon as={feature.icon} color="#5B21B6" boxSize={8} />
                                         </Circle>
-                                        <Heading size="md" color={colors.purple[700]}>
+                                        <Heading size="md" color="#5B21B6">
                                             {feature.title}
                                         </Heading>
                                         <Text color="gray.600" textAlign="center">
@@ -484,7 +484,7 @@ const HomePage = () => {
                         >
                             <Heading
                                 size="2xl"
-                                color={colors.purple[700]}
+                                color="#5B21B6"
                                 mb={4}
                                 position="relative"
                                 _after={{
@@ -496,7 +496,7 @@ const HomePage = () => {
                                     width: '80px',
                                     height: '4px',
                                     borderRadius: 'full',
-                                    bg: colors.purple[400],
+                                    bg: "#5B21B6",
                                 }}
                             >
                                 {t.featuredAssociations}
@@ -574,11 +574,11 @@ const HomePage = () => {
                                                             <Flex
                                                                 w="full"
                                                                 h="full"
-                                                                bg="purple.50"
+                                                                bg="#5B21B6"
                                                                 align="center"
                                                                 justify="center"
                                                             >
-                                                                <Icon as={FaBuilding} boxSize={12} color="purple.200" />
+                                                                <Icon as={FaBuilding} boxSize={12} color="#5B21B6" />
                                                             </Flex>
                                                         }
                                                     />
@@ -590,28 +590,20 @@ const HomePage = () => {
                                                 >
                                                     <Heading
                                                         size="xl"
-                                                        color={colors.purple[700]}
+                                                        color="#5B21B6"
                                                     >
                                                         {association.name}
                                                     </Heading>
                                                     <HStack spacing={6}>
                                                         <HStack spacing={2}>
-                                                            <Icon as={FaBuilding} color={colors.purple[500]} />
+                                                            <Icon as={FaBuilding} color="#5B21B6" />
                                                             <Text fontSize="lg">{association.ville}</Text>
                                                         </HStack>
                                                         <HStack spacing={2}>
-                                                            <Icon as={FaPhone} color={colors.purple[500]} />
+                                                            <Icon as={FaPhone} color="#5B21B6" />
                                                             <Text fontSize="lg">{association.responsablePhone}</Text>
                                                         </HStack>
                                                     </HStack>
-                                                    <Button
-                                                        colorScheme="purple"
-                                                        size="lg"
-                                                        rightIcon={<Icon as={FaArrowRight} />}
-                                                        onClick={() => window.location.href = `/associations`}
-                                                    >
-                                                        {t.learnMore}
-                                                    </Button>
                                                 </VStack>
                                             </Stack>
                                         </MotionBox>

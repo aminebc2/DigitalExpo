@@ -59,10 +59,10 @@ const translations = {
         loading: "Chargement des sessions...",
         error: "Erreur lors du chargement des sessions",
         status: {
-            pending: "Pending",
-            confirmed: "Confirmed",
-            cancelled: "CANCELED",
-            completed: "Completed"
+            pending: "EN ATTENTE",
+            confirmed: "CONFIRMÉ",
+            cancelled: "ANNULÉ",
+            completed: "TERMINÉ"
         }
     },
     en: {
@@ -85,10 +85,10 @@ const translations = {
         loading: "Loading sessions...",
         error: "Error loading sessions",
         status: {
-            pending: "Pending",
-            confirmed: "Confirmed",
+            pending: "PENDING",
+            confirmed: "CONFIRMED",
             cancelled: "CANCELED",
-            completed: "Completed"
+            completed: "COMPLETED"
         }
     }
 };
@@ -100,6 +100,63 @@ const float = keyframes`
     100% { transform: translateY(0px); }
 `;
 
+// Create a shared status configuration object
+const STATUS_CONFIG = {
+    pending: {
+        bg: '#FFF3E0',
+        color: '#B45309',
+        fr: 'EN ATTENTE',
+        en: 'PENDING'
+    },
+    confirmed: {
+        bg: '#E6F6EC',
+        color: '#166534',
+        fr: 'CONFIRMÉ',
+        en: 'CONFIRMED'
+    },
+    cancelled: {
+        bg: '#FEE2E2',
+        color: '#9e0a0a',
+        fr: 'ANNULÉ',
+        en: 'CANCELED'
+    },
+    completed: {
+        bg: '#EEF2FF',
+        color: '#3730A3',
+        fr: 'TERMINÉ',
+        en: 'COMPLETED'
+    }
+};
+
+// Update the standardizeStatus function
+const standardizeStatus = (status) => {
+    if (!status) return 'pending';
+
+    // Convert to lowercase for consistent comparison
+    const normalizedStatus = status.toLowerCase();
+
+    // Map common variations to standard status
+    if (normalizedStatus.includes('confirm')) return 'confirmed';
+    if (normalizedStatus.includes('cancel') || normalizedStatus.includes('annul')) return 'cancelled';
+    if (normalizedStatus.includes('complet') || normalizedStatus.includes('termin')) return 'completed';
+    if (normalizedStatus.includes('pend') || normalizedStatus.includes('attente')) return 'pending';
+
+    return 'pending'; // Default fallback
+};
+
+// Update the getStatusStyles function
+const getStatusStyles = (status, language) => {
+    const standardStatus = standardizeStatus(status);
+    const config = STATUS_CONFIG[standardStatus] || STATUS_CONFIG.pending;
+
+    return {
+        bg: config.bg,
+        color: config.color,
+        text: config[language] || config.en
+    };
+};
+
+// Update the SessionCard component to use the new status handling
 const SessionCard = ({ session, onViewDetails }) => {
     const { language } = useLanguage();
     const t = translations[language];
@@ -108,54 +165,7 @@ const SessionCard = ({ session, onViewDetails }) => {
     const borderColor = useColorModeValue('gray.200', 'gray.700');
     const textColor = useColorModeValue('gray.600', 'gray.300');
 
-    // Standardize status text regardless of input
-    const standardizeStatus = (status) => {
-        const lowercaseStatus = status?.toLowerCase() || '';
-
-        if (lowercaseStatus.includes('confirmed')) return 'Confirmed';
-        if (lowercaseStatus.includes('pending')) return 'Pending';
-        if (lowercaseStatus.includes('canceled') || lowercaseStatus.includes('annul')) return 'CANCELED';
-        if (lowercaseStatus.includes('complet') || lowercaseStatus.includes('termin')) return 'Completed';
-        return status;
-    };
-
-    const getStatusStyles = (status) => {
-        const standardStatus = standardizeStatus(status);
-        switch (standardStatus) {
-            case 'Pending':
-                return {
-                    bg: '#FFF3E0',
-                    color: '#B45309',
-                    text: 'Pending'
-                };
-            case 'Confirmed':
-                return {
-                    bg: '#E6F6EC',
-                    color: '#166534',
-                    text: 'Confirmed'
-                };
-            case 'CANCELED':
-                return {
-                    bg: '#FEE2E2',
-                    color: '#9e0a0a',
-                    text: 'CANCELED'
-                };
-            case 'Completed':
-                return {
-                    bg: '#EEF2FF',
-                    color: '#3730A3',
-                    text: 'Completed'
-                };
-            default:
-                return {
-                    bg: 'gray.100',
-                    color: 'gray.600',
-                    text: standardStatus
-                };
-        }
-    };
-
-    const statusStyles = getStatusStyles(session.status);
+    const statusStyles = getStatusStyles(session.status, language);
 
     return (
         <Box
@@ -168,13 +178,13 @@ const SessionCard = ({ session, onViewDetails }) => {
             _hover={{
                 transform: 'translateY(-4px)',
                 shadow: 'lg',
-                borderColor: 'purple.400',
+                borderColor: '#5B21B6',
             }}
         >
             <VStack spacing={4} align="stretch">
                 <Flex justify="space-between" align="center">
                     <HStack spacing={3}>
-                        <Icon as={FaCalendarAlt} color="purple.500" boxSize={5} />
+                        <Icon as={FaCalendarAlt} color="#5B21B6" boxSize={5} />
                         <Text fontWeight="medium" color={textColor}>
                             {session.date}
                         </Text>
@@ -185,24 +195,15 @@ const SessionCard = ({ session, onViewDetails }) => {
                         borderRadius="full"
                         bg={statusStyles.bg}
                         color={statusStyles.color}
-                        textTransform="none"
+                        textTransform="uppercase"
                     >
                         {statusStyles.text}
                     </Badge>
                 </Flex>
 
-                <Divider />
-
-                <HStack spacing={4}>
-                    <Icon as={FaBuilding} color="purple.500" />
-                    <Text fontWeight="medium" noOfLines={1}>
-                        {session.association?.name || t.notAvailable}
-                    </Text>
-                </HStack>
-
                 <Button
                     rightIcon={<FaArrowRight />}
-                    colorScheme="purple"
+                    color="#5B21B6"
                     variant="ghost"
                     size="sm"
                     onClick={() => onViewDetails(session)}
@@ -227,9 +228,9 @@ const SessionDetailsModal = ({ session, isOpen, onClose }) => {
 
     const InfoItem = ({ icon, label, value }) => (
         <HStack spacing={3} p={3} bg={sectionBg} borderRadius="lg">
-            <Icon as={icon} color="purple.500" boxSize={5} />
+            <Icon as={icon} color="#5B21B6" boxSize={5} />
             <VStack align="start" spacing={0}>
-                <Text fontSize="sm" color={textColor}>
+                <Text fontSize="sm" color="#5B21B6">
                     {label}
                 </Text>
                 <Text fontWeight="medium">
@@ -245,8 +246,8 @@ const SessionDetailsModal = ({ session, isOpen, onClose }) => {
             <ModalContent borderRadius="2xl">
                 <ModalHeader borderBottomWidth="1px" borderColor={borderColor}>
                     <HStack spacing={3}>
-                        <Icon as={FaCalendarAlt} color="purple.500" />
-                        <Text>{t.sessionDetails}</Text>
+                        <Icon as={FaCalendarAlt} color="#5B21B6" />
+                        <Text color="#5B21B6">{t.sessionDetails}</Text>
                     </HStack>
                 </ModalHeader>
                 <ModalCloseButton />
@@ -357,7 +358,7 @@ const SessionPage = () => {
     return (
         <Box
             minH="100vh"
-            bg={bgColor}
+            bg="#ffffff"
             pt={{ base: 10, md: 20 }}
             pb={{ base: 10, md: 20 }}
         >
@@ -366,22 +367,24 @@ const SessionPage = () => {
                     <Icon
                         as={FaCalendarAlt}
                         boxSize={{ base: 12, md: 16 }}
-                        color="purple.400"
+                        color="#5B21B6"
                         animation={`${float} 3s ease-in-out infinite`}
                     />
                     <Heading
                         as="h1"
                         fontSize={{ base: '3xl', md: '5xl' }}
                         fontWeight="bold"
-                        color={headingColor}
+                        color="#5B21B6"
                         letterSpacing="tight"
+                        textShadow="2px 2px 4px rgba(0,0,0,0.2)"
                     >
                         {t.pageTitle}
                     </Heading>
                     <Text
                         fontSize={{ base: 'lg', md: 'xl' }}
-                        color={subTextColor}
+                        color="black"
                         maxW="2xl"
+                        textShadow="1px 1px 2px rgba(0,0,0,0.1)"
                     >
                         {t.pageSubtitle}
                     </Text>
@@ -392,10 +395,10 @@ const SessionPage = () => {
                         <Icon
                             as={FaCalendarAlt}
                             boxSize={8}
-                            color="purple.400"
+                            color="#5B21B6"
                             animation={`${float} 1s ease-in-out infinite`}
                         />
-                        <Text color={subTextColor}>{t.loading}</Text>
+                        <Text color="#5B21B6">{t.loading}</Text>
                     </VStack>
                 ) : sessions.length > 0 ? (
                     <SimpleGrid
@@ -422,7 +425,7 @@ const SessionPage = () => {
                         <Icon
                             as={FaCalendarAlt}
                             boxSize={12}
-                            color="purple.400"
+                            color="#5B21B6"
                             opacity={0.5}
                         />
                         <Heading size="lg" color={headingColor}>

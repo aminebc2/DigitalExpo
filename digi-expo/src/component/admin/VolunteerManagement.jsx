@@ -50,6 +50,43 @@ import {
     FaUserClock
 } from 'react-icons/fa';
 
+const colors = {
+    primary: {
+        purple: '#8B5CF6',
+        lightPurple: '#A78BFA',
+        darkPurple: '#7C3AED',
+        white: '#FFFFFF'
+    },
+    purple: {
+        50: '#F5F3FF',
+        100: '#EDE9FE',
+        200: '#DDD6FE',
+        300: '#C4B5FD',
+        400: '#A78BFA',
+        500: '#8B5CF6',
+        600: '#7C3AED',
+        700: '#6D28D9',
+        800: '#5B21B6',
+        900: '#582C83'
+    },
+    neutrals: {
+        lightGray: '#F8FAFC',
+        mediumGray: '#94A3B8',
+        darkGray: '#374151',
+        black: '#000000'
+    },
+    accents: {
+        teal: '#14B8A6',
+        blue: '#3B82F6',
+        darkTeal: '#0F766E',
+        green: '#10B981',
+        orange: '#F97316',
+        gold: '#F59E0B',
+        yellow: '#EAB308',
+        red: '#9e0a0a'
+    }
+};
+
 const translations = {
     fr: {
         title: "Gestion des Bénévoles",
@@ -338,31 +375,34 @@ const VolunteerManagement = () => {
         onClose();
     };
 
-    const filteredVolunteers = volunteers.filter(vol =>
-        vol.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vol.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vol.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vol.phoneNumber.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredVolunteers = volunteers.filter(vol => {
+        const searchQueryLower = searchQuery.toLowerCase();
+        return (
+            (vol.username?.toLowerCase() || '').includes(searchQueryLower) ||
+            (vol.fullName?.toLowerCase() || '').includes(searchQueryLower) ||
+            (vol.email?.toLowerCase() || '').includes(searchQueryLower) ||
+            (vol.phoneNumber?.toLowerCase() || '').includes(searchQueryLower)
+        );
+    });
 
     return (
-        <Box bg={bgMain} minH="100vh" py={8}>
+        <Box bg={bgMain} minH="100vh" py={8} bgGradient={`linear(to-br, ${colors.purple[50]}, ${colors.primary.white})`}>
             <Container maxW="container.xl">
                 {/* Header Section */}
                 <Box mb={8}>
                     <Flex justify="space-between" align="center" mb={6}>
                         <VStack align="start" spacing={1}>
-                            <Heading size="lg" color="purple.600">
+                            <Heading size="lg" color="#582C83">
                                 {t.title}
                             </Heading>
-                            <Text color={secondaryTextColor}>
+                            <Text color="black">
                                 {t.subtitle}
                             </Text>
                         </VStack>
                         <Button
                             leftIcon={<FaPlus />}
                             onClick={onOpen}
-                            colorScheme="purple"
+                            colorScheme="#582C83"
                             size="lg"
                             rounded="full"
                             px={8}
@@ -537,7 +577,7 @@ const VolunteerManagement = () => {
                     <DrawerContent>
                         <DrawerCloseButton />
                         <DrawerHeader borderBottomWidth="1px" bg="purple.50">
-                            <Heading size="md" color="purple.600">
+                            <Heading size="md" color="#582C83">
                                 {editingVolunteer ? t.update : t.addVolunteer}
                             </Heading>
                         </DrawerHeader>
@@ -647,7 +687,7 @@ const VolunteerManagement = () => {
 
                                 <HStack spacing={4} w="100%" pt={4}>
                                     <Button
-                                        colorScheme="purple"
+                                        colorScheme="#582C83"
                                         leftIcon={buttonLoading ? <Box className="loading-spinner" /> : <FaSave />}
                                         onClick={handleSubmit}
                                         isLoading={buttonLoading}

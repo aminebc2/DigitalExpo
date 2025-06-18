@@ -218,7 +218,7 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                             {t.selectVolunteer}
                         </Heading>
                     </HStack>
-                    <Tag size="lg" variant="subtle" colorScheme="purple" borderRadius="full" px={4} py={2}>
+                    <Tag size="lg" variant="subtle" color="#166534" borderRadius="full" px={4} py={2}>
                         <TagLeftIcon as={FaUserFriends} color={iconColor} />
                         <TagLabel>{volunteers.length} {t.totalVolunteers}</TagLabel>
                     </Tag>
@@ -297,7 +297,7 @@ const AssignVolunteerToSession = ({ sessionId, associationId, onClose }) => {
                         size="lg"
                         borderRadius="xl"
                         borderColor="dxc.purple.500"
-                        color="dxc.purple.500"
+                        color="#166534"
                         _hover={{
                             bg: 'dxc.purple.50'
                         }}
