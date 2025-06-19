@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import AssociationService from '../../service/AssociationService';
-import { FaCalendarAlt, FaInfoCircle, FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
+import {FaCalendarAlt, FaInfoCircle, FaUser, FaEnvelope, FaPhone, FaAddressCard} from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 import {
     Box,
@@ -166,7 +166,7 @@ const SessionCard = ({ session, onViewDetails, t, formatDate }) => {
                     left: 0,
                     right: 0,
                     height: "4px",
-                    bgGradient: "linear(to-r, purple.500, purple.300)"
+                    bgGradient: "linear(to-r, #582C83, purple.300)"
                 }}
             >
                 <VStack spacing={4} align="stretch">
@@ -185,7 +185,7 @@ const SessionCard = ({ session, onViewDetails, t, formatDate }) => {
                     <Button
                         onClick={() => onViewDetails(session)}
                         variant="ghost"
-                        colorScheme="purple"
+                        color="#582C83"
                         size="sm"
                         rightIcon={<Icon as={FaCalendarAlt} />}
                         _hover={{
@@ -217,16 +217,16 @@ const SessionDetailsModal = ({ isOpen, onClose, session, t, formatFullDate, getT
                     left={0}
                     right={0}
                     height="6px"
-                    bgGradient="linear(to-r, purple.500, purple.300)"
+                    bgGradient="#582C83"
                 />
 
                 <ModalHeader pt={8}>
                     <HStack spacing={3}>
-                        <Circle size={10} bg="purple.100" color="purple.500">
+                        <Circle size={10} bg="white" color="#582C83">
                             <Icon as={FaCalendarAlt} />
                         </Circle>
                         <VStack align="start" spacing={1}>
-                            <Text fontSize="xl" fontWeight="bold">
+                            <Text fontSize="xl" fontWeight="bold" color="#582C83">
                                 {t.sessionDetails}
                             </Text>
                             <Text fontSize="sm" color="gray.500">
@@ -252,34 +252,46 @@ const SessionDetailsModal = ({ isOpen, onClose, session, t, formatFullDate, getT
                         >
                             <VStack spacing={4} align="stretch">
                                 <HStack spacing={3}>
-                                    <Circle size={8} bg="purple.100" color="purple.500">
+                                    <Circle size={8} bg="purple.100" color="#582C83">
                                         <Icon as={FaUser} />
                                     </Circle>
-                                    <Text fontWeight="semibold">{t.volunteerInfo}</Text>
+                                    <Text fontWeight="semibold" color="#582C83">{t.volunteerInfo}</Text>
                                 </HStack>
 
                                 {session.volunteer ? (
                                     <Grid templateColumns="repeat(2, 1fr)" gap={4}>
                                         <GridItem>
                                             <VStack align="start" spacing={1}>
-                                                <Text fontSize="sm" color="gray.500">{t.username}</Text>
-                                                <Text>{session.volunteer.username || 'N/A'}</Text>
+                                                <HStack spacing={2}>
+                                                    <Icon as={FaUser} color="#582C83" />
+                                                    <Text fontSize="sm" color="#582C83">{t.username}</Text>
+                                                </HStack>
+                                                <Text pl="6">{session.volunteer.username || 'N/A'}</Text>
                                             </VStack>
-                                            <VStack align="start" spacing={1}>
-                                                <Text fontSize="sm" color="gray.500">{t.fullName}</Text>
-                                                <Text>{session.volunteer.fullName || 'N/A'}</Text>
+                                            <VStack align="start" spacing={1} mt={4}>
+                                                <HStack spacing={2}>
+                                                    <Icon as={FaAddressCard} color="#582C83" />
+                                                    <Text fontSize="sm" color="#582C83">{t.fullName}</Text>
+                                                </HStack>
+                                                <Text pl="6">{session.volunteer.fullName || 'N/A'}</Text>
                                             </VStack>
                                         </GridItem>
                                         <GridItem colSpan={2}>
                                             <VStack align="start" spacing={1}>
-                                                <Text fontSize="sm" color="gray.500">{t.email}</Text>
-                                                <Text>{session.volunteer.email || t.notProvided}</Text>
+                                                <HStack spacing={2}>
+                                                    <Icon as={FaEnvelope} color="#582C83" />
+                                                    <Text fontSize="sm" color="#582C83">{t.email}</Text>
+                                                </HStack>
+                                                <Text pl="6">{session.volunteer.email || t.notProvided}</Text>
                                             </VStack>
                                         </GridItem>
                                         <GridItem>
                                             <VStack align="start" spacing={1}>
-                                                <Text fontSize="sm" color="gray.500">{t.phone}</Text>
-                                                <Text>{session.volunteer.phoneNumber || t.notProvided}</Text>
+                                                <HStack spacing={2}>
+                                                    <Icon as={FaPhone} color="#582C83" />
+                                                    <Text fontSize="sm" color="#582C83">{t.phone}</Text>
+                                                </HStack>
+                                                <Text pl="6">{session.volunteer.phoneNumber || t.notProvided}</Text>
                                             </VStack>
                                         </GridItem>
                                     </Grid>
@@ -375,12 +387,12 @@ const SessionListPage = () => {
                 <VStack spacing={8} align="stretch">
                     <HStack justify="space-between" align="center">
                         <HStack spacing={3}>
-                            <Circle size={12} bg="purple.100" color="purple.500">
-                                <Icon as={FaCalendarAlt} boxSize={6} />
+                            <Circle size={12} bg="white" color="#582C83">
+                                <Icon as={FaCalendarAlt} boxSize={8} />
                             </Circle>
                             <VStack align="start" spacing={0}>
-                                <Heading size="lg">{t.pageTitle}</Heading>
-                                <Text fontSize="sm" color="gray.500">
+                                <Heading size="lg" color="#582C83">{t.pageTitle}</Heading>
+                                <Text color="#582C83">
                                     {t.lastUpdate} {formatLastUpdate(lastUpdateTime)}
                                 </Text>
                             </VStack>
@@ -396,7 +408,7 @@ const SessionListPage = () => {
 
                     {isLoading ? (
                         <VStack py={12} spacing={4}>
-                            <Spinner size="xl" color="purple.500" thickness="4px" />
+                            <Spinner size="xl" color="#582C83" thickness="4px" />
                             <Text>{t.loading}</Text>
                         </VStack>
                     ) : sessions.length > 0 ? (
@@ -413,7 +425,7 @@ const SessionListPage = () => {
                         </SimpleGrid>
                     ) : (
                         <VStack py={12} spacing={4}>
-                            <Circle size={16} bg="purple.100" color="purple.500">
+                            <Circle size={16} bg="purple.100" color="#582C83">
                                 <Icon as={FaCalendarAlt} boxSize={8} />
                             </Circle>
                             <Text fontSize="lg" color="gray.500">

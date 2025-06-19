@@ -41,7 +41,8 @@ import {
     FaCamera,
     FaEdit,
     FaSave,
-    FaTimes
+    FaTimes,
+    FaLock, FaAddressCard
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
@@ -78,7 +79,10 @@ const translations = {
             FRIDAY: "VENDREDI",
             SATURDAY: "SAMEDI",
             SUNDAY: "DIMANCHE"
-        }
+        },
+        password: "Mot de passe",
+        newPassword: "Nouveau mot de passe",
+        passwordPlaceholder: "Entrez le nouveau mot de passe (laisser vide pour ne pas changer)"
     },
     en: {
         pageTitle: "My Profile",
@@ -110,7 +114,10 @@ const translations = {
             FRIDAY: "FRIDAY",
             SATURDAY: "SATURDAY",
             SUNDAY: "SUNDAY"
-        }
+        },
+        password: "Password",
+        newPassword: "New Password",
+        passwordPlaceholder: "Enter new password (leave empty to keep current)",
     }
 };
 
@@ -129,7 +136,8 @@ function VolunteerProfile() {
         fullname: "",
         email: "",
         phoneNumber: "",
-        availableDays: []
+        availableDays: [],
+        password: ""
     });
     const { language } = useLanguage();
     const t = translations[language];
@@ -162,8 +170,13 @@ function VolunteerProfile() {
                     if (!Array.isArray(volunteerData.availableDays)) {
                         volunteerData.availableDays = [];
                     }
-                    setVolunteer(volunteerData);
-                    setFormData(volunteerData);
+                    // Make sure password is not included in the data
+                    const { password, ...volunteerWithoutPassword } = volunteerData;
+                    setVolunteer(volunteerWithoutPassword);
+                    setFormData({
+                        ...volunteerWithoutPassword,
+                        password: '' // Explicitly set empty password
+                    });
                 } else {
                     setError(response.message || t.updateFailed);
                 }
@@ -196,24 +209,85 @@ function VolunteerProfile() {
 
     const handleSave = async () => {
         try {
-            const response = await VolunteerService.updateVolunteer(volunteerId, formData);
+            // Create a copy of formData
+            const dataToSend = { ...formData };
+
+            // Only include password if it was changed
+            if (!dataToSend.password || dataToSend.password.trim() === '') {
+                delete dataToSend.password;
+            }
+
+            // Check if there are any actual changes
+            const hasChanges = Object.keys(dataToSend).some(key => {
+                if (key === 'password') return dataToSend.password; // Check if password was added
+                if (key === 'availableDays') {
+                    // Compare arrays
+                    const currentDays = volunteer.availableDays || [];
+                    const newDays = dataToSend.availableDays || [];
+                    return JSON.stringify(currentDays.sort()) !== JSON.stringify(newDays.sort());
+                }
+                return dataToSend[key] !== volunteer[key];
+            });
+
+            // If no changes, just exit edit mode
+            if (!hasChanges) {
+                setEditMode(false);
+                toast({
+                    title: "Info",
+                    description: "No changes to save",
+                    status: "info",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+
+            const response = await VolunteerService.updateVolunteer(volunteerId, dataToSend);
 
             if (response.statusCode === 200) {
                 toast({
                     title: t.success,
-                    description: t.updateSuccess,
+                    description: dataToSend.password ? t.updateSuccess : "Profile updated successfully",
                     status: "success",
                     duration: 3000,
                     isClosable: true,
                 });
 
-                logout();
+                // If password was changed, force logout
+                if (dataToSend.password) {
+                    logout();
+                    setTimeout(() => {
+                        navigate('/login');
+                    }, 2000);
+                } else {
+                    // Update local state with new data or keep current data if no new data
+                    setEditMode(false);
 
-                setTimeout(() => {
-                    navigate('/login');
-                }, 2000);
+                    // Process the response data or keep current data
+                    const updatedVolunteer = response.volunteer || volunteer;
+
+                    // Ensure availableDays is properly formatted
+                    if (typeof updatedVolunteer.availableDays === "string") {
+                        updatedVolunteer.availableDays = updatedVolunteer.availableDays
+                            .split(",")
+                            .map(day => day.trim())
+                            .filter(Boolean); // Remove empty strings
+                    }
+
+                    // Ensure availableDays is always an array
+                    if (!Array.isArray(updatedVolunteer.availableDays)) {
+                        updatedVolunteer.availableDays = [];
+                    }
+
+                    // Update states with processed data
+                    setVolunteer(updatedVolunteer);
+                    setFormData({
+                        ...updatedVolunteer,
+                        password: '' // Reset password field
+                    });
+                }
             } else {
-                throw new Error(response.message || t.updateFailed);
+                throw new Error(response?.message || t.updateFailed);
             }
         } catch (error) {
             console.error("Update error:", error);
@@ -282,7 +356,7 @@ function VolunteerProfile() {
                                 <Box position="relative">
                                     <Box
                                         h="120px"
-                                        bgGradient="linear(to-r, #5f249f, #8f4fd3)"
+                                        bgGradient="linear(to-r, #582C83, #582C83)"
                                         position="relative"
                                     />
                                     <Box
@@ -297,7 +371,7 @@ function VolunteerProfile() {
                                             bg="#f3e8ff"
                                             border="4px solid white"
                                         >
-                                            <Icon as={FaUser} boxSize={10} color="#5B21B6" />
+                                            <Icon as={FaUser} boxSize={10} color="#582C83" />
                                         </Circle>
                                     </Box>
                                 </Box>
@@ -305,7 +379,7 @@ function VolunteerProfile() {
                                 <VStack pt="60px" pb={6} px={6} spacing={4}>
                                     <VStack spacing={1}>
                                         <Heading size="md" color={textColor}>
-                                            {volunteer.username}
+                                            {volunteer.fullName}
                                         </Heading>
                                         <Badge colorScheme="purple" px={3} py={1} borderRadius="full">
                                             {t.volunteerBadge}
@@ -313,10 +387,17 @@ function VolunteerProfile() {
                                     </VStack>
 
                                     {!editMode && (
+                                        // In the left column edit button
                                         <Button
                                             leftIcon={<Icon as={FaEdit} />}
-                                            onClick={() => setEditMode(true)}
-                                            colorScheme="#5B21B6"
+                                            onClick={() => {
+                                                setFormData({
+                                                    ...volunteer,
+                                                    password: '' // Explicitly set password to empty
+                                                });
+                                                setEditMode(true);
+                                            }}
+                                            colorScheme="#582C83"
                                             variant="outline"
                                             size="sm"
                                             w="full"
@@ -339,7 +420,7 @@ function VolunteerProfile() {
                             <CardBody>
                                 <Stack spacing={6}>
                                     <HStack justify="space-between" align="center">
-                                        <Heading size="md" color="#5B21B6">
+                                        <Heading size="md" color="#582C83">
                                             {t.pageTitle}
                                         </Heading>
                                         {editMode && (
@@ -347,9 +428,9 @@ function VolunteerProfile() {
                                                 <Button
                                                     leftIcon={<Icon as={FaSave} />}
                                                     onClick={handleSave}
-                                                    bg="#5B21B6"
+                                                    bg="#582C83"
                                                     color="white"
-                                                    _hover={{ bg: "#5B21B6" }}
+                                                    _hover={{ bg: "#582C83" }}
                                                     size="sm"
                                                 >
                                                     {t.saveChanges}
@@ -358,7 +439,10 @@ function VolunteerProfile() {
                                                     leftIcon={<Icon as={FaTimes} />}
                                                     onClick={() => {
                                                         setEditMode(false);
-                                                        setFormData(volunteer);
+                                                        setFormData({
+                                                            ...volunteer,
+                                                            password: '' // Reset password field but keep other data
+                                                        });
                                                     }}
                                                     variant="ghost"
                                                     size="sm"
@@ -374,8 +458,8 @@ function VolunteerProfile() {
                                             <FormControl>
                                                 <FormLabel color={mutedColor}>
                                                     <HStack spacing={2}>
-                                                        <Icon as={FaUser} color="#5B21B6" />
-                                                        <Text>{t.username}</Text>
+                                                        <Icon as={FaUser} color="#582C83" />
+                                                        <Text color="#582C83">{t.username}</Text>
                                                     </HStack>
                                                 </FormLabel>
                                                 {editMode ? (
@@ -386,8 +470,8 @@ function VolunteerProfile() {
                                                         bg={inputBg}
                                                         borderColor={borderColor}
                                                         _focus={{
-                                                            borderColor: "#5f249f",
-                                                            boxShadow: "0 0 0 1px #5f249f",
+                                                            borderColor: "#582C83",
+                                                            boxShadow: "0 0 0 1px #582C83",
                                                         }}
                                                     />
                                                 ) : (
@@ -402,8 +486,8 @@ function VolunteerProfile() {
                                             <FormControl>
                                                 <FormLabel color={mutedColor}>
                                                     <HStack spacing={2}>
-                                                        <Icon as={FaEnvelope} color="#5B21B6" />
-                                                        <Text>{t.email}</Text>
+                                                        <Icon as={FaEnvelope} color="#582C83" />
+                                                        <Text color="#582C83">{t.email}</Text>
                                                     </HStack>
                                                 </FormLabel>
                                                 {editMode ? (
@@ -414,8 +498,8 @@ function VolunteerProfile() {
                                                         bg={inputBg}
                                                         borderColor={borderColor}
                                                         _focus={{
-                                                            borderColor: "#5f249f",
-                                                            boxShadow: "0 0 0 1px #5f249f",
+                                                            borderColor: "#582C83",
+                                                            boxShadow: "0 0 0 1px #582C83",
                                                         }}
                                                     />
                                                 ) : (
@@ -430,8 +514,8 @@ function VolunteerProfile() {
                                             <FormControl>
                                                 <FormLabel color={mutedColor}>
                                                     <HStack spacing={2}>
-                                                        <Icon as={FaUser} color="#5f249f" />
-                                                        <Text>{t.fullName}</Text>
+                                                        <Icon as={FaAddressCard} color="#582C83" />
+                                                        <Text color="#582C83">{t.fullName}</Text>
                                                     </HStack>
                                                 </FormLabel>
                                                 {editMode ? (
@@ -442,8 +526,8 @@ function VolunteerProfile() {
                                                         bg={inputBg}
                                                         borderColor={borderColor}
                                                         _focus={{
-                                                            borderColor: "#5f249f",
-                                                            boxShadow: "0 0 0 1px #5f249f",
+                                                            borderColor: "#582C83",
+                                                            boxShadow: "0 0 0 1px #582C83",
                                                         }}
                                                     />
                                                 ) : (
@@ -458,8 +542,8 @@ function VolunteerProfile() {
                                             <FormControl>
                                                 <FormLabel color={mutedColor}>
                                                     <HStack spacing={2}>
-                                                        <Icon as={FaPhone} color="#5f249f" />
-                                                        <Text>{t.phone}</Text>
+                                                        <Icon as={FaPhone} color="#582C83" />
+                                                        <Text color="#582C83">{t.phone}</Text>
                                                     </HStack>
                                                 </FormLabel>
                                                 {editMode ? (
@@ -470,8 +554,8 @@ function VolunteerProfile() {
                                                         bg={inputBg}
                                                         borderColor={borderColor}
                                                         _focus={{
-                                                            borderColor: "#5f249f",
-                                                            boxShadow: "0 0 0 1px #5f249f",
+                                                            borderColor: "#582C83",
+                                                            boxShadow: "0 0 0 1px #582C83",
                                                         }}
                                                     />
                                                 ) : (
@@ -486,8 +570,8 @@ function VolunteerProfile() {
                                             <FormControl>
                                                 <FormLabel color={mutedColor}>
                                                     <HStack spacing={2}>
-                                                        <Icon as={FaCalendarAlt} color="#5f249f" />
-                                                        <Text>{t.availableDays}</Text>
+                                                        <Icon as={FaCalendarAlt} color="#582C83" />
+                                                        <Text color="#582C83">{t.availableDays}</Text>
                                                     </HStack>
                                                 </FormLabel>
                                                 {editMode ? (
@@ -523,6 +607,31 @@ function VolunteerProfile() {
                                                     </SimpleGrid>
                                                 )}
                                             </FormControl>
+                                        </GridItem>
+                                        <GridItem>
+                                            {editMode && (
+                                                <FormControl>
+                                                    <FormLabel color={mutedColor}>
+                                                        <HStack spacing={2}>
+                                                            <Icon as={FaLock} color="#582C83" />
+                                                            <Text>{t.newPassword}</Text>
+                                                        </HStack>
+                                                    </FormLabel>
+                                                    <Input
+                                                        name="password"
+                                                        type="password"
+                                                        value={formData.password || ''} // Ensure empty string if undefined
+                                                        onChange={handleChange}
+                                                        placeholder={t.passwordPlaceholder}
+                                                        bg={inputBg}
+                                                        borderColor={borderColor}
+                                                        _focus={{
+                                                            borderColor: "#582C83",
+                                                            boxShadow: "0 0 0 1px #582C83",
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                            )}
                                         </GridItem>
                                     </Grid>
                                 </Stack>

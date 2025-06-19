@@ -1,32 +1,60 @@
 import React, { useEffect, useState } from 'react';
 import VolunteerService from "../../service/VolunteerService";
-import { FaBuilding, FaHandshake, FaCheckCircle, FaArrowRight, FaEnvelope, FaPhone, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
-import { keyframes } from '@emotion/react';
+import { useLanguage } from '../../context/LanguageContext';
 import {
     Box,
     Container,
     Heading,
     Text,
-    Button,
-    Image,
-    Icon,
-    useColorModeValue,
-    VStack,
-    Badge,
-    Flex,
-    HStack,
-    useToast,
     Input,
+    InputGroup,
+    InputLeftElement,
+    SimpleGrid,
+    VStack,
+    HStack,
+    Icon,
+    Button,
     Select,
+    useColorModeValue,
+    Badge,
+    Image,
+    Flex,
+    Alert,
+    AlertIcon,
+    Circle,
+    useToast,
+    Skeleton,
+    IconButton,
+    Tooltip,
 } from '@chakra-ui/react';
-import { useLanguage } from '../../context/LanguageContext';
+import {
+    FaSearch,
+    FaMapMarkerAlt,
+    FaPhone,
+    FaEnvelope,
+    FaUser,
+    FaBuilding,
+    FaHandshake,
+    FaCheckCircle,
+} from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import { keyframes } from '@emotion/react';
+
+const MotionBox = motion(Box);
+const MotionGrid = motion(SimpleGrid);
+
+const float = keyframes`
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+`;
 
 const translations = {
     fr: {
         pageTitle: "Découvrez des Associations",
-        pageSubtitle: "Explorez et rejoignez des associations qui partagent vos valeurs",
+        pageDescription: "Explorez et rejoignez des associations qui partagent vos valeurs",
+        searchPlaceholder: "Rechercher une association...",
         loginRequired: "Vous devez être connecté pour rejoindre une association",
-        missingVolunteerId: "ID du bénévole manquant. Veuillez vous reconnecter",
         loadError: "Impossible de charger les associations",
         networkError: "Erreur de connexion au serveur",
         requestSuccess: "Votre demande d'adhésion a été envoyée avec succès",
@@ -47,13 +75,14 @@ const translations = {
         joinButton: "Rejoindre l'Association",
         successTitle: "Succès !",
         errorTitle: "Erreur",
-        requestAlreadyExists: "Une demande existe déjà pour ce bénévole et cette association"
+        requestAlreadyExists: "Une demande existe déjà pour ce bénévole et cette association",
+        allCities: "Toutes les villes"
     },
     en: {
         pageTitle: "Discover Associations",
-        pageSubtitle: "Explore and join associations that share your values",
+        pageDescription: "Explore and join associations that share your values",
+        searchPlaceholder: "Search for an association...",
         loginRequired: "You must be logged in to join an association",
-        missingVolunteerId: "Volunteer ID is missing. Please log in again",
         loadError: "Unable to load associations",
         networkError: "Server connection error",
         requestSuccess: "Your membership request has been sent successfully",
@@ -74,80 +103,51 @@ const translations = {
         joinButton: "Join Association",
         successTitle: "Success!",
         errorTitle: "Error",
-        requestAlreadyExists: "Request already exists for this volunteer and association"
+        requestAlreadyExists: "Request already exists for this volunteer and association",
+        allCities: "All cities"
     }
-};
-
-const float = keyframes`
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-`;
-
-const pulse = keyframes`
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-`;
-
-const InfoItem = ({ icon, label, value }) => {
-    const textColor = useColorModeValue('gray.600', 'gray.300');
-    return value ? (
-        <HStack spacing={2} align="center">
-            <Icon as={icon} color="purple.400" />
-            <Text color={textColor} fontSize="sm" fontWeight="medium">
-                {value}
-            </Text>
-        </HStack>
-    ) : null;
 };
 
 const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) => {
     const { language } = useLanguage();
     const t = translations[language];
-
-    const cardBg = useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(26, 32, 44, 0.9)');
-    const headingColor = useColorModeValue('#5B21B6', 'white');
-    const buttonScheme = isJoined ? 'green' : 'purple';
-    const floatAnimation = `${float} 3s ease-in-out infinite`;
-    const pulseAnimation = `${pulse} 2s ease-in-out infinite`;
-    const imageBg = useColorModeValue('purple.50', 'purple.900');
+    const cardBg = useColorModeValue('white', 'gray.700');
+    const textColor = useColorModeValue('gray.600', 'gray.200');
+    const headingColor = useColorModeValue('gray.700', 'white');
+    const shadowColor = useColorModeValue('rgba(95, 36, 159, 0.1)', 'rgba(95, 36, 159, 0.3)');
 
     return (
-        <Box
-            position="relative"
-            animation={floatAnimation}
-            style={{ animationDelay: `${index * 0.2}s` }}
-            mb={6}
+        <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
         >
             <Box
                 bg={cardBg}
-                borderRadius="3xl"
+                borderRadius="2xl"
                 overflow="hidden"
+                boxShadow={`0 4px 20px ${shadowColor}`}
                 position="relative"
                 transition="all 0.3s"
-                boxShadow="2xl"
-                backdropFilter="blur(10px)"
                 _hover={{
-                    transform: 'scale(1.02)',
-                    boxShadow: '3xl',
+                    transform: "translateY(-8px)",
+                    boxShadow: "2xl",
                 }}
             >
                 <Box
                     position="relative"
-                    height="300px"
-                    bg={imageBg}
+                    width="100%"
+                    height="260px"
+                    bg="purple.50"
                 >
                     {association.imageFileName ? (
                         <Image
                             src={`http://localhost:8080/images/${association.imageFileName}`}
-                            alt={`Logo - ${association.name}`}
+                            alt={association.name}
+                            objectFit="contain"
                             w="full"
                             h="full"
-                            objectFit="contain"
                             p={4}
-                            transition="transform 0.5s"
-                            _hover={{ transform: 'scale(1.05)' }}
                         />
                     ) : (
                         <Flex
@@ -156,15 +156,9 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
                             align="center"
                             justify="center"
                         >
-                            <Icon
-                                as={FaBuilding}
-                                boxSize={16}
-                                color="purple.200"
-                                animation={pulseAnimation}
-                            />
+                            <Icon as={FaBuilding} boxSize={12} color="purple.200" />
                         </Flex>
                     )}
-
                     <Badge
                         position="absolute"
                         top={4}
@@ -181,63 +175,53 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
                 </Box>
 
                 <Box p={6}>
-                    <Heading
-                        size="md"
-                        color="#5B21B6"
-                        noOfLines={2}
-                    >
-                        {association.name}
-                    </Heading>
+                    <VStack align="stretch" spacing={4}>
+                        <Heading size="lg" color={headingColor}>
+                            {association.name}
+                        </Heading>
 
-                    <Text
-                        fontSize="sm"
-                        fontWeight="medium"
-                        color="#5B21B6"
-                    >
-                        {t.contactSection}
-                    </Text>
-                    <InfoItem
-                        icon={FaEnvelope}
-                        color="#5B21B6"
-                        label={t.email}
-                        value={association.email}
-                    />
-                    <InfoItem
-                        icon={FaUser}
-                        label={t.manager}
-                        value={association.responsableName}
-                    />
-                    <InfoItem
-                        icon={FaPhone}
-                        label={t.phone}
-                        value={association.responsablePhone}
-                    />
-                    <InfoItem
-                        icon={FaMapMarkerAlt}
-                        label={t.ville}
-                        value={association.ville}
-                    />
+                        <VStack align="stretch" spacing={2}>
+                            <HStack spacing={2} color={textColor}>
+                                <Icon as={FaEnvelope} color="purple.500" />
+                                <Text>{association.email}</Text>
+                            </HStack>
+                            <HStack spacing={2} color={textColor}>
+                                <Icon as={FaUser} color="purple.500" />
+                                <Text>{association.responsableName}</Text>
+                            </HStack>
+                            {association.responsablePhone && (
+                                <HStack spacing={2} color={textColor}>
+                                    <Icon as={FaPhone} color="purple.500" />
+                                    <Text>{association.responsablePhone}</Text>
+                                </HStack>
+                            )}
+                            <HStack spacing={2} color={textColor}>
+                                <Icon as={FaMapMarkerAlt} color="purple.500" />
+                                <Text>{association.ville}</Text>
+                            </HStack>
+                        </VStack>
 
-                    <Button
-                        bg="#5B21B6"
-                        color="white"
-                        _hover={{
-                            bg: '#4C1D96',  // Slightly darker shade for hover
-                            transform: 'translateY(-2px)',
-                        }}
-                        size="lg"
-                        isLoading={isLoading}
-                        onClick={() => onJoin(association.id)}
-                        isDisabled={isJoined}
-                        leftIcon={!isLoading && (isJoined ? <FaCheckCircle /> : <FaHandshake />)}
-                        rightIcon={!isJoined && !isLoading ? <FaArrowRight /> : null}
-                        borderRadius="xl"
-                    >
-                        {isLoading ? t.sending : isJoined ? t.requestSent : t.joinButton}
-                    </Button>
+                        <Button
+                            leftIcon={!isLoading && (isJoined ? <FaCheckCircle /> : <FaHandshake />)}
+                            onClick={() => onJoin(association.id)}
+                            isLoading={isLoading}
+                            isDisabled={isJoined}
+                            bg="#582C83"
+                            color="white"
+                            size="lg"
+                            width="full"
+                            borderRadius="xl"
+                            _hover={{
+                                bg: '#4C1D96',
+                                transform: 'translateY(-2px)',
+                            }}
+                        >
+                            {isLoading ? t.sending : isJoined ? t.requestSent : t.joinButton}
+                        </Button>
+                    </VStack>
                 </Box>
             </Box>
-        </Box>
+        </MotionBox>
     );
 };
 
@@ -245,14 +229,23 @@ const AssociationList = () => {
     const [associations, setAssociations] = useState([]);
     const [joinedIds, setJoinedIds] = useState([]);
     const [loadingId, setLoadingId] = useState(null);
-    const [search, setSearch] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const [cityFilter, setCityFilter] = useState('');
+
     const { language } = useLanguage();
     const t = translations[language];
     const toast = useToast();
 
     const user = JSON.parse(localStorage.getItem("user"));
     const volunteerId = user?.id;
+
+    // Color mode values
+    const bgColor = useColorModeValue('gray.50', 'gray.900');
+    const cardBg = useColorModeValue('white', 'gray.700');
+    const textColor = useColorModeValue('gray.600', 'gray.200');
+    const shadowColor = useColorModeValue('rgba(95, 36, 159, 0.1)', 'rgba(95, 36, 159, 0.3)');
 
     useEffect(() => {
         const fetchAssociations = async () => {
@@ -264,31 +257,24 @@ const AssociationList = () => {
                     duration: 3000,
                     isClosable: true,
                 });
+                setLoading(false);
                 return;
             }
             try {
                 const response = await VolunteerService.getAllAssociations();
                 if (response.status === 200) {
                     setAssociations(response.data.associationList || []);
+                    setError(null);
                 } else {
-                    toast({
-                        title: t.errorTitle,
-                        description: t.loadError,
-                        status: 'error',
-                        duration: 3000,
-                        isClosable: true,
-                    });
+                    setError(t.loadError);
                 }
             } catch (err) {
-                toast({
-                    title: t.errorTitle,
-                    description: t.networkError,
-                    status: 'error',
-                    duration: 3000,
-                    isClosable: true,
-                });
+                setError(t.networkError);
+            } finally {
+                setLoading(false);
             }
         };
+
         fetchAssociations();
     }, [volunteerId, t.errorTitle, t.loginRequired, t.loadError, t.networkError, toast]);
 
@@ -333,155 +319,212 @@ const AssociationList = () => {
 
     // Filter associations by search and city
     const filteredAssociations = associations.filter(a => {
-        const matchesSearch =
-            a.name.toLowerCase().includes(search.toLowerCase()) ||
-            (a.ville && a.ville.toLowerCase().includes(search.toLowerCase()));
-        const matchesCity = cityFilter ? a.ville === cityFilter : true;
+        const matchesSearch = (a.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (a.ville?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+        const matchesCity = !cityFilter || a.ville === cityFilter;
         return matchesSearch && matchesCity;
     });
 
+    const cities = [...new Set(associations
+        .filter(a => a?.ville)
+        .map(a => a.ville))];
+
     return (
-        <Box
-            minH="100vh"
-            position="relative"
-            overflow="hidden"
-            css={{
-                background: "#ffffff",
-                backgroundSize: '400% 400%',
-            }}
-            pt={{ base: 10, md: 20 }}
-            pb={{ base: 10, md: 20 }}
-        >
-            {/* Decorative background elements */}
+        <Box minH="100vh" bg={bgColor}>
+            {/* Hero Section with Search */}
             <Box
-                position="absolute"
-                top="0"
-                left="0"
-                right="0"
-                bottom="0"
+                bgGradient="linear(to-r, #582C83, #4C1D96)"
+                pt={24}
+                pb={32}
+                position="relative"
                 overflow="hidden"
-                pointerEvents="none"
             >
-                {[...Array(20)].map((_, i) => (
-                    <Box
-                        key={i}
-                        position="absolute"
-                        bg="whiteAlpha.200"
-                        borderRadius="full"
-                        css={{
-                            width: `${Math.random() * 300 + 50}px`,
-                            height: `${Math.random() * 300 + 50}px`,
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                            animation: `${float} ${Math.random() * 5 + 3}s ease-in-out infinite`,
-                            opacity: 0.1,
-                        }}
-                    />
-                ))}
+                {/* Animated Background Elements */}
+                <Box
+                    position="absolute"
+                    top="0"
+                    left="0"
+                    right="0"
+                    bottom="0"
+                    overflow="hidden"
+                    zIndex="0"
+                >
+                    {[...Array(5)].map((_, i) => (
+                        <Circle
+                            key={i}
+                            position="absolute"
+                            bg={`rgba(255, 255, 255, ${0.03 + i * 0.01})`}
+                            w={`${300 + i * 100}px`}
+                            h={`${300 + i * 100}px`}
+                            top={`${-50 + i * 20}%`}
+                            left={`${-20 + i * 30}%`}
+                            transform="rotate(-45deg)"
+                            filter="blur(60px)"
+                        />
+                    ))}
+                </Box>
+
+                <Container maxW="container.xl" position="relative" zIndex={1}>
+                    <VStack spacing={6} align="center" textAlign="center" mb={12}>
+                        <MotionBox
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Icon
+                                as={FaBuilding}
+                                boxSize={{ base: 12, md: 16 }}
+                                color="white"
+                                mb={6}
+                                animation={`${float} 3s ease-in-out infinite`}
+                            />
+                            <Heading
+                                as="h1"
+                                size="3xl"
+                                color="white"
+                                fontWeight="bold"
+                                letterSpacing="tight"
+                                mb={4}
+                            >
+                                {t.pageTitle}
+                            </Heading>
+                            <Text
+                                fontSize="xl"
+                                color="whiteAlpha.900"
+                                maxW="2xl"
+                                mx="auto"
+                            >
+                                {t.pageDescription}
+                            </Text>
+                        </MotionBox>
+                    </VStack>
+
+                    <MotionBox
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                        <HStack
+                            spacing={4}
+                            justify="center"
+                            maxW="2xl"
+                            mx="auto"
+                            bg="whiteAlpha.200"
+                            p={2}
+                            borderRadius="full"
+                            backdropFilter="blur(10px)"
+                        >
+                            <InputGroup size="lg" flex={1}>
+                                <InputLeftElement pointerEvents="none">
+                                    <Icon as={FaSearch} color="whiteAlpha.700" />
+                                </InputLeftElement>
+                                <Input
+                                    placeholder={t.searchPlaceholder}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    variant="unstyled"
+                                    color="white"
+                                    pl={12}
+                                    _placeholder={{ color: "whiteAlpha.700" }}
+                                />
+                            </InputGroup>
+                            <Select
+                                value={cityFilter}
+                                onChange={(e) => setCityFilter(e.target.value)}
+                                placeholder={t.allCities}
+                                bg="white"
+                                color="purple.600"
+                                size="lg"
+                                maxW="200px"
+                                borderRadius="full"
+                                _hover={{
+                                    bg: "whiteAlpha.900"
+                                }}
+                            >
+                                {cities.map(city => (
+                                    <option key={city} value={city}>{city}</option>
+                                ))}
+                            </Select>
+                        </HStack>
+                    </MotionBox>
+                </Container>
             </Box>
 
-            <Container maxW="7xl" position="relative">
-                <VStack spacing={6} mb={16} textAlign="center">
-                    <Icon
-                        as={FaBuilding}
-                        boxSize={{ base: 12, md: 16 }}
-                        color="#5B21B6"
-                        animation={`${float} 3s ease-in-out infinite`}
-                    />
-                    <Heading
-                        as="h1"
-                        fontSize={{ base: '3xl', md: '5xl' }}
-                        fontWeight="bold"
-                        color="#5B21B6"
-                        letterSpacing="tight"
-                        textShadow="2px 2px 4px rgba(0,0,0,0.2)"
-                    >
-                        {t.pageTitle}
-                    </Heading>
-                    <Text
-                        fontSize={{ base: 'lg', md: 'xl' }}
-                        color="black"
-                        maxW="2xl"
-                        textShadow="1px 1px 2px rgba(0,0,0,0.1)"
-                    >
-                        {t.pageSubtitle}
-                    </Text>
-                </VStack>
+            {/* Main Content */}
+            <Box
+                transform="translateY(-100px)"
+                position="relative"
+                zIndex={1}
+            >
+                <Container maxW="container.xl" px={4}>
+                    {/* Error Alert */}
+                    {error && (
+                        <Alert status="error" borderRadius="xl" mb={8}>
+                            <AlertIcon />
+                            {error}
+                        </Alert>
+                    )}
 
-                {/* Search and Filter Bar */}
-                <HStack mb={10} spacing={4} justify="center" flexWrap="wrap">
-                    <Input
-                        placeholder={t.pageTitle + '...'}
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        bg="white"
-                        maxW="300px"
-                        borderRadius="xl"
-                        boxShadow="md"
-                    />
-                    <Select
-                        placeholder={t.ville}
-                        value={cityFilter}
-                        onChange={e => setCityFilter(e.target.value)}
-                        bg="white"
-                        maxW="200px"
-                        borderRadius="xl"
-                        boxShadow="md"
-                    >
-                        {[...new Set(associations.map(a => a.ville).filter(Boolean))].map(city => (
-                            <option key={city} value={city}>{city}</option>
-                        ))}
-                    </Select>
-                </HStack>
-
-                {filteredAssociations.length > 0 ? (
-                    <Box
-                        sx={{
-                            columnCount: { base: 1, md: 2, lg: 3 },
-                            columnGap: "24px",
-                            '& > div': {
-                                breakInside: 'avoid',
-                                marginBottom: '24px'
-                            }
-                        }}
-                    >
-                        {filteredAssociations.map((association, index) => (
-                            <Box key={association.id}>
+                    {/* Associations Grid */}
+                    {loading ? (
+                        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8}>
+                            {[...Array(6)].map((_, i) => (
+                                <Box
+                                    key={i}
+                                    bg={cardBg}
+                                    borderRadius="2xl"
+                                    overflow="hidden"
+                                    boxShadow={`0 4px 20px ${shadowColor}`}
+                                >
+                                    <Skeleton height="200px" />
+                                    <Box p={6}>
+                                        <VStack align="stretch" spacing={4}>
+                                            <Skeleton height="24px" width="70%" />
+                                            <Skeleton height="20px" width="40%" />
+                                            <Skeleton height="20px" width="30%" />
+                                        </VStack>
+                                    </Box>
+                                </Box>
+                            ))}
+                        </SimpleGrid>
+                    ) : filteredAssociations.length === 0 ? (
+                        <Box
+                            bg={cardBg}
+                            borderRadius="2xl"
+                            p={12}
+                            textAlign="center"
+                            boxShadow={`0 4px 20px ${shadowColor}`}
+                        >
+                            <Icon as={FaBuilding} boxSize={12} color="#582C83" mb={4} />
+                            <Text color={textColor} fontSize="xl" fontWeight="medium">
+                                {t.noAssociations}
+                            </Text>
+                            <Text color={textColor} mt={2}>
+                                {t.noAssociationsDesc}
+                            </Text>
+                        </Box>
+                    ) : (
+                        <MotionGrid
+                            columns={{ base: 1, md: 2, lg: 3 }}
+                            spacing={8}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            {filteredAssociations.map((association, index) => (
                                 <AssociationCard
+                                    key={association.id}
                                     association={association}
                                     onJoin={handleJoinAssociation}
                                     isJoined={joinedIds.includes(association.id)}
                                     isLoading={loadingId === association.id}
                                     index={index}
                                 />
-                            </Box>
-                        ))}
-                    </Box>
-                ) : (
-                    <VStack
-                        spacing={6}
-                        p={10}
-                        bg="whiteAlpha.900"
-                        borderRadius="3xl"
-                        boxShadow="xl"
-                        backdropFilter="blur(10px)"
-                        animation={`${float} 3s ease-in-out infinite`}
-                    >
-                        <Icon
-                            as={FaBuilding}
-                            boxSize={12}
-                            color="purple.400"
-                            opacity={0.5}
-                        />
-                        <Heading size="lg" color="purple.600">
-                            {t.noAssociations}
-                        </Heading>
-                        <Text color="gray.600">
-                            {t.noAssociationsDesc}
-                        </Text>
-                    </VStack>
-                )}
-            </Container>
+                            ))}
+                        </MotionGrid>
+                    )}
+                </Container>
+            </Box>
         </Box>
     );
 };

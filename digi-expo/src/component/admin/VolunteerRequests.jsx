@@ -209,8 +209,7 @@ const RequestCard = React.memo(({
                                     language
                                 }) => {
     const formattedDate = new Date().toLocaleDateString(
-        language === 'fr' ? 'fr-FR' : 'en-US'
-    );
+        language === 'fr' ? 'fr-FR' : 'en-US');
 
     return (
         <Card
@@ -234,8 +233,9 @@ const RequestCard = React.memo(({
                                 size="md"
                                 name={request.volunteer?.username}
                                 src={request.volunteer?.avatar}
-                                bg="dxc.purple.100"
-                                icon={<FaUserTie />}
+                                bg="#582C83"
+                                color="white"
+                                icon={<FaUserTie fontSize="1.5rem" />}
                             />
                             <Box>
                                 <Text fontWeight="bold" fontSize="lg">
@@ -260,6 +260,7 @@ const RequestCard = React.memo(({
                         </Circle>
                     </HStack>
 
+                    {/* Rest of the component remains the same */}
                     <Box py={2}>
                         <HStack spacing={4} fontSize="sm" color={mutedText}>
                             <HStack>
@@ -315,7 +316,7 @@ const RequestCard = React.memo(({
                                 />
                             </HStack>
                         ) : (
-                            <Menu isLazy> {/* Add lazy loading for menu */}
+                            <Menu isLazy>
                                 <MenuButton
                                     as={Button}
                                     size="sm"
@@ -360,6 +361,7 @@ const RequestCard = React.memo(({
         </Card>
     );
 });
+
 
 const VolunteerRequests = () => {
     const [requests, setRequests] = useState([]);

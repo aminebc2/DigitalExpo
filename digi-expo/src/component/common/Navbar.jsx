@@ -40,7 +40,7 @@ const Navbar = () => {
                             as={Link}
                             to="/associations"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Associations' : 'Associations'}
@@ -49,7 +49,7 @@ const Navbar = () => {
                             as={Link}
                             to="/admin"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Tableau de bord' : 'Dashboard'}
@@ -58,7 +58,7 @@ const Navbar = () => {
                             as={Link}
                             to="/aboutus"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'À Propos' : 'About Us'}
@@ -72,7 +72,7 @@ const Navbar = () => {
                             as={Link}
                             to="/volunteer/all-associations"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Associations' : 'Associations'}
@@ -81,7 +81,7 @@ const Navbar = () => {
                             as={Link}
                             to="/volunteer/sessions"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Mes Sessions' : 'My Sessions'}
@@ -90,7 +90,7 @@ const Navbar = () => {
                             as={Link}
                             to="/aboutus"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'À Propos' : 'About Us'}
@@ -99,7 +99,7 @@ const Navbar = () => {
                             as={Link}
                             to="/volunteer/profile"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Profil' : 'Profile'}
@@ -113,7 +113,7 @@ const Navbar = () => {
                             as={Link}
                             to="/associations"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Associations' : 'Associations'}
@@ -122,7 +122,7 @@ const Navbar = () => {
                             as={Link}
                             to={currentUser?.id ? `/association/reserve/${currentUser.id}` : '#'}
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Réserver' : 'Book'}
@@ -131,7 +131,7 @@ const Navbar = () => {
                             as={Link}
                             to="/association/sessions"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Sessions' : 'Sessions'}
@@ -140,7 +140,7 @@ const Navbar = () => {
                             as={Link}
                             to="/association/volunteers"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Bénévoles' : 'Volunteers'}
@@ -149,7 +149,7 @@ const Navbar = () => {
                             as={Link}
                             to="/aboutus"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'À Propos' : 'About Us'}
@@ -158,7 +158,7 @@ const Navbar = () => {
                             as={Link}
                             to="/association/profile"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             _hover={{ bg: 'purple.50' }}
                         >
                             {language === 'fr' ? 'Profil' : 'Profile'}
@@ -211,7 +211,7 @@ const Navbar = () => {
                                     mr={2}
                                 />
                                 <Text
-                                    color="purple.600"
+                                    color="#582C83"
                                     fontWeight="bold"
                                     fontSize={{ base: 'sm', md: 'md' }}
                                     display={{ base: 'none', md: 'block' }}
@@ -229,7 +229,7 @@ const Navbar = () => {
                                             as={Link}
                                             to="/home"
                                             variant="ghost"
-                                            color="purple.600"
+                                            color="#582C83"
                                             _hover={{ bg: 'purple.50' }}
                                         >
                                             {language === 'fr' ? 'Accueil' : 'Home'}
@@ -242,7 +242,7 @@ const Navbar = () => {
                                             as={Link}
                                             to="/home"
                                             variant="ghost"
-                                            color="purple.600"
+                                            color="#582C83"
                                             _hover={{ bg: 'purple.50' }}
                                         >
                                             {language === 'fr' ? 'Accueil' : 'Home'}
@@ -251,7 +251,7 @@ const Navbar = () => {
                                             as={Link}
                                             to="/associations"
                                             variant="ghost"
-                                            color="purple.600"
+                                            color="#582C83"
                                             _hover={{ bg: 'purple.50' }}
                                         >
                                             {language === 'fr' ? 'Associations' : 'Associations'}
@@ -260,7 +260,7 @@ const Navbar = () => {
                                             as={Link}
                                             to="/aboutus"
                                             variant="ghost"
-                                            color="purple.600"
+                                            color="#582C83"
                                             _hover={{ bg: 'purple.50' }}
                                         >
                                             {language === 'fr' ? 'About Us' : 'About Us'}
@@ -282,7 +282,7 @@ const Navbar = () => {
                             <>
                                 <Button
                                     variant="outline"
-                                    colorScheme="purple"
+                                    color="#582C83"
                                     size="sm"
                                     onClick={handleLogout}
                                 >
@@ -295,7 +295,7 @@ const Navbar = () => {
                                     as={Link}
                                     to="/login"
                                     variant="ghost"
-                                    color="purple.600"
+                                    color="#582C83"
                                     size="sm"
                                 >
                                     {language === 'fr' ? 'Connexion' : 'Login'}
@@ -303,7 +303,7 @@ const Navbar = () => {
                                 <Button
                                     as={Link}
                                     to="/register"
-                                    colorScheme="purple"
+                                    colorScheme="#582C83"
                                     size="sm"
                                 >
                                     {language === 'fr' ? "S'inscrire" : 'Register'}
@@ -313,7 +313,7 @@ const Navbar = () => {
                         <Button
                             size="sm"
                             variant="ghost"
-                            color="purple.600"
+                            color="#582C83"
                             onClick={toggleLanguage}
                         >
                             {language === 'fr' ? 'EN' : 'FR'}
@@ -333,7 +333,7 @@ const Navbar = () => {
                                     as={Link}
                                     to="/home"
                                     variant="ghost"
-                                    color="purple.600"
+                                    color="#582C83"
                                     w="full"
                                     onClick={onToggle}
                                 >
@@ -347,7 +347,7 @@ const Navbar = () => {
                                     as={Link}
                                     to="/home"
                                     variant="ghost"
-                                    color="purple.600"
+                                    color="#582C83"
                                     w="full"
                                     onClick={onToggle}
                                 >
@@ -357,7 +357,7 @@ const Navbar = () => {
                                     as={Link}
                                     to="/associations"
                                     variant="ghost"
-                                    color="purple.600"
+                                    color="#582C83"
                                     w="full"
                                     onClick={onToggle}
                                 >
@@ -367,7 +367,7 @@ const Navbar = () => {
                                     as={Link}
                                     to="/aboutus"
                                     variant="ghost"
-                                    color="purple.600"
+                                    color="#582C83"
                                     w="full"
                                     onClick={onToggle}
                                 >

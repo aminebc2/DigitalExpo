@@ -126,7 +126,7 @@ const AssociationCard = ({ association, onJoin, isJoined, hasRequested, index })
                     </Text>
 
                     <Button
-                        colorScheme={buttonScheme}
+                        colorScheme="#582C83"
                         size="lg"
                         onClick={() => !isJoined && !hasRequested && onJoin(association.id)}
                         isDisabled={isJoined || hasRequested}

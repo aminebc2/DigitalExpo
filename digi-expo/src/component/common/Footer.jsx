@@ -132,7 +132,7 @@ const Footer = () => {
 
                     {/* Quick Links */}
                     <VStack align="start" spacing={4}>
-                        <Heading size="md" color={headingColor}>
+                        <Heading size="md" color="#582C83">
                             {t.navigation.aboutUs}
                         </Heading>
                         <Button
@@ -140,7 +140,7 @@ const Footer = () => {
                             to="/home"
                             variant="link"
                             color={textColor}
-                            _hover={{ color: headingColor }}
+                            _hover={{ color: "#582C83" }}
                         >
                             {t.navigation.home}
                         </Button>
@@ -149,7 +149,7 @@ const Footer = () => {
                             to="/associations"
                             variant="link"
                             color={textColor}
-                            _hover={{ color: headingColor }}
+                            _hover={{ color: "#582C83" }}
                         >
                             {t.navigation.associations}
                         </Button>
@@ -158,7 +158,7 @@ const Footer = () => {
                             to="/aboutus"
                             variant="link"
                             color={textColor}
-                            _hover={{ color: headingColor }}
+                            _hover={{ color: "#582C83" }}
                         >
                             {t.navigation.aboutUs}
                         </Button>
@@ -166,13 +166,13 @@ const Footer = () => {
 
                     {/* Mission & Vision */}
                     <VStack align="start" spacing={4}>
-                        <Heading size="md" color={headingColor}>
+                        <Heading size="md" color="#582C83">
                             {t.aboutUs.mission}
                         </Heading>
                         <Text fontSize="sm">
                             {t.aboutUs.missionText}
                         </Text>
-                        <Heading size="md" color={headingColor} mt={4}>
+                        <Heading size="md" color="#582C83" mt={4}>
                             {t.aboutUs.vision}
                         </Heading>
                         <Text fontSize="sm">
@@ -182,19 +182,19 @@ const Footer = () => {
 
                     {/* Contact Info */}
                     <VStack align="start" spacing={4}>
-                        <Heading size="md" color={headingColor}>
+                        <Heading size="md" color="#582C83">
                             {t.contact.title}
                         </Heading>
                         <HStack spacing={3}>
-                            <Icon as={FaMapMarkerAlt} color={headingColor} />
+                            <Icon as={FaMapMarkerAlt} color="#582C83" />
                             <Text fontSize="sm">{t.contact.address}</Text>
                         </HStack>
                         <HStack spacing={3}>
-                            <Icon as={FaPhone} color={headingColor} />
+                            <Icon as={FaPhone} color="#582C83" />
                             <Text fontSize="sm">{t.contact.phone}</Text>
                         </HStack>
                         <HStack spacing={3}>
-                            <Icon as={FaEnvelope} color={headingColor} />
+                            <Icon as={FaEnvelope} color="#582C83" />
                             <Text fontSize="sm">{t.contact.email}</Text>
                         </HStack>
                     </VStack>
@@ -214,7 +214,7 @@ const Footer = () => {
                             variant="link"
                             size="sm"
                             color={textColor}
-                            _hover={{ color: headingColor }}
+                            _hover={{ color: "#582C83" }}
                         >
                             {t.legal.privacy}
                         </Button>
@@ -222,7 +222,7 @@ const Footer = () => {
                             variant="link"
                             size="sm"
                             color={textColor}
-                            _hover={{ color: headingColor }}
+                            _hover={{ color: "#582C83" }}
                         >
                             {t.legal.terms}
                         </Button>

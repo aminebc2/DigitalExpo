@@ -47,7 +47,7 @@ import {
     FaPhone,
     FaCalendar,
     FaSearch,
-    FaUserClock
+    FaUserClock, FaAddressCard
 } from 'react-icons/fa';
 
 const colors = {
@@ -478,6 +478,7 @@ const VolunteerManagement = () => {
                                         <Avatar
                                             size="lg"
                                             name={vol.username}
+                                            bg="#582C83"
                                             mr={4}
                                         />
                                         <Box>
@@ -497,7 +498,7 @@ const VolunteerManagement = () => {
                                                 {t.form.fullName}
                                             </Text>
                                             <Flex align="center" color={textColor}>
-                                                <Icon as={FaUser} mr={2} color="purple.500" />
+                                                <Icon as={FaAddressCard} mr={2} color="purple.500" />
                                                 <Text fontSize="sm" isTruncated>
                                                     {vol.fullName}
                                                 </Text>

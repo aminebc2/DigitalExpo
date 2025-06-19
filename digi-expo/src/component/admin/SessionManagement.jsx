@@ -568,7 +568,7 @@ const SessionManagement = () => {
                                                     <ButtonGroup size="sm" spacing={2}>
                                                         <Button
                                                             leftIcon={<FaEdit />}
-                                                            bg="purple.900"
+                                                            bg="#582C83"
                                                             color="white"
                                                             _hover={{
                                                                 opacity: 0.8,
@@ -656,17 +656,17 @@ const SessionManagement = () => {
                     borderRadius="2xl"
                     shadow="2xl"
                     border="2px solid"
-                    borderColor={colors.purple[200]}
+                    borderColor="white"
                 >
                     <ModalHeader
-                        bg="purple.900"
+                        bg="#582C83"
                         color="white"
                         borderTopRadius="2xl"
                         py={6}
                     >
                         <HStack spacing={3}>
                             <Icon as={FaCog} />
-                            <Text fontWeight="bold">{t.modals.editStatus.title}</Text>
+                            <Text fontWeight="bold" content="#582C83" >{t.modals.editStatus.title}</Text>
                         </HStack>
                     </ModalHeader>
                     <ModalCloseButton color="white" />
@@ -674,7 +674,7 @@ const SessionManagement = () => {
                         <ModalBody py={8}>
                             <FormControl isRequired>
                                 <FormLabel
-                                    color="purple.900"
+                                    color="#582C83"
                                     fontWeight="bold"
                                     mb={3}
                                 >
@@ -727,7 +727,7 @@ const SessionManagement = () => {
                                 <Button
                                     type="submit"
                                     leftIcon={loading ? <Spinner size="sm" /> : <FaCheck />}
-                                    bg="purple.900"
+                                    bg="#582C83"
                                     color="white"
                                     _hover={{ opacity: 0.8 }}
                                     borderRadius="lg"
@@ -751,7 +751,7 @@ const SessionManagement = () => {
                     borderRadius="2xl"
                     shadow="2xl"
                     border="2px solid"
-                    borderColor={colors.purple[900]}
+                    borderColor="white"
                 >
                     <ModalHeader
                         bg={STATUS_CONFIG.CONFIRMED.bg}
@@ -784,7 +784,7 @@ const SessionManagement = () => {
                     borderRadius="2xl"
                     shadow="2xl"
                     border="2px solid"
-                    borderColor={colors.purple[200]}
+                    borderColor="white"
                 >
                     <ModalHeader
                         bg={STATUS_CONFIG.CANCELED.bg}
@@ -814,19 +814,19 @@ const SessionManagement = () => {
                                 >
                                     <VStack spacing={3} align="start">
                                         <Text color={colors.neutrals.darkGray}>
-                                            <Text as="span" fontWeight="bold" color={colors.primary.purple}>
+                                            <Text as="span" fontWeight="bold" color="#582C83">
                                                 {t.modals.deleteSession.details.date}:
                                             </Text>{' '}
                                             {new Date(selectedSession.date).toLocaleDateString(language)}
                                         </Text>
                                         <Text color={colors.neutrals.darkGray}>
-                                            <Text as="span" fontWeight="bold" color={colors.primary.purple}>
+                                            <Text as="span" fontWeight="bold" color="#582C83">
                                                 {t.modals.deleteSession.details.association}:
                                             </Text>{' '}
                                             {selectedSession.association?.name || t.notAvailable}
                                         </Text>
                                         <Text color={colors.neutrals.darkGray}>
-                                            <Text as="span" fontWeight="bold" color={colors.primary.purple}>
+                                            <Text as="span" fontWeight="bold" color="#582C83">
                                                 {t.modals.deleteSession.details.status}:
                                             </Text>{' '}
                                             {selectedSession.status}

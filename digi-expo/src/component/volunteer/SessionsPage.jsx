@@ -178,13 +178,13 @@ const SessionCard = ({ session, onViewDetails }) => {
             _hover={{
                 transform: 'translateY(-4px)',
                 shadow: 'lg',
-                borderColor: '#5B21B6',
+                borderColor: '#582C83',
             }}
         >
             <VStack spacing={4} align="stretch">
                 <Flex justify="space-between" align="center">
                     <HStack spacing={3}>
-                        <Icon as={FaCalendarAlt} color="#5B21B6" boxSize={5} />
+                        <Icon as={FaCalendarAlt} color="#582C83" boxSize={5} />
                         <Text fontWeight="medium" color={textColor}>
                             {session.date}
                         </Text>
@@ -203,7 +203,7 @@ const SessionCard = ({ session, onViewDetails }) => {
 
                 <Button
                     rightIcon={<FaArrowRight />}
-                    color="#5B21B6"
+                    color="#582C83"
                     variant="ghost"
                     size="sm"
                     onClick={() => onViewDetails(session)}
@@ -228,9 +228,9 @@ const SessionDetailsModal = ({ session, isOpen, onClose }) => {
 
     const InfoItem = ({ icon, label, value }) => (
         <HStack spacing={3} p={3} bg={sectionBg} borderRadius="lg">
-            <Icon as={icon} color="#5B21B6" boxSize={5} />
+            <Icon as={icon} color="#582C83" boxSize={5} />
             <VStack align="start" spacing={0}>
-                <Text fontSize="sm" color="#5B21B6">
+                <Text fontSize="sm" color="#582C83">
                     {label}
                 </Text>
                 <Text fontWeight="medium">
@@ -246,8 +246,8 @@ const SessionDetailsModal = ({ session, isOpen, onClose }) => {
             <ModalContent borderRadius="2xl">
                 <ModalHeader borderBottomWidth="1px" borderColor={borderColor}>
                     <HStack spacing={3}>
-                        <Icon as={FaCalendarAlt} color="#5B21B6" />
-                        <Text color="#5B21B6">{t.sessionDetails}</Text>
+                        <Icon as={FaCalendarAlt} color="#582C83" />
+                        <Text color="#582C83">{t.sessionDetails}</Text>
                     </HStack>
                 </ModalHeader>
                 <ModalCloseButton />
@@ -267,7 +267,7 @@ const SessionDetailsModal = ({ session, isOpen, onClose }) => {
                                 fontSize="lg"
                                 fontWeight="semibold"
                                 mb={4}
-                                color="purple.500"
+                                color="#582C83"
                             >
                                 {t.associationInfo}
                             </Text>
@@ -367,14 +367,14 @@ const SessionPage = () => {
                     <Icon
                         as={FaCalendarAlt}
                         boxSize={{ base: 12, md: 16 }}
-                        color="#5B21B6"
+                        color="#582C83"
                         animation={`${float} 3s ease-in-out infinite`}
                     />
                     <Heading
                         as="h1"
                         fontSize={{ base: '3xl', md: '5xl' }}
                         fontWeight="bold"
-                        color="#5B21B6"
+                        color="#582C83"
                         letterSpacing="tight"
                         textShadow="2px 2px 4px rgba(0,0,0,0.2)"
                     >
@@ -395,10 +395,10 @@ const SessionPage = () => {
                         <Icon
                             as={FaCalendarAlt}
                             boxSize={8}
-                            color="#5B21B6"
+                            color="#582C83"
                             animation={`${float} 1s ease-in-out infinite`}
                         />
-                        <Text color="#5B21B6">{t.loading}</Text>
+                        <Text color="#582C83">{t.loading}</Text>
                     </VStack>
                 ) : sessions.length > 0 ? (
                     <SimpleGrid
@@ -425,7 +425,7 @@ const SessionPage = () => {
                         <Icon
                             as={FaCalendarAlt}
                             boxSize={12}
-                            color="#5B21B6"
+                            color="#582C83"
                             opacity={0.5}
                         />
                         <Heading size="lg" color={headingColor}>

@@ -137,7 +137,7 @@ const AboutUs = () => {
                             color={headingColor}
                             fontWeight="bold"
                             letterSpacing="tight"
-                            bgGradient="linear(to-r, purple.400, purple.600)"
+                            bgGradient="linear(to-r, purple.400, #582C83)"
                             bgClip="text"
                             mb={4}
                         >
@@ -174,7 +174,7 @@ const AboutUs = () => {
                 >
                     <Text
                         fontSize={["lg", "xl"]}
-                        color={textColor}
+                        color="black"
                         lineHeight="tall"
                         textAlign="center"
                         position="relative"
@@ -220,12 +220,12 @@ const AboutUs = () => {
                                     alignItems="center"
                                     justifyContent="center"
                                 >
-                                    <Icon as={feature.icon} w={8} h={8} color={accentColor} />
+                                    <Icon as={feature.icon} w={8} h={8} color="#582C83" />
                                 </Circle>
-                                <Heading size="lg" mb={4} color={headingColor}>
+                                <Heading size="lg" mb={4} color="#582C83">
                                     {feature.title}
                                 </Heading>
-                                <Text color={textColor} textAlign="center">
+                                <Text color="black" textAlign="center">
                                     {feature.text}
                                 </Text>
                             </Flex>
@@ -277,7 +277,7 @@ const AboutUs = () => {
                                     <StatNumber
                                         fontSize="4xl"
                                         fontWeight="bold"
-                                        color={accentColor}
+                                        color="#582C83"
                                         mb={2}
                                         position="relative"
                                     >
@@ -285,7 +285,7 @@ const AboutUs = () => {
                                     </StatNumber>
                                     <StatLabel
                                         fontSize="sm"
-                                        color={textColor}
+                                        color="black"
                                         position="relative"
                                     >
                                         {stat.label}

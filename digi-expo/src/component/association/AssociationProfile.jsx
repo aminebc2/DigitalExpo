@@ -1,7 +1,20 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from 'react-router-dom';
 import AssociationService from "../../service/AssociationService";
-import { FaUser, FaEnvelope, FaBuilding, FaCity, FaUserTie, FaPhone, FaCamera, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import {
+    FaUser,
+    FaEnvelope,
+    FaBuilding,
+    FaCity,
+    FaUserTie,
+    FaPhone,
+    FaCamera,
+    FaEdit,
+    FaSave,
+    FaTimes,
+    FaLock,
+    FaKey
+} from 'react-icons/fa';
 import { useLanguage } from '../../context/LanguageContext';
 import {AuthContext} from '../../context/AuthContext';
 
@@ -38,7 +51,7 @@ import {
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 
-const MotionBox = motion(Box);
+const MotionBox = motion.div;
 
 const translations = {
     fr: {
@@ -59,7 +72,8 @@ const translations = {
             name: "Nom",
             ville: "Ville",
             responsableName: "Nom du Responsable",
-            responsablePhone: "Téléphone du Responsable"
+            responsablePhone: "Téléphone du Responsable",
+            password: "Mot de passe"
         },
         placeholders: {
             username: "Entrez le nom d'utilisateur",
@@ -67,7 +81,8 @@ const translations = {
             name: "Entrez le nom",
             ville: "Entrez la ville",
             responsableName: "Entrez le nom du responsable",
-            responsablePhone: "Entrez le téléphone du responsable"
+            responsablePhone: "Entrez le téléphone du responsable",
+            password: "Entrez le nouveau mot de passe"
         }
     },
     en: {
@@ -88,7 +103,8 @@ const translations = {
             name: "Name",
             ville: "City",
             responsableName: "Manager Name",
-            responsablePhone: "Manager Phone"
+            responsablePhone: "Manager Phone",
+            password: "Password"
         },
         placeholders: {
             username: "Enter username",
@@ -96,7 +112,8 @@ const translations = {
             name: "Enter name",
             ville: "Enter city",
             responsableName: "Enter manager name",
-            responsablePhone: "Enter manager phone"
+            responsablePhone: "Enter manager phone",
+            password: "Enter new password"
         }
     }
 };
@@ -115,6 +132,7 @@ function AssociationProfile() {
         ville: "",
         responsableName: "",
         responsablePhone: "",
+        password: "",
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -174,31 +192,68 @@ function AssociationProfile() {
 
     const handleSave = async () => {
         try {
+            // Create a copy of formData
+            const dataToSend = { ...formData };
+
+            // Only include password if it was changed
+            if (!dataToSend.password) {
+                delete dataToSend.password;
+            }
+
+            // Check if there are any actual changes
+            const hasChanges = Object.keys(dataToSend).some(key =>
+                dataToSend[key] !== association[key]
+            ) || imageFile;
+
+            // If no changes, just exit edit mode
+            if (!hasChanges) {
+                setEditMode(false);
+                toast({
+                    title: "Info",
+                    description: "No changes to save",
+                    status: "info",
+                    duration: 3000,
+                    isClosable: true,
+                });
+                return;
+            }
+
             const response = await AssociationService.updateAssociation(
                 associationId,
-                formData,
-                imageFile  // Pass the imageFile directly
+                dataToSend,
+                imageFile
             );
 
             if (response && response.statusCode === 200) {
-                // Show success message
                 toast({
                     title: "Success",
-                    description: "Profile updated successfully. Please login again.",
+                    description: formData.password
+                        ? "Profile updated successfully. Please login again."
+                        : "Profile updated successfully",
                     status: "success",
                     duration: 3000,
                     isClosable: true,
                 });
 
-                // Call the logout function from AuthContext
-                logout();
+                // If password was changed, force logout
+                if (formData.password) {
+                    logout();
+                    setTimeout(() => {
+                        navigate('/login');
+                    }, 2000);
+                } else {
+                    // Update local state with new data
+                    setEditMode(false);
+                    setAssociation(response.association || association);
+                    setFormData(response.association || association);
 
-                // Redirect to login page after a short delay
-                setTimeout(() => {
-                    navigate('/login');
-                }, 2000);
+                    // Update image preview if needed
+                    if (response.association?.imageFileName) {
+                        setImagePreview(`http://localhost:8080/images/${response.association.imageFileName}`);
+                    }
+                }
             } else {
-                throw new Error('Update failed');
+                throw new Error(response?.message || 'Update failed');
             }
         } catch (err) {
             console.error('Update error:', err);
@@ -219,6 +274,12 @@ function AssociationProfile() {
         { name: 'ville', icon: FaCity, label: t.fields.ville },
         { name: 'responsableName', icon: FaUserTie, label: t.fields.responsableName },
         { name: 'responsablePhone', icon: FaPhone, label: t.fields.responsablePhone },
+        {
+            name: 'password',
+            icon: FaLock,
+            label: t.fields.password,
+            isPassword: true
+        },
     ];
 
     if (loading) {
@@ -276,7 +337,7 @@ function AssociationProfile() {
                                 <Box position="relative">
                                     <Box
                                         h="120px"
-                                        bgGradient="linear(to-r, #5f249f, #8f4fd3)"
+                                        bgGradient="linear(to-r, #582C83, #582C83)"
                                         position="relative"
                                     />
                                     <Box
@@ -374,7 +435,7 @@ function AssociationProfile() {
                             <CardBody>
                                 <Stack spacing={6}>
                                     <HStack justify="space-between" align="center">
-                                        <Heading size="md" color={textColor}>
+                                        <Heading size="md" color="#582C83">
                                             {t.pageTitle}
                                         </Heading>
                                         {editMode && (
@@ -382,9 +443,9 @@ function AssociationProfile() {
                                                 <Button
                                                     leftIcon={<Icon as={FaSave} />}
                                                     onClick={handleSave}
-                                                    bg="#5f249f"
+                                                    bg="#582C83"
                                                     color="white"
-                                                    _hover={{ bg: "#4a1d7f" }}
+                                                    _hover={{ bg: "#582C83" }}
                                                     size="sm"
                                                 >
                                                     {t.saveChanges}
@@ -408,31 +469,39 @@ function AssociationProfile() {
                                     </HStack>
 
                                     <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
-                                        {fields.map(({ name, icon, label }) => (
-                                            <GridItem key={name}>
+                                        {fields.map((field) => (
+                                            <GridItem key={field.name}>
                                                 <FormControl>
                                                     <FormLabel color={mutedColor}>
                                                         <HStack spacing={2}>
-                                                            <Icon as={icon} color="#5f249f" />
-                                                            <Text>{label}</Text>
+                                                            <Icon as={field.icon} color="#582C83" />
+                                                            <Text color="#582C83">{field.label}</Text>
                                                         </HStack>
                                                     </FormLabel>
                                                     {editMode ? (
-                                                        <Input
-                                                            name={name}
-                                                            value={formData[name] || ""}
-                                                            onChange={handleChange}
-                                                            placeholder={t.placeholders[name]}
-                                                            bg={inputBg}
-                                                            borderColor={borderColor}
-                                                            _focus={{
-                                                                borderColor: "#5f249f",
-                                                                boxShadow: "0 0 0 1px #5f249f",
-                                                            }}
-                                                        />
+                                                        <InputGroup>
+                                                            <InputLeftElement>
+                                                                <Icon as={field.icon} color="#582C83" />
+                                                            </InputLeftElement>
+                                                            <Input
+                                                                name={field.name}
+                                                                value={formData[field.name] || ""}
+                                                                onChange={handleChange}
+                                                                placeholder={t.placeholders[field.name]}
+                                                                type={field.type}
+                                                                bg={inputBg}
+                                                                borderColor={borderColor}
+                                                                _focus={{
+                                                                    borderColor: "#582C83",
+                                                                    boxShadow: "0 0 0 1px #582C83",
+                                                                }}
+                                                            />
+                                                        </InputGroup>
                                                     ) : (
                                                         <Text color={textColor} fontSize="md" pl={8}>
-                                                            {association[name] || t.notProvided}
+                                                            {field.type === 'password' ?
+                                                                (formData[field.name] ? "••••••••" : "*******") :
+                                                                (association[field.name] || "*********")}
                                                         </Text>
                                                     )}
                                                 </FormControl>

@@ -500,7 +500,7 @@ const ReserveSessionsPage = () => {
             minH="100vh"
             position="relative"
             overflow="hidden"
-            bgGradient={`linear(135deg, ${dxcColors.primary.purple}10, ${dxcColors.primary.purple}05)`}
+            bgGradient="#582C83"
             py={10}
         >
             {/* Creative Background Elements */}
@@ -542,7 +542,7 @@ const ReserveSessionsPage = () => {
                             <Box position="relative" display="inline-block">
                                 <Circle
                                     size={16}
-                                    bg={dxcColors.primary.purple}
+                                    bg="#582C83"
                                     color="white"
                                 >
                                     <CalendarIcon boxSize={6} />
@@ -550,7 +550,7 @@ const ReserveSessionsPage = () => {
                             </Box>
                             <Heading
                                 fontSize="3xl"
-                                color={dxcColors.primary.purple}
+                                color="#582C83"
                                 letterSpacing="tight"
                                 fontWeight="bold"
                             >

@@ -13,6 +13,7 @@ import com.amine.digiexpo.service.interfac.IVolunteerService;
 import com.amine.digiexpo.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -25,14 +26,19 @@ import static com.amine.digiexpo.utils.Utils.mapSessionToDTOWithAssociationDetai
 @Service
 public class VolunteerService implements IVolunteerService {
 
+    @Autowired
     private final VolunteerRepository volunteerRepository;
+    @Autowired
     private final SessionRepository sessionRepository;
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public VolunteerService(VolunteerRepository volunteerRepository,
-                            SessionRepository sessionRepository) {
+                            SessionRepository sessionRepository, PasswordEncoder passwordEncoder) {
         this.volunteerRepository = volunteerRepository;
         this.sessionRepository = sessionRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -108,6 +114,11 @@ public class VolunteerService implements IVolunteerService {
             existing.setPhoneNumber(updatedVolunteerDTO.getPhoneNumber());
             existing.setFullName(updatedVolunteerDTO.getFullName());
             existing.setAvailableDays(updatedVolunteerDTO.getAvailableDays());
+
+            // Update password if provided
+            if (updatedVolunteerDTO.getPassword() != null && !updatedVolunteerDTO.getPassword().isEmpty()) {
+                existing.setPassword(passwordEncoder.encode(updatedVolunteerDTO.getPassword()));
+            }
 
             Volunteer saved = volunteerRepository.save(existing);
 

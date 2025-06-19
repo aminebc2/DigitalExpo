@@ -2,10 +2,7 @@ package com.amine.digiexpo.service.impl;
 
 import com.amine.digiexpo.DTO.*;
 import com.amine.digiexpo.Repository.*;
-import com.amine.digiexpo.entity.Association;
-import com.amine.digiexpo.entity.Session;
-import com.amine.digiexpo.entity.Volunteer;
-import com.amine.digiexpo.entity.VolunteerRequest;
+import com.amine.digiexpo.entity.*;
 import com.amine.digiexpo.enumeration.RequestStatus;
 import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.IAdminService;
@@ -36,6 +33,8 @@ public class AdminService implements IAdminService {
     private AssociationRepository associationRepository;
     @Autowired
     private VolunteerRepository volunteerRepository;
+    @Autowired
+    private AdminRepository adminRepository;
     @Autowired
     private VolunteerRequestRepository volunteerRequestRepository;
     @Autowired
@@ -276,29 +275,6 @@ public class AdminService implements IAdminService {
         // Ensure data is wrapped in the "data" field
         return new Response(200, "Volunteers retrieved successfully", volunteerDTOs);
     }
-
-
-    /*@Override
-    public Response validateVolunteerRequest(Long requestId) {
-        try {
-            VolunteerRequest volunteerRequest = volunteerRequestRepository.findById(requestId)
-                    .orElseThrow(() -> new RuntimeException("Volunteer request not found"));
-
-            volunteerRequest.setStatus(RequestStatus.APPROVED);
-            Volunteer volunteer = volunteerRequest.getVolunteer();
-            Association association = volunteerRequest.getAssociation();
-            association.getVolunteers().add(volunteer);
-            volunteer.getAssociations().add(association);
-
-            volunteerRequestRepository.save(volunteerRequest);
-            associationRepository.save(association);
-            volunteerRepository.save(volunteer);
-
-            return new Response(200, "Volunteer request approved successfully", volunteerRequest);
-        } catch (RuntimeException e) {
-            return new Response(404, e.getMessage(), null);
-        }
-    }*/
 
     @Override
     public Response updateRequestStatus(UpdateRequestStatusDTO updateRequestStatusDTO) {

@@ -281,12 +281,12 @@ const VolunteersListPage = ({ associationId }) => {
                         boxShadow="sm"
                     >
                         <HStack spacing={4}>
-                            <Circle size={12} bg="#f3e8ff" color="#5f249f">
-                                <Icon as={FaUserFriends} boxSize={6} />
+                            <Circle size={12} bg="white" color="#582C83">
+                                <Icon as={FaUserFriends} boxSize={8} />
                             </Circle>
                             <VStack align="start" spacing={1}>
-                                <Heading size="lg">{t.pageTitle}</Heading>
-                                <Text color="gray.500">
+                                <Heading size="lg" color="#582C83">{t.pageTitle}</Heading>
+                                <Text color="#582C83">
                                     {t.volunteersCount.replace('{count}', volunteers.length)}
                                 </Text>
                             </VStack>
@@ -318,7 +318,7 @@ const VolunteersListPage = ({ associationId }) => {
                         </VStack>
                     ) : (
                         <VStack py={12} spacing={4}>
-                            <Circle size={16} bg="#f3e8ff" color="#5f249f">
+                            <Circle size={16} bg="#f3e8ff" color="#582C83">
                                 <Icon as={FaUserFriends} boxSize={8} />
                             </Circle>
                             <Text fontSize="lg" color="gray.500">

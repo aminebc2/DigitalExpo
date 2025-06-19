@@ -18,6 +18,7 @@ import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,6 +45,9 @@ public class AssociationService implements IAssociationService {
 
     @Autowired
     private SessionRepository sessionRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(AssociationService.class);
 
@@ -125,6 +129,11 @@ public class AssociationService implements IAssociationService {
             existing.setVille(updatedAssociationDTO.getVille());
             existing.setResponsableName(updatedAssociationDTO.getResponsableName());
             existing.setResponsablePhone(updatedAssociationDTO.getResponsablePhone());
+
+            // Update password if provided
+            if (updatedAssociationDTO.getPassword() != null && !updatedAssociationDTO.getPassword().isEmpty()) {
+                existing.setPassword(passwordEncoder.encode(updatedAssociationDTO.getPassword()));
+            }
 
             // Handle picture upload if provided
             if (picture != null && !picture.isEmpty()) {
