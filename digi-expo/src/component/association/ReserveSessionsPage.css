@@ -1,0 +1,389 @@
+/* This file is no longer needed as we're using MUI's styling system */
+
+.date-picker-container {
+    position: relative;
+    width: 100%;
+}
+
+.date-picker-input {
+    width: 100%;
+    height: 45px;
+    padding: 0 16px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.date-picker-calendar {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(88, 44, 131, 0.15);
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(88, 44, 131, 0.05);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    padding: 16px;
+}
+
+.calendar-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.calendar-day:hover:not(.disabled) {
+    background: rgba(88, 44, 131, 0.1);
+}
+
+.calendar-day.selected {
+    background: #582C83;
+    color: white;
+}
+
+.calendar-day.disabled {
+    cursor: not-allowed;
+    color: #9e0a0a;
+    background: rgba(158, 10, 10, 0.1);
+}
+
+.calendar-day.disabled::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: rgba(158, 10, 10, 0.5);
+    transform: rotate(-45deg);
+}
+
+.weekday-header {
+    font-weight: bold;
+    color: #582C83;
+    text-align: center;
+    padding: 8px 0;
+}
+
+.month-navigation {
+    background: transparent;
+    border: none;
+    color: #582C83;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.month-navigation:hover {
+    background: rgba(88, 44, 131, 0.1);
+}
+
+.month-title {
+    font-weight: 500;
+    color: #582C83;
+}
+
+.reserved-date-message {
+    display: flex;
+    align-items: center;
+    color: #582C83;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.reserved-date-message svg {
+    margin-right: 8px;
+}
+
+/* Animation classes */
+.fade-enter {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 200ms, transform 200ms;
+}
+
+.fade-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 200ms, transform 200ms;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .date-picker-calendar {
+        background: #1A202C;
+    }
+
+    .calendar-day {
+        color: white;
+    }
+
+    .weekday-header {
+        color: #CBD5E0;
+    }
+
+    .month-title {
+        color: #CBD5E0;
+    }
+
+    .month-navigation {
+        color: #CBD5E0;
+    }
+
+    .month-navigation:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Custom animations for date picker */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* Custom styles for date input */
+input[type="date"] {
+    position: relative;
+    padding-right: 35px !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Custom scrollbar for the calendar popover */
+.chakra-popover__content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chakra-popover__content::-webkit-scrollbar-track {
+    background: rgba(88, 44, 131, 0.05);
+    border-radius: 3px;
+}
+
+.chakra-popover__content::-webkit-scrollbar-thumb {
+    background: rgba(88, 44, 131, 0.2);
+    border-radius: 3px;
+}
+
+.chakra-popover__content::-webkit-scrollbar-thumb:hover {
+    background: rgba(88, 44, 131, 0.3);
+}
+
+/* Smooth transitions for interactive elements */
+.chakra-button,
+.chakra-icon-button {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Custom focus styles */
+.chakra-input:focus-visible,
+.chakra-button:focus-visible,
+.chakra-icon-button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(88, 44, 131, 0.4) !important;
+}
+
+/* Animation classes for framer-motion */
+.fade-enter {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+}
+
+.fade-exit {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 300ms, transform 300ms;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    input[type="date"] {
+        font-size: 14px;
+    }
+
+    .chakra-popover__content {
+        width: 280px !important;
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+    }
+
+    .chakra-popover__content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .chakra-popover__content::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .chakra-popover__content::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Disable browser's default date picker on focus */
+input[type="date"]::-webkit-datetime-edit {
+    display: block;
+}
+
+input[type="date"]:focus::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+/* Custom styles for disabled dates */
+.chakra-popover__content [aria-disabled="true"] {
+    text-decoration: line-through;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Hover effect for calendar days */
+.calendar-day {
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-day::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(88, 44, 131, 0.1);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.calendar-day:not([aria-disabled="true"]):hover::after {
+    opacity: 1;
+}
+
+/* Selected date highlight */
+.calendar-day[aria-selected="true"] {
+    background-color: #582C83 !important;
+    color: white !important;
+}
+
+/* Today's date indicator */
+.calendar-day[data-today="true"] {
+    font-weight: bold;
+    border: 2px solid #582C83;
+}
+
+/* Reserved date indicator */
+.calendar-day[data-reserved="true"] {
+    background-color: rgba(158, 10, 10, 0.1);
+    color: #9e0a0a;
+    opacity: 0.6;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+/* Animation for calendar navigation */
+.calendar-month-transition {
+    transition: transform 0.3s ease;
+}
+
+.calendar-month-transition.prev {
+    transform: translateX(-100%);
+}
+
+.calendar-month-transition.next {
+    transform: translateX(100%);
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+    .calendar-day,
+    .chakra-icon-button {
+        min-height: 44px;
+    }
+
+    input[type="date"] {
+        min-height: 44px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .chakra-popover,
+    .chakra-popover__content {
+        display: none !important;
+    }
+
+    input[type="date"] {
+        border: none !important;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+}

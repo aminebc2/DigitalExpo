@@ -28,6 +28,45 @@ public class AdminController {
 
     @Autowired
     private ISessionService sessionService;
+
+    // --------- Admin Endpoints -------- //
+
+    @PostMapping(value = "/create-admin", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Response> createAdmin(@RequestBody AdminDTO adminDTO) {
+        Response response = adminService.createAdmin(adminDTO);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PutMapping("/update-admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Response> updateAdmin(@PathVariable Long id, @RequestBody AdminDTO adminDTO) {
+        Response response = adminService.updateAdmin(id, adminDTO);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @DeleteMapping("/delete-admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Response> deleteAdmin(@PathVariable Long id) {
+        Response response = adminService.deleteAdmin(id);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/all-admins")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Response> getAllAdmins() {
+        Response response = adminService.getAllAdmins();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/{adminId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Response> getAdminById(@PathVariable Long adminId) {
+        Response response = adminService.getAdminById(adminId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+
     // --- Associations Endpoints (standard REST naming) --- //
 
     @Autowired

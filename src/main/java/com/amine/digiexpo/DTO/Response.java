@@ -15,6 +15,7 @@ public class Response {
 
     // Single objects
     private UserDTO user;
+    private AdminDTO admin;
     private AssociationDTO association;
     private VolunteerDTO volunteer;
     private SessionDTO session;
@@ -22,6 +23,7 @@ public class Response {
 
     // Lists
     private List<UserDTO> userList;
+    private List<AdminDTO> adminList;
     private List<AssociationDTO> associationList;
     private List<VolunteerDTO> volunteerList;
     private List<SessionDTO> sessionList;
@@ -74,6 +76,14 @@ public class Response {
         this.user = user;
     }
 
+    public AdminDTO getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(AdminDTO admin) {
+        this.admin = admin;
+    }
+
     public AssociationDTO getAssociation() {
         return association;
     }
@@ -112,6 +122,14 @@ public class Response {
 
     public void setUserList(List<UserDTO> userList) {
         this.userList = userList;
+    }
+
+    public List<AdminDTO> getAdminList() {
+        return adminList;
+    }
+
+    public void setAdminList(List<AdminDTO> adminList) {
+        this.adminList = adminList;
     }
 
     public List<AssociationDTO> getAssociationList() {

@@ -49,6 +49,8 @@ public class Utils {
         dto.setUsername(admin.getUsername());
         dto.setEmail(admin.getEmail());
         dto.setRole(admin.getRole());
+        dto.setPhoneNumber(admin.getPhoneNumber());
+        dto.setFullName(admin.getPhoneNumber());
         return dto;
     }
 
@@ -334,6 +336,10 @@ public class Utils {
 
     public static List<UserDTO> mapUserListToDTOList(List<User> users) {
         return users.stream().map(Utils::mapUserToDTO).collect(Collectors.toList());
+    }
+
+    public static List<AdminDTO> mapAdminListToDTOList(List<Admin> admins) {
+        return admins.stream().map(Utils::mapAdminToDTO).collect(Collectors.toList());
     }
 
     public static List<VolunteerDTO> mapVolunteerListToDTOList(List<Volunteer> volunteers) {

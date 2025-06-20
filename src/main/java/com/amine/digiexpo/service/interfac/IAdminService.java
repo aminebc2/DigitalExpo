@@ -21,6 +21,14 @@ public interface IAdminService {
     Response deleteVolunteer(Long volunteerId);
     Response getAllVolunteers();
 
+    //Gerer les admin (CRUD)
+    Response createAdmin(AdminDTO adminDTO);
+    Response updateAdmin(Long adminId, AdminDTO adminDTO);
+    Response deleteAdmin(Long adminId);
+    Response getAllAdmins();
+    Response getAdminById(Long adminId);
+    Response getAdminByUsername(String username);
+
     // Valider la demande d’un bénévole
     /*Response validateVolunteerRequest(Long requestId);*/
     Response updateRequestStatus(UpdateRequestStatusDTO updateRequestStatusDTO);

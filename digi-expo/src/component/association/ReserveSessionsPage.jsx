@@ -1,60 +1,68 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams } from 'react-router-dom';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { fr, enUS } from 'date-fns/locale';
+import { motion, AnimatePresence } from 'framer-motion';
 import AssociationService from '../../service/AssociationService';
 import { AuthContext } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import {
-    Box,
-    Button,
     Container,
-    Flex,
-    FormControl,
-    Heading,
-    Input,
-    Text,
+    Box,
     VStack,
     HStack,
-    useToast,
-    Card,
-    CardBody,
-    CardHeader,
-    Badge,
-    Divider,
+    Heading,
+    Text,
+    Button,
     IconButton,
-    Grid,
-    GridItem,
+    Input,
+    Alert,
+    AlertIcon,
+    Badge,
     useColorModeValue,
+    Spinner,
+    Flex,
     Tooltip,
     Circle,
-    Stack,
     Wrap,
-    WrapItem
+    WrapItem,
+    FormControl,
+    Card,
+    CardBody,
+    useToast
 } from '@chakra-ui/react';
-import { AddIcon, DeleteIcon, CalendarIcon, TimeIcon, CheckIcon, InfoIcon } from '@chakra-ui/icons';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const MotionBox = motion(Box);
-const MotionCard = motion(Card);
+import {
+    AddIcon,
+    DeleteIcon,
+    CalendarIcon,
+    WarningIcon,
+    CheckIcon,
+    TimeIcon,
+    InfoIcon,
+} from '@chakra-ui/icons';
+import CustomDatePicker from './CustomDatePicker';
 
 // DXC Color Palette
 const dxcColors = {
     primary: {
-        purple: '#582C83', // DXC Bright Purple
+        purple: '#582C83',
         white: '#FFFFFF'
     },
     secondary: {
-        lightGray: '#D8D9D9', // DXC Light Gray
-        mediumGray: '#97999B', // DXC Medium Gray
-        darkGray: '#58595B'  // DXC Dark Gray
+        lightGray: '#D8D9D9',
+        mediumGray: '#97999B',
+        darkGray: '#58595B'
     },
     accents: {
-        teal: '#00A6AF', // DXC Bright Teal
-        blue: '#0095C8', // DXC Blue
-        darkTeal: '#006275', // DXC Dark Teal
-        green: '#00C14F', // DXC Green
-        orange: '#FF8F1C', // DXC Orange
-        gold: '#FFCD00' , // DXC Gold
-        red: '#9e0a0a' // DXC Red
+        teal: '#00A6AF',
+        blue: '#0095C8',
+        darkTeal: '#006275',
+        green: '#00C14F',
+        orange: '#FF8F1C',
+        gold: '#FFCD00',
+        red: '#9e0a0a'
     }
 };
 
@@ -71,6 +79,8 @@ const translations = {
         reservationError: "Erreur lors de la réservation.",
         reserving: "Réservation...",
         reserve: "Réserver",
+        selectedDates: "Dates Sélectionnées",
+        noDatesSelected: "Aucune date sélectionnée",
         reservedDates: "Dates déjà réservées",
         alreadyReserved: "Déjà réservée",
         sessionsExist: "Sessions déjà réservées pour les dates: ",
@@ -95,6 +105,8 @@ const translations = {
         reservationError: "Error during reservation.",
         reserving: "Booking...",
         reserve: "Book",
+        selectedDates: "Selected Dates",
+        noDatesSelected: "No dates selected",
         reservedDates: "Already Reserved Dates",
         alreadyReserved: "Already reserved",
         sessionsExist: "Sessions already exist for dates: ",
@@ -109,6 +121,9 @@ const translations = {
         }
     }
 };
+
+const MotionBox = motion(Box);
+const MotionCard = motion(Card);
 
 const StatusBadge = ({ status, t }) => {
     const statusColors = {
@@ -150,7 +165,6 @@ const ReserveSessionsPage = () => {
     const [globalReservedDates, setGlobalReservedDates] = useState([]);
     const toast = useToast();
 
-    // Move useColorModeValue hooks to the top level
     const cardBg = useColorModeValue('white', 'gray.800');
     const headerBg = useColorModeValue('gray.50', 'gray.700');
     const pageBg = useColorModeValue('gray.50', 'gray.900');
@@ -162,19 +176,16 @@ const ReserveSessionsPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Check if user is logged in
                 if (!currentUser) {
                     setRawMessage("Please log in to access this page");
                     return;
                 }
 
-                // Check if user has the ASSOCIATION role
                 if (currentUser.role !== 'ASSOCIATION') {
                     setRawMessage("Access denied. Only associations can view this page.");
                     return;
                 }
 
-                // Check if token exists
                 const token = localStorage.getItem("token");
                 if (!token) {
                     setRawMessage("Please log in to access this page");
@@ -189,7 +200,6 @@ const ReserveSessionsPage = () => {
                 } catch (error) {
                     console.error("Error fetching data:", error);
                     if (error.response?.status === 403) {
-                        // Clear invalid token and user data
                         localStorage.removeItem("token");
                         localStorage.removeItem("user");
                         setRawMessage("Your session has expired. Please log in again.");
@@ -212,21 +222,18 @@ const ReserveSessionsPage = () => {
         if (rawMessage.includes('already reserved') || rawMessage.includes('déjà réservée')) {
             const conflictDates = rawMessage
                 .split('\n')
-                .slice(1) // Skip the first line which is the message
-                .filter(date => date.trim()) // Remove empty lines
+                .slice(1)
+                .filter(date => date.trim())
                 .map(date => {
-                    // Try to extract the date from the formatted string
                     try {
                         const dateStr = date.trim();
-                        // Parse the date from the string
                         const parsedDate = new Date(dateStr);
                         if (!isNaN(parsedDate.getTime())) {
-                            // If successfully parsed, format it in the current language
                             return formatDate(parsedDate);
                         }
-                        return dateStr; // If parsing fails, return original string
+                        return dateStr;
                     } catch (e) {
-                        return date; // If any error occurs, return original string
+                        return date;
                     }
                 });
 
@@ -240,12 +247,16 @@ const ReserveSessionsPage = () => {
     const fetchAllReservedDates = async () => {
         try {
             const response = await AssociationService.getAllReservedSessions();
-            if (response?.sessions) {
-                const reserved = response.sessions.map(session => ({
-                    date: session.date,
-                    associationName: session.associationName
+            console.log('API Response:', response); // Debug log to see the actual structure
+
+            // Based on your API format, sessions are in response.data, not response.sessions
+            if (response?.data) {
+                const reserved = response.data.map(session => ({
+                    date: new Date(session.date).toISOString().split('T')[0], // Ensure YYYY-MM-DD format
+                    associationName: session.association.name // Get association name from nested object
                 }));
                 setGlobalReservedDates(reserved);
+                console.log('Reserved dates for date picker:', reserved); // Debug log
             }
         } catch (error) {
             console.error("Failed to fetch global reserved dates:", error);
@@ -269,48 +280,29 @@ const ReserveSessionsPage = () => {
         }
     };
 
-    const getDisabledDates = () => {
-        return globalReservedDates.map(reserved => reserved.date);
-    };
-
-    const isDateDisabled = (date) => {
-        return getDisabledDates().includes(date);
-    };
-
-    const isDateReserved = (date) => {
-        return globalReservedDates.some(reserved => {
-            const reservedDate = new Date(reserved.date).toISOString().split('T')[0];
-            return reservedDate === date;
-        });
-    };
-
-    const getAssociationNameForDate = (date) => {
-        const reservation = globalReservedDates.find(reserved => reserved.date === date);
-        if (reservation) {
-            return reservation.associationName;
-        }
-        // If it's reserved by current association
-        if (reservedDates.includes(date)) {
-            return "your association";
-        }
-        return '';
-    };
-
     const handleDateChange = (index, value) => {
+        // Check if date is reserved before allowing the change
         if (isDateReserved(value)) {
-            const reservation = globalReservedDates.find(reserved =>
-                new Date(reserved.date).toISOString().split('T')[0] === value
-            );
-            const message = t.dateAlreadyBooked.replace('{association}', reservation?.associationName || '');
+            const reservation = globalReservedDates.find(reserved => {
+                const reservedDate = typeof reserved === 'object' && reserved.date
+                    ? reserved.date
+                    : (typeof reserved === 'string' ? reserved : new Date(reserved).toISOString().split('T')[0]);
+                return reservedDate === value;
+            });
+
+            const associationName = reservation?.associationName || 'another association';
+            const message = t.dateAlreadyBooked.replace('{association}', associationName);
             setRawMessage(message);
-            return;
+            return; // Don't allow the change
         }
 
+        // Check for duplicate selection within current form
         if (dates.some((date, i) => i !== index && date === value)) {
             setRawMessage('dateAlreadySelected');
             return;
         }
 
+        // Update the date if it's valid
         const updatedDates = [...dates];
         updatedDates[index] = value;
         setDates(updatedDates);
@@ -336,13 +328,13 @@ const ReserveSessionsPage = () => {
         }).format(date);
     };
 
-    const isDateGloballyReserved = (date) => {
-        return globalReservedDates.some(reserved => reserved.date === date);
-    };
-
-    const getAssociationForDate = (date) => {
-        const reservation = globalReservedDates.find(reserved => reserved.date === date);
-        return reservation?.associationName || '';
+    const isDateReserved = (dateString) => {
+        return globalReservedDates.some(reserved => {
+            const reservedDate = typeof reserved === 'object' && reserved.date
+                ? reserved.date
+                : (typeof reserved === 'string' ? reserved : new Date(reserved).toISOString().split('T')[0]);
+            return reservedDate === dateString;
+        });
     };
 
     const getMinDate = () => {
@@ -357,7 +349,6 @@ const ReserveSessionsPage = () => {
             return;
         }
 
-        // Filter out empty dates
         const validDates = dates.filter(date => date);
         if (validDates.length === 0) {
             setRawMessage('noDatesSelected');
@@ -367,7 +358,6 @@ const ReserveSessionsPage = () => {
         setLoading(true);
         const dto = { dates: validDates };
         try {
-            // First, check all dates against current reservations
             const reservedResponse = await AssociationService.getAllReservedSessions();
             const existingSessions = reservedResponse?.sessions || [];
 
@@ -384,11 +374,9 @@ const ReserveSessionsPage = () => {
                 return;
             }
 
-            // If no conflicts, proceed with reservation
             const response = await AssociationService.reserveSessions(associationId, dto);
 
             if (response?.statusCode === 400) {
-                // If somehow there are still conflicts (race condition)
                 const errorMessage = response.message;
                 if (errorMessage.includes("Cannot reserve: The following dates are already booked:") ||
                     errorMessage.includes("Sessions already exist for dates:")) {
@@ -400,7 +388,7 @@ const ReserveSessionsPage = () => {
                     }
 
                     const conflicts = conflictsStr.split(", ")
-                        .map(conflict => conflict.split(" (")[0].trim()) // Remove any text in parentheses
+                        .map(conflict => conflict.split(" (")[0].trim())
                         .map(date => formatDate(date));
 
                     const formattedMessage = conflicts.join('\n');
@@ -417,7 +405,6 @@ const ReserveSessionsPage = () => {
             }
         } catch (error) {
             console.error("Reservation failed:", error);
-            // Try to extract date information from error response
             const errorMessage = error.response?.data?.message || '';
             if (errorMessage.includes("Cannot reserve:") ||
                 errorMessage.includes("Sessions already exist")) {
@@ -430,13 +417,12 @@ const ReserveSessionsPage = () => {
 
                 if (conflictsStr) {
                     const conflicts = conflictsStr.split(", ")
-                        .map(conflict => conflict.split(" (")[0].trim()) // Remove any text in parentheses
+                        .map(conflict => conflict.split(" (")[0].trim())
                         .map(date => formatDate(date));
 
                     const formattedMessage = conflicts.join('\n');
                     setRawMessage(`${t.dateReserved}\n${formattedMessage}`);
                 } else {
-                    // If we can't parse the error message, check current reservations
                     fetchAllReservedDates().then(() => {
                         const conflicts = validDates
                             .filter(date => isDateReserved(date))
@@ -454,18 +440,6 @@ const ReserveSessionsPage = () => {
         }
     };
 
-    const formatSelectedDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        }).format(date);
-    };
-
-    // Add new function to determine message type
     const getMessageStyle = (message) => {
         if (!message) return {};
 
@@ -500,10 +474,9 @@ const ReserveSessionsPage = () => {
             minH="100vh"
             position="relative"
             overflow="hidden"
-            bgGradient="#582C83"
+            bg={pageBg}
             py={10}
         >
-            {/* Creative Background Elements */}
             <Box
                 position="fixed"
                 top="5%"
@@ -529,9 +502,14 @@ const ReserveSessionsPage = () => {
                 zIndex={0}
             />
 
-            <Container maxW="3xl" position="relative" zIndex={1}>
+            <Container
+                maxW="3xl"
+                position="relative"
+                zIndex={1}
+                px={{ base: 4, md: 8 }}
+                py={{ base: 6, md: 10 }}
+            >
                 <VStack spacing={8}>
-                    {/* Header */}
                     <MotionBox
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -541,8 +519,8 @@ const ReserveSessionsPage = () => {
                         <VStack spacing={4}>
                             <Box position="relative" display="inline-block">
                                 <Circle
-                                    size={16}
-                                    bg="#582C83"
+                                    size="4rem"
+                                    bg={dxcColors.primary.purple}
                                     color="white"
                                 >
                                     <CalendarIcon boxSize={6} />
@@ -550,7 +528,7 @@ const ReserveSessionsPage = () => {
                             </Box>
                             <Heading
                                 fontSize="3xl"
-                                color="#582C83"
+                                color={dxcColors.primary.purple}
                                 letterSpacing="tight"
                                 fontWeight="bold"
                             >
@@ -559,18 +537,14 @@ const ReserveSessionsPage = () => {
                         </VStack>
                     </MotionBox>
 
-                    {/* Main Form Card */}
                     <MotionCard
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        bg={`${cardBg}90`}
-                        backdropFilter="blur(12px)"
+                        bg={cardBg}
                         borderRadius="2xl"
-                        border="1px solid"
-                        borderColor={`${dxcColors.primary.purple}20`}
                         overflow="hidden"
-                        boxShadow={`0 4px 20px ${dxcColors.primary.purple}15`}
+                        boxShadow={`0 4px 20px ${shadowColor}`}
                         w="full"
                     >
                         <CardBody p={6}>
@@ -589,27 +563,12 @@ const ReserveSessionsPage = () => {
                                                 <FormControl>
                                                     <HStack spacing={3}>
                                                         <Box position="relative" flex={1}>
-                                                            <Input
-                                                                type="date"
+                                                            <CustomDatePicker
                                                                 value={date}
-                                                                onChange={(e) => handleDateChange(index, e.target.value)}
-                                                                min={new Date().toISOString().split('T')[0]}
-                                                                required
-                                                                bg={`${cardBg}90`}
-                                                                border="1px solid"
-                                                                borderColor={isDateReserved(date) ? dxcColors.accents.orange : `${dxcColors.primary.purple}30`}
-                                                                borderRadius="xl"
-                                                                h="45px"
-                                                                pl={4}
-                                                                _hover={{
-                                                                    borderColor: dxcColors.primary.purple,
-                                                                    boxShadow: `0 0 0 1px ${dxcColors.primary.purple}30`
-                                                                }}
-                                                                _focus={{
-                                                                    borderColor: dxcColors.primary.purple,
-                                                                    boxShadow: `0 0 0 2px ${dxcColors.primary.purple}30`
-                                                                }}
-                                                                transition="all 0.2s"
+                                                                onChange={(value) => handleDateChange(index, value)}
+                                                                minDate={getMinDate()}
+                                                                reservedDates={globalReservedDates} // This will now be in correct format
+                                                                language={language}
                                                             />
                                                         </Box>
                                                         {dates.length > 1 && (
@@ -623,35 +582,17 @@ const ReserveSessionsPage = () => {
                                                                     onClick={() => removeDateInput(index)}
                                                                     aria-label={t.deleteDate}
                                                                     variant="ghost"
-                                                                    color="red.500"
-                                                                    _hover={{
-                                                                        bg: 'red.50',
-                                                                        color: 'red.600'
-                                                                    }}
+                                                                    colorScheme="red"
                                                                     size="sm"
-                                                                    borderRadius="xl"
                                                                 />
                                                             </Tooltip>
                                                         )}
                                                     </HStack>
-                                                    {isDateReserved(date) && (
-                                                        <Text
-                                                            color={dxcColors.primary.purple}
-                                                            fontSize="sm"
-                                                            mt={2}
-                                                            display="flex"
-                                                            alignItems="center"
-                                                        >
-                                                            <TimeIcon mr={2} />
-                                                            {t.dateReserved}
-                                                        </Text>
-                                                    )}
                                                 </FormControl>
                                             </MotionBox>
                                         ))}
                                     </AnimatePresence>
 
-                                    {/* Action Buttons */}
                                     <VStack spacing={4} w="full" pt={3}>
                                         <Button
                                             leftIcon={<AddIcon />}
@@ -663,8 +604,6 @@ const ReserveSessionsPage = () => {
                                             _hover={{
                                                 bg: `${dxcColors.primary.purple}20`
                                             }}
-                                            borderRadius="xl"
-                                            h="45px"
                                         >
                                             {t.addDate}
                                         </Button>
@@ -674,29 +613,11 @@ const ReserveSessionsPage = () => {
                                             bg={dxcColors.primary.purple}
                                             color="white"
                                             _hover={{
-                                                bg: `${dxcColors.primary.purple}90`,
-                                                transform: 'translateY(-2px)',
-                                                boxShadow: `0 4px 12px ${dxcColors.primary.purple}40`
-                                            }}
-                                            _active={{
-                                                bg: dxcColors.primary.purple,
-                                                transform: 'translateY(0)',
-                                                boxShadow: `0 2px 6px ${dxcColors.primary.purple}30`
-                                            }}
-                                            _disabled={{
-                                                bg: `${dxcColors.primary.purple}60`,
-                                                opacity: 0.7,
-                                                cursor: 'not-allowed',
-                                                transform: 'none',
-                                                boxShadow: 'none'
+                                                bg: `${dxcColors.primary.purple}90`
                                             }}
                                             isLoading={loading}
                                             loadingText={t.reserving}
                                             isDisabled={dates.some(date => !date || isDateReserved(date))}
-                                            borderRadius="xl"
-                                            h="45px"
-                                            boxShadow={`0 4px 12px ${dxcColors.primary.purple}30`}
-                                            transition="all 0.2s ease"
                                         >
                                             {t.reserve}
                                         </Button>
@@ -704,7 +625,6 @@ const ReserveSessionsPage = () => {
                                 </VStack>
                             </form>
 
-                            {/* Messages */}
                             <AnimatePresence>
                                 {message && (
                                     <MotionBox
@@ -712,32 +632,22 @@ const ReserveSessionsPage = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -20 }}
                                         transition={{ duration: 0.3 }}
+                                        mt={6}
                                     >
-                                        <Box
-                                            mt={6}
-                                            p={4}
+                                        <Alert
+                                            status={message === t.reservationSuccess ? "success" : "error"}
+                                            variant="subtle"
                                             borderRadius="xl"
-                                            bg={getMessageStyle(message).bg}
-                                            backdropFilter="blur(8px)"
-                                            border="1px solid"
-                                            borderColor={getMessageStyle(message).borderColor}
-                                            color={getMessageStyle(message).color}
-                                            whiteSpace="pre-line"
                                         >
-                                            <HStack spacing={3} align="flex-start">
-                                                <Box mt={0.5}>
-                                                    {getMessageStyle(message).icon}
-                                                </Box>
-                                                <Text>{message}</Text>
-                                            </HStack>
-                                        </Box>
+                                            <AlertIcon />
+                                            <Text>{message}</Text>
+                                        </Alert>
                                     </MotionBox>
                                 )}
                             </AnimatePresence>
                         </CardBody>
                     </MotionCard>
 
-                    {/* Reserved Dates Section */}
                     {globalReservedDates.length > 0 && (
                         <MotionBox
                             initial={{ opacity: 0, y: 20 }}
@@ -745,60 +655,6 @@ const ReserveSessionsPage = () => {
                             transition={{ duration: 0.5, delay: 0.2 }}
                             w="full"
                         >
-                            <VStack spacing={6}>
-                                <Text
-                                    fontSize="lg"
-                                    color={dxcColors.primary.purple}
-                                    fontWeight="medium"
-                                >
-                                    {t.reservedDates}
-                                </Text>
-                                <Wrap spacing={4} justify="center">
-                                    {globalReservedDates.map((reservation, index) => (
-                                        <WrapItem key={index}>
-                                            <MotionBox
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ duration: 0.2, delay: index * 0.1 }}
-                                            >
-                                                <Box
-                                                    p={4}
-                                                    bg={`${cardBg}90`}
-                                                    backdropFilter="blur(8px)"
-                                                    borderRadius="xl"
-                                                    border="1px solid"
-                                                    borderColor={`${dxcColors.primary.purple}20`}
-                                                    minW="250px"
-                                                    _hover={{
-                                                        transform: 'translateY(-2px)',
-                                                        boxShadow: `0 4px 12px ${dxcColors.primary.purple}20`,
-                                                        borderColor: dxcColors.primary.purple
-                                                    }}
-                                                    transition="all 0.2s"
-                                                >
-                                                    <VStack align="start" spacing={3}>
-                                                        <Text
-                                                            fontWeight="medium"
-                                                            color={dxcColors.primary.purple}
-                                                        >
-                                                            {formatSelectedDate(reservation.date)}
-                                                        </Text>
-                                                        <HStack
-                                                            fontSize="sm"
-                                                            color={dxcColors.primary.purple}
-                                                            opacity={0.8}
-                                                            spacing={2}
-                                                        >
-                                                            <CalendarIcon boxSize={3} />
-                                                            <Text>{reservation.associationName}</Text>
-                                                        </HStack>
-                                                    </VStack>
-                                                </Box>
-                                            </MotionBox>
-                                        </WrapItem>
-                                    ))}
-                                </Wrap>
-                            </VStack>
                         </MotionBox>
                     )}
                 </VStack>

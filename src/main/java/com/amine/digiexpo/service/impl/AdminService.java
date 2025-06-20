@@ -8,7 +8,6 @@ import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.IAdminService;
 import com.amine.digiexpo.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -41,6 +39,117 @@ public class AdminService implements IAdminService {
     private SessionRepository sessionRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Override
+    public Response createAdmin(AdminDTO adminDTO) {
+        try {
+            if (adminRepository.findByUsername(adminDTO.getUsername()).isPresent() ||
+                    adminRepository.findByEmail(adminDTO.getEmail()).isPresent()) {
+                return new Response(400, "Username or email already exists", null);
+            }
+
+            Admin admin = new Admin();
+            admin.setUsername(adminDTO.getUsername());
+            admin.setEmail(adminDTO.getEmail());
+            admin.setPassword(passwordEncoder.encode(adminDTO.getPassword()));
+            admin.setRole(adminDTO.getRole());
+            admin.setFullName(adminDTO.getFullName());
+            admin.setPhoneNumber(adminDTO.getPhoneNumber());
+
+            Admin savedAdmin = adminRepository.save(admin);
+            AdminDTO savedAdminDTO = Utils.mapAdminToDTO(savedAdmin);
+
+            return new Response(201, "Admin created successfully", savedAdminDTO);
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error creating admin", e);
+            return new Response(500, "Internal server error: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response updateAdmin(Long adminId, AdminDTO adminDTO) {
+        try {
+            Admin admin = adminRepository.findById(adminId)
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            // Update fields if they are provided
+            if (adminDTO.getUsername() != null) admin.setUsername(adminDTO.getUsername());
+            if (adminDTO.getEmail() != null) admin.setEmail(adminDTO.getEmail());
+            if (adminDTO.getPassword() != null && !adminDTO.getPassword().isEmpty()) {
+                admin.setPassword(passwordEncoder.encode(adminDTO.getPassword()));
+            }
+            if (adminDTO.getFullName() != null) admin.setFullName(adminDTO.getFullName());
+            if (adminDTO.getPhoneNumber() != null) admin.setPhoneNumber(adminDTO.getPhoneNumber());
+
+            Admin updatedAdmin = adminRepository.save(admin);
+            AdminDTO updatedAdminDTO = Utils.mapAdminToDTO(updatedAdmin);
+
+            return new Response(200, "Admin updated successfully", updatedAdminDTO);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Error updating admin: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response deleteAdmin(Long adminId) {
+        try {
+            Admin admin = adminRepository.findById(adminId)
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            adminRepository.delete(admin);
+            return new Response(200, "Admin deleted successfully", null);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Error deleting admin: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response getAllAdmins() {
+        try {
+            List<Admin> admins = adminRepository.findAll();
+            List<AdminDTO> adminDTOs = admins.stream()
+                    .map(Utils::mapAdminToDTO)
+                    .collect(Collectors.toList());
+
+            return new Response(200, "Admins retrieved successfully", adminDTOs);
+        } catch (Exception e) {
+            return new Response(500, "Error retrieving admins: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response getAdminById(Long adminId) {
+        try {
+            Admin admin = adminRepository.findById(adminId)
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            AdminDTO adminDTO = Utils.mapAdminToDTO(admin);
+            return new Response(200, "Admin retrieved successfully", adminDTO);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Error retrieving admin: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response getAdminByUsername(String username) {
+        try {
+            Admin admin = adminRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+            AdminDTO adminDTO = Utils.mapAdminToDTO(admin);
+            return new Response(200, "Admin retrieved successfully", adminDTO);
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Error retrieving admin: " + e.getMessage(), null);
+        }
+    }
 
     @Override
     public Response createAssociation(AssociationDTO associationDTO, MultipartFile imageFile) {

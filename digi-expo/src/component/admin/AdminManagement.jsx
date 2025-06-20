@@ -29,6 +29,9 @@ import {
     useToast,
     Badge,
     Icon,
+    Checkbox,
+    CheckboxGroup,
+    Divider,
     InputGroup,
     InputLeftElement,
 } from '@chakra-ui/react';
@@ -41,12 +44,9 @@ import {
     FaUser,
     FaEnvelope,
     FaLock,
-    FaBuilding,
-    FaCity,
-    FaUserTie,
     FaPhone,
-    FaImage,
     FaSearch,
+    FaAddressCard
 } from 'react-icons/fa';
 
 const colors = {
@@ -86,111 +86,99 @@ const colors = {
     }
 };
 
-// Keep your existing translations object
 const translations = {
     fr: {
-        title: "Gestion des Associations",
-        subtitle: "Gérer et surveiller vos associations",
-        searchPlaceholder: "Rechercher des associations...",
-        addAssociation: "Ajouter une Association",
-        editAssociation: "Modifier l'Association",
+        title: "Gestion des Admins",
+        subtitle: "Gérer et surveiller vos admins",
+        loading: "Chargement des admins...",
+        noAdmins: "Aucun admin trouvé",
+        addAdmin: "Ajouter un Admin",
         cancel: "Annuler",
-        loading: "Chargement des associations...",
-        networkError: "Erreur réseau ou serveur lors du chargement des associations",
-        deleteConfirm: "Êtes-vous sûr de vouloir supprimer cette association ?",
-        deleteError: "Erreur réseau ou serveur lors de la suppression de l'association",
-        deleteSuccess: "Association supprimée avec succès",
-        passwordRequired: "Le mot de passe est requis pour créer une nouvelle association.",
-        saveSuccess: "Association enregistrée avec succès !",
-        saveFailed: "Échec de l'enregistrement de l'association",
-        saveError: "Erreur réseau ou serveur lors de l'enregistrement de l'association",
-        saving: "Enregistrement...",
-        noAssociations: "Aucune association trouvée",
         closeForm: "Fermer le formulaire",
+        saving: "Enregistrement...",
+        save: "Enregistrer",
+        update: "Mettre à jour",
+        deleteConfirm: "Êtes-vous sûr de vouloir supprimer ce admin ?",
+        deleteSuccess: "Admin supprimé avec succès",
+        deleteFailed: "Échec de la suppression du admin",
+        saveSuccess: "Admin enregistré avec succès !",
+        saveFailed: "Échec de l'enregistrement du admin",
+        passwordRequired: "Le mot de passe est requis pour créer un nouveau admin.",
+        networkError: "Erreur réseau ou serveur lors de l'enregistrement du admin",
+        searchPlaceholder: "Rechercher des admins...",
+        updateLogout: "Profil mis à jour avec succès. Vous allez être déconnecté...",
+        redirecting: "Redirection vers la page de connexion...",
         status: {
             active: "Actif",
-            association: "Association"
+            admin: "Bénévole"
         },
         form: {
             username: "Nom d'utilisateur",
+            fullName:"Nom complet",
             email: "Email",
             password: "Mot de passe",
             newPassword: "Nouveau mot de passe (optionnel)",
-            name: "Nom de l'Association",
-            city: "Ville",
-            responsible: "Responsable",
-            phone: "Numéro de téléphone",
-            uploadImage: "Télécharger une image",
-            update: "Mettre à jour",
-            save: "Enregistrer"
+            phoneNumber: "Numéro de téléphone"
         },
         table: {
             username: "Nom d'utilisateur",
+            fullName: "Nom complet",
             email: "Email",
-            name: "Nom",
-            city: "Ville",
-            responsible: "Responsable",
-            phone: "Téléphone",
-            image: "Image",
+            phoneNumber: "Numéro de téléphone",
             actions: "Actions"
         }
     },
     en: {
-        title: "Association Management",
-        subtitle: "Manage and monitor your associations",
-        searchPlaceholder: "Search associations...",
-        addAssociation: "Add Association",
-        editAssociation: "Edit Association",
+        title: "Admin Management",
+        subtitle: "Manage and monitor your admins",
+        loading: "Loading admins...",
+        noAdmins: "No admins found",
+        addAdmin: "Add Admin",
         cancel: "Cancel",
-        loading: "Loading associations...",
-        networkError: "Network or server error while loading associations",
-        deleteConfirm: "Are you sure you want to delete this association?",
-        deleteError: "Network or server error while deleting the association",
-        deleteSuccess: "Association successfully deleted",
-        passwordRequired: "Password is required for creating a new association.",
-        saveSuccess: "Association successfully saved!",
-        saveFailed: "Failed to save association",
-        saveError: "Network or server error while saving the association",
+        closeForm: "Close Form",
         saving: "Saving...",
-        noAssociations: "No associations found",
-        closeForm: "Close form",
+        save: "Save",
+        update: "Update",
+        deleteConfirm: "Are you sure you want to delete this admin?",
+        deleteSuccess: "Admin deleted successfully",
+        deleteFailed: "Failed to delete admin",
+        saveSuccess: "Admin successfully saved!",
+        saveFailed: "Failed to save admin",
+        passwordRequired: "Password is required for creating a new admin.",
+        networkError: "Network or server error while saving the admin",
+        searchPlaceholder: "Search admins...",
+        updateLogout: "Profile updated successfully. You will be logged out...",
+        redirecting: "Redirecting to login page...",
         status: {
             active: "Active",
-            association: "Association"
+            admin: "Admin"
         },
         form: {
             username: "Username",
+            fullName: "Full Name",
             email: "Email",
             password: "Password",
             newPassword: "New Password (optional)",
-            name: "Association Name",
-            city: "City",
-            responsible: "Responsible Person",
-            phone: "Phone Number",
-            uploadImage: "Upload Image",
-            update: "Update",
-            save: "Save"
+            phoneNumber: "Phone Number"
         },
         table: {
             username: "Username",
+            fullName: "Full Name",
             email: "Email",
-            name: "Name",
-            city: "City",
-            responsible: "Responsible",
-            phone: "Phone",
-            image: "Image",
+            phoneNumber: "Phone Number",
             actions: "Actions"
         }
     }
 };
 
-const AssociationManagement = () => {
-    const [associations, setAssociations] = useState([]);
+const AdminManagement = () => {
+    const [admins, setAdmins] = useState([]);
     const [formData, setFormData] = useState(initialFormState());
-    const [editingAssociation, setEditingAssociation] = useState(null);
+    const [editingAdmin, setEditingAdmin] = useState(null);
     const [globalLoading, setGlobalLoading] = useState(false);
     const [buttonLoading, setButtonLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const { language } = useLanguage();
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -206,29 +194,42 @@ const AssociationManagement = () => {
     function initialFormState() {
         return {
             username: '',
+            fullName: '',
             email: '',
             password: '',
-            role: 'ASSOCIATION',
-            name: '',
-            ville: '',
-            responsableName: '',
-            responsablePhone: '',
-            imageFileName: null
+            role: 'ADMIN',
+            phoneNumber: ''
         };
     }
 
     useEffect(() => {
-        fetchAssociations();
+        fetchAdmins();
     }, []);
 
-    const fetchAssociations = async () => {
+    const fetchAdmins = async () => {
         setGlobalLoading(true);
         try {
-            const response = await AdminService.getAllAssociations();
-            setAssociations(response.data || []);
+            const result = await AdminService.getAllAdmins();
+
+            if (result && result.data) {
+                setAdmins(result.data);
+                if (result.data.length === 0) {
+                    toast({
+                        title: t.noAdmins,
+                        status: 'info',
+                        duration: 5000,
+                        isClosable: true,
+                        position: 'top-right'
+                    });
+                }
+            } else {
+                console.error('Invalid response format:', result);
+            }
         } catch (err) {
+            console.error('Error fetching admins:', err);
             toast({
-                title: t.networkError,
+                title: t.saveFailed,
+                description: err.message,
                 status: 'error',
                 duration: 5000,
                 isClosable: true,
@@ -241,7 +242,53 @@ const AssociationManagement = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({
+            ...prev,
+            [name]: value || '' // Ensure value is never null
+        }));
+    };
+
+    const handleCheckboxChange = (selectedDays) => {
+        setFormData(prev => ({
+            ...prev
+        }));
+    };
+
+    // Function to handle logout
+    const handleLogout = () => {
+        console.log('handleLogout called');
+        setIsLoggingOut(true);
+
+        // Show logout message
+        toast({
+            title: t.updateLogout,
+            status: 'success',
+            duration: 3000,
+            isClosable: false,
+            position: 'top-right'
+        });
+
+        // Clear all stored data - be more thorough
+        const keysToRemove = ['username', 'adminUsername', 'userId', 'adminId', 'id', 'email', 'adminEmail', 'token', 'authToken', 'accessToken', 'refreshToken', 'role', 'userRole'];
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
+        });
+
+        // Also clear everything just to be sure
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Force redirect immediately - don't wait
+        setTimeout(() => {
+            console.log('Redirecting to login...');
+            // Try multiple redirect methods
+            if (window.location.pathname !== '/login') {
+                window.location.replace('/login');
+                // Fallback
+                window.location.href = '/login';
+            }
+        }, 1000);
     };
 
     const handleSubmit = async (e) => {
@@ -249,55 +296,130 @@ const AssociationManagement = () => {
         setButtonLoading(true);
 
         try {
-            const formDataToSend = new FormData();
-            const { imageFile, password, ...otherData } = formData;
+            const payload = { ...formData };
 
-            if (!editingAssociation && !password) {
-                toast({
-                    title: t.passwordRequired,
-                    status: 'warning',
-                    duration: 5000,
-                    isClosable: true,
-                    position: 'top-right'
-                });
-                setButtonLoading(false);
-                return;
-            }
-
-            const dataToSend = {
-                ...otherData,
-                password: password || undefined,
-            };
-
-            formDataToSend.append('data', JSON.stringify(dataToSend));
-
-            if (imageFile) {
-                formDataToSend.append('image', imageFile);
-            }
+            // Get current user information from localStorage - check all possible keys
+            const currentUsername = localStorage.getItem('username') || localStorage.getItem('adminUsername');
+            const currentUserId = localStorage.getItem('userId') || localStorage.getItem('adminId') || localStorage.getItem('id');
+            const currentUserEmail = localStorage.getItem('email') || localStorage.getItem('adminEmail');
 
             let response;
-            if (editingAssociation) {
-                response = await AdminService.updateAssociation(editingAssociation.id, formDataToSend);
-            } else {
-                response = await AdminService.createAssociation(formDataToSend);
-            }
+            if (editingAdmin) {
+                response = await AdminService.updateAdmin(editingAdmin.id, payload);
 
-            if (response.statusCode === 200 || response.statusCode === 201) {
-                toast({
-                    title: t.saveSuccess,
-                    status: 'success',
-                    duration: 5000,
-                    isClosable: true,
-                    position: 'top-right'
-                });
-                await fetchAssociations();
-                handleCancel();
+                if (response.statusCode === 200) {
+                    // More comprehensive check for current user - stricter comparison
+                    const isCurrentUser = (
+                        (currentUsername && editingAdmin.username?.toLowerCase() === currentUsername.toLowerCase()) ||
+                        (currentUserId && (editingAdmin.id === parseInt(currentUserId) || editingAdmin.id === currentUserId)) ||
+                        (currentUserEmail && editingAdmin.email?.toLowerCase() === currentUserEmail.toLowerCase())
+                    );
+
+                    if (isCurrentUser) {
+                        // Immediately start logout process without waiting for state updates
+                        setIsLoggingOut(true);
+
+                        // Show logout message first
+                        toast({
+                            title: t.updateLogout,
+                            status: 'success',
+                            duration: 2000,
+                            isClosable: false,
+                            position: 'top-right'
+                        });
+
+                        // Clear form and close drawer immediately
+                        onClose();
+                        setFormData(initialFormState());
+                        setEditingAdmin(null);
+                        setButtonLoading(false);
+
+                        // Clear all stored data
+                        const keysToRemove = [
+                            'username', 'adminUsername', 'userId', 'adminId', 'id',
+                            'email', 'adminEmail', 'token', 'authToken', 'accessToken',
+                            'refreshToken', 'role', 'userRole', 'permissions'
+                        ];
+
+                        keysToRemove.forEach(key => {
+                            localStorage.removeItem(key);
+                            sessionStorage.removeItem(key);
+                        });
+
+                        // Clear everything
+                        localStorage.clear();
+                        sessionStorage.clear();
+
+                        // Force redirect after a short delay to ensure toast is visible
+                        setTimeout(() => {
+                            if (window.location.pathname !== '/login') {
+                                window.location.href = '/login';
+                                // Fallback
+                                setTimeout(() => {
+                                    window.location.replace('/login');
+                                }, 100);
+                            }
+                        }, 1500);
+
+                        return;
+                    }
+
+                    // If it's not the current user, update the local state
+                    const updatedAdmin = response.data;
+                    setAdmins(prevAdmins =>
+                        prevAdmins.map(admin =>
+                            admin.id === editingAdmin.id ? updatedAdmin : admin
+                        )
+                    );
+
+                    toast({
+                        title: "Admin updated successfully!",
+                        status: 'success',
+                        duration: 5000,
+                        isClosable: true,
+                        position: 'top-right'
+                    });
+
+                    onClose();
+                    setFormData(initialFormState());
+                    setEditingAdmin(null);
+                }
             } else {
-                throw new Error(response.message || t.saveFailed);
+                // Handle create new admin...
+                if (!payload.password) {
+                    toast({
+                        title: t.passwordRequired,
+                        status: 'warning',
+                        duration: 5000,
+                        isClosable: true,
+                        position: 'top-right'
+                    });
+                    setButtonLoading(false);
+                    return;
+                }
+                response = await AdminService.createAdmin(payload);
+
+                if (response.statusCode === 201) {
+                    // Add the new admin to the state
+                    const newAdmin = response.data;
+                    setAdmins(prevAdmins => [...prevAdmins, newAdmin]);
+
+                    toast({
+                        title: t.saveSuccess,
+                        status: 'success',
+                        duration: 5000,
+                        isClosable: true,
+                        position: 'top-right'
+                    });
+
+                    onClose();
+                    setFormData(initialFormState());
+                }
             }
         } catch (err) {
+            console.error('Error in handleSubmit:', err);
             toast({
-                title: t.saveError,
+                title: t.networkError,
                 description: err.message,
                 status: 'error',
                 duration: 5000,
@@ -309,19 +431,16 @@ const AssociationManagement = () => {
         }
     };
 
-    const handleEdit = (assoc) => {
+    const handleEdit = (admin) => {
         setFormData({
-            username: assoc.username,
-            email: assoc.email,
-            password: '',
-            role: assoc.role,
-            name: assoc.name,
-            ville: assoc.ville,
-            responsableName: assoc.responsableName,
-            responsablePhone: assoc.responsablePhone,
-            imageFileName: assoc.imageFileName
+            username: admin.username || '',
+            fullName: admin.fullName || '',
+            email: admin.email || '',
+            password: '',  // Always empty for editing
+            role: admin.role || 'ADMIN',
+            phoneNumber: admin.phoneNumber || ''
         });
-        setEditingAssociation(assoc);
+        setEditingAdmin(admin);
         onOpen();
     };
 
@@ -330,18 +449,23 @@ const AssociationManagement = () => {
 
         setGlobalLoading(true);
         try {
-            await AdminService.deleteAssociation(id);
-            await fetchAssociations();
-            toast({
-                title: t.deleteSuccess,
-                status: 'success',
-                duration: 5000,
-                isClosable: true,
-                position: 'top-right'
-            });
+            const response = await AdminService.deleteAdmin(id);
+            if (response && response.statusCode === 200) {
+                toast({
+                    title: t.deleteSuccess,
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top-right'
+                });
+                await fetchAdmins();
+            } else {
+                throw new Error(response?.message || t.deleteFailed);
+            }
         } catch (err) {
             toast({
-                title: t.deleteError,
+                title: t.networkError,
+                description: err.message,
                 status: 'error',
                 duration: 5000,
                 isClosable: true,
@@ -354,15 +478,39 @@ const AssociationManagement = () => {
 
     const handleCancel = () => {
         setFormData(initialFormState());
-        setEditingAssociation(null);
+        setEditingAdmin(null);
         onClose();
     };
 
-    const filteredAssociations = associations.filter(assoc =>
-        (assoc?.name?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-        (assoc?.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-        (assoc?.ville?.toLowerCase() || '').includes(searchQuery.toLowerCase())
-    );
+    const filteredAdmins = admins.filter(ad => {
+        const searchQueryLower = searchQuery.toLowerCase();
+        return (
+            (ad.username?.toLowerCase() || '').includes(searchQueryLower) ||
+            (ad.fullName?.toLowerCase() || '').includes(searchQueryLower) ||
+            (ad.email?.toLowerCase() || '').includes(searchQueryLower) ||
+            (ad.phoneNumber?.toLowerCase() || '').includes(searchQueryLower)
+        );
+    });
+
+    // Show loading overlay when logging out
+    if (isLoggingOut) {
+        return (
+            <Box
+                bg={bgMain}
+                minH="100vh"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                bgGradient={`linear(to-br, ${colors.purple[50]}, ${colors.primary.white})`}
+            >
+                <VStack spacing={4}>
+                    <Box className="loading-spinner" />
+                    <Text color={textColor} fontSize="lg">{t.updateLogout}</Text>
+                    <Text color={secondaryTextColor}>{t.redirecting}</Text>
+                </VStack>
+            </Box>
+        );
+    }
 
     return (
         <Box bg={bgMain} minH="100vh" py={8} bgGradient={`linear(to-br, ${colors.purple[50]}, ${colors.primary.white})`}>
@@ -378,16 +526,18 @@ const AssociationManagement = () => {
                                 {t.subtitle}
                             </Text>
                         </VStack>
-                        <Button
-                            leftIcon={<FaPlus />}
-                            onClick={onOpen}
-                            colorScheme="#582C83"
-                            size="lg"
-                            rounded="full"
-                            px={8}
-                        >
-                            {t.addAssociation}
-                        </Button>
+                        <HStack spacing={4}>
+                            <Button
+                                leftIcon={<FaPlus />}
+                                onClick={onOpen}
+                                colorScheme="#582C83"
+                                size="lg"
+                                rounded="full"
+                                px={8}
+                            >
+                                {t.addAdmin}
+                            </Button>
+                        </HStack>
                     </Flex>
 
                     {/* Search Bar */}
@@ -405,7 +555,7 @@ const AssociationManagement = () => {
                     </InputGroup>
                 </Box>
 
-                {/* Associations Grid */}
+                {/* Admins Grid */}
                 {globalLoading ? (
                     <Flex justify="center" align="center" h="400px">
                         <VStack spacing={4}>
@@ -415,9 +565,9 @@ const AssociationManagement = () => {
                     </Flex>
                 ) : (
                     <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-                        {filteredAssociations.map((assoc) => (
+                        {filteredAdmins.map((ad) => (
                             <Box
-                                key={assoc.id}
+                                key={ad.id}
                                 bg={bgCard}
                                 p={6}
                                 rounded="xl"
@@ -435,7 +585,7 @@ const AssociationManagement = () => {
                                         icon={<FaEdit />}
                                         variant="ghost"
                                         colorScheme="purple"
-                                        onClick={() => handleEdit(assoc)}
+                                        onClick={() => handleEdit(ad)}
                                         aria-label="Edit"
                                         size="sm"
                                         mr={2}
@@ -444,7 +594,7 @@ const AssociationManagement = () => {
                                         icon={<FaTrash />}
                                         variant="ghost"
                                         colorScheme="red"
-                                        onClick={() => handleDelete(assoc.id)}
+                                        onClick={() => handleDelete(ad.id)}
                                         aria-label="Delete"
                                         size="sm"
                                     />
@@ -456,17 +606,16 @@ const AssociationManagement = () => {
                                     <Flex align="center" mb={4}>
                                         <Avatar
                                             size="lg"
-                                            name={assoc.name}
-                                            src={assoc.imageFileName ? `http://localhost:8080/images/${assoc.imageFileName}` : undefined}
+                                            name={ad.username}
                                             bg="#582C83"
                                             mr={4}
                                         />
                                         <Box>
                                             <Heading size="md" color={textColor} mb={1}>
-                                                {assoc.name}
+                                                {ad.username}
                                             </Heading>
                                             <Text color="purple.500" fontSize="sm" fontWeight="medium">
-                                                @{assoc.username}
+                                                {t.status.admin}
                                             </Text>
                                         </Box>
                                     </Flex>
@@ -475,58 +624,43 @@ const AssociationManagement = () => {
                                     <SimpleGrid columns={1} spacing={4}>
                                         <Box>
                                             <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
-                                                {t.table.email}
+                                                {t.form.fullName}
+                                            </Text>
+                                            <Flex align="center" color={textColor}>
+                                                <Icon as={FaAddressCard} mr={2} color="purple.500" />
+                                                <Text fontSize="sm" isTruncated>
+                                                    {ad.fullName}
+                                                </Text>
+                                            </Flex>
+                                        </Box>
+                                        <Box>
+                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
+                                                {t.form.email}
                                             </Text>
                                             <Flex align="center" color={textColor}>
                                                 <Icon as={FaEnvelope} mr={2} color="blue.500" />
                                                 <Text fontSize="sm" isTruncated>
-                                                    {assoc.email}
+                                                    {ad.email}
                                                 </Text>
                                             </Flex>
                                         </Box>
 
                                         <Box>
                                             <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
-                                                {t.table.city}
+                                                {t.form.phoneNumber}
                                             </Text>
                                             <Flex align="center" color={textColor}>
-                                                <Icon as={FaCity} mr={2} color="green.500" />
+                                                <Icon as={FaPhone} mr={2} color="green.500" />
                                                 <Text fontSize="sm">
-                                                    {assoc.ville}
+                                                    {ad.phoneNumber}
                                                 </Text>
                                             </Flex>
                                         </Box>
 
-                                        <Box>
-                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
-                                                {t.table.responsible}
-                                            </Text>
-                                            <Flex align="center" color={textColor}>
-                                                <Icon as={FaUserTie} mr={2} color="orange.500" />
-                                                <Text fontSize="sm">
-                                                    {assoc.responsableName}
-                                                </Text>
-                                            </Flex>
-                                        </Box>
-
-                                        <Box>
-                                            <Text fontSize="xs" color={secondaryTextColor} textTransform="uppercase" mb={1}>
-                                                {t.table.phone}
-                                            </Text>
-                                            <Flex align="center" color={textColor}>
-                                                <Icon as={FaPhone} mr={2} color="pink.500" />
-                                                <Text fontSize="sm">
-                                                    {assoc.responsablePhone}
-                                                </Text>
-                                            </Flex>
-                                        </Box>
                                     </SimpleGrid>
 
-                                    {/* Status Badges */}
+                                    {/* Status Badge */}
                                     <Flex mt={4} gap={2}>
-                                        <Badge colorScheme="purple" variant="subtle" px={3} py={1} borderRadius="full">
-                                            {t.status.association}
-                                        </Badge>
                                         <Badge colorScheme="green" variant="subtle" px={3} py={1} borderRadius="full">
                                             {t.status.active}
                                         </Badge>
@@ -554,7 +688,7 @@ const AssociationManagement = () => {
                         <DrawerCloseButton />
                         <DrawerHeader borderBottomWidth="1px" bg="purple.50">
                             <Heading size="md" color="#582C83">
-                                {editingAssociation ? t.editAssociation : t.addAssociation}
+                                {editingAdmin ? t.update : t.addAdmin}
                             </Heading>
                         </DrawerHeader>
 
@@ -569,7 +703,22 @@ const AssociationManagement = () => {
                                     </FormLabel>
                                     <Input
                                         name="username"
-                                        value={formData.username}
+                                        value={formData.username || ''}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </FormControl>
+
+                                <FormControl>
+                                    <FormLabel>
+                                        <HStack spacing={2}>
+                                            <FaAddressCard />
+                                            <Text>{t.form.fullName}</Text>
+                                        </HStack>
+                                    </FormLabel>
+                                    <Input
+                                        name="fullName"
+                                        value={formData.fullName || ''}
                                         onChange={handleInputChange}
                                         required
                                     />
@@ -585,7 +734,7 @@ const AssociationManagement = () => {
                                     <Input
                                         type="email"
                                         name="email"
-                                        value={formData.email}
+                                        value={formData.email || ''}
                                         onChange={handleInputChange}
                                         required
                                     />
@@ -596,61 +745,16 @@ const AssociationManagement = () => {
                                         <HStack spacing={2}>
                                             <FaLock />
                                             <Text>
-                                                {editingAssociation ? t.form.newPassword : t.form.password}
+                                                {editingAdmin ? t.form.newPassword : t.form.password}
                                             </Text>
                                         </HStack>
                                     </FormLabel>
                                     <Input
                                         type="password"
                                         name="password"
-                                        value={formData.password}
+                                        value={formData.password || ''}
                                         onChange={handleInputChange}
-                                        required={!editingAssociation}
-                                    />
-                                </FormControl>
-
-                                <FormControl>
-                                    <FormLabel>
-                                        <HStack spacing={2}>
-                                            <FaBuilding />
-                                            <Text>{t.form.name}</Text>
-                                        </HStack>
-                                    </FormLabel>
-                                    <Input
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </FormControl>
-
-                                <FormControl>
-                                    <FormLabel>
-                                        <HStack spacing={2}>
-                                            <FaCity />
-                                            <Text>{t.form.city}</Text>
-                                        </HStack>
-                                    </FormLabel>
-                                    <Input
-                                        name="ville"
-                                        value={formData.ville}
-                                        onChange={handleInputChange}
-                                        required
-                                    />
-                                </FormControl>
-
-                                <FormControl>
-                                    <FormLabel>
-                                        <HStack spacing={2}>
-                                            <FaUserTie />
-                                            <Text>{t.form.responsible}</Text>
-                                        </HStack>
-                                    </FormLabel>
-                                    <Input
-                                        name="responsableName"
-                                        value={formData.responsableName}
-                                        onChange={handleInputChange}
-                                        required
+                                        required={!editingAdmin}
                                     />
                                 </FormControl>
 
@@ -658,29 +762,14 @@ const AssociationManagement = () => {
                                     <FormLabel>
                                         <HStack spacing={2}>
                                             <FaPhone />
-                                            <Text>{t.form.phone}</Text>
+                                            <Text>{t.form.phoneNumber}</Text>
                                         </HStack>
                                     </FormLabel>
                                     <Input
-                                        name="responsablePhone"
-                                        value={formData.responsablePhone}
+                                        name="phoneNumber"
+                                        value={formData.phoneNumber || ''}
                                         onChange={handleInputChange}
                                         required
-                                    />
-                                </FormControl>
-
-                                <FormControl>
-                                    <FormLabel>
-                                        <HStack spacing={2}>
-                                            <FaImage />
-                                            <Text>{t.form.uploadImage}</Text>
-                                        </HStack>
-                                    </FormLabel>
-                                    <Input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => setFormData(prev => ({...prev, imageFile: e.target.files[0]}))}
-                                        p={1}
                                     />
                                 </FormControl>
 
@@ -692,7 +781,7 @@ const AssociationManagement = () => {
                                         isLoading={buttonLoading}
                                         flex={1}
                                     >
-                                        {editingAssociation ? t.form.update : t.form.save}
+                                        {editingAdmin ? t.update : t.save}
                                     </Button>
                                     <Button
                                         variant="ghost"
@@ -708,8 +797,9 @@ const AssociationManagement = () => {
                     </DrawerContent>
                 </Drawer>
             </Container>
+
         </Box>
     );
 };
 
-export default AssociationManagement;
+export default AdminManagement;

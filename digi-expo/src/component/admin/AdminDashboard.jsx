@@ -1,205 +1,255 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { AuthContext } from '../../context/AuthContext';
 import AssociationManagement from './AssociationManagement';
 import VolunteerManagement from './VolunteerManagement';
 import VolunteerRequests from './VolunteerRequests';
 import SessionManagement from './SessionManagement';
+import AdminManagement from "./AdminManagement";
 import {
     Box,
-    Container,
-    Heading,
-    Button,
-    SimpleGrid,
-    VStack,
-    useColorModeValue,
+    Flex,
     Icon,
     Text,
-    Circle,
-    Flex,
-    Slide,
-    SlideFade
+    useColorModeValue,
+    IconButton,
+    VStack,
+    HStack,
+    useBreakpointValue,
+    Drawer,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    useDisclosure,
+    Avatar,
+    Tooltip,
+    Divider,
+    Button,
 } from '@chakra-ui/react';
 import {
     FaBuilding,
     FaUsers,
     FaUserPlus,
     FaCalendarAlt,
-    FaTachometerAlt,
-    FaHome
+    FaBars,
+    FaSignOutAlt,
+    FaUserTie,
+    FaChevronLeft,
+    FaChevronRight,
 } from 'react-icons/fa';
 
-// DXC Color Palette
-const dxcColors = {
-    primary: {
-        purple: '#582C83',
-        white: '#FFFFFF'
-    },
-    secondary: {
-        lightGray: '#D8D9D9',
-        mediumGray: '#97999B',
-        darkGray: '#58595B'
-    }
-};
+const mainColor = "#582C83";
 
-// Translations object
 const translations = {
     fr: {
-        pageTitle: "Tableau de Bord Admin",
-        backToHome: "Retour à l'Accueil",
-        tabs: {
-            associations: "Associations",
-            volunteers: "Bénévoles",
-            volunteerRequests: "Demandes de Bénévolat",
-            sessions: "Sessions"
-        }
+        dashboard: "Tableau de bord",
+        admins: "Administrateurs",
+        associations: "Associations",
+        volunteers: "Bénévoles",
+        requests: "Demandes",
+        sessions: "Sessions",
+        logout: "Déconnexion",
+        collapse: "Réduire",
+        expand: "Développer"
     },
     en: {
-        pageTitle: "Admin Dashboard",
-        backToHome: "Back to Home",
-        tabs: {
-            associations: "Associations",
-            volunteers: "Volunteers",
-            volunteerRequests: "Volunteer Requests",
-            sessions: "Sessions"
-        }
+        dashboard: "Dashboard",
+        admins: "Administrators",
+        associations: "Associations",
+        volunteers: "Volunteers",
+        requests: "Requests",
+        sessions: "Sessions",
+        logout: "Logout",
+        collapse: "Collapse",
+        expand: "Expand"
     }
 };
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { language } = useLanguage();
+    const { currentUser, logout } = useContext(AuthContext); // Update this line
     const t = translations[language];
     const [activeTab, setActiveTab] = React.useState('associations');
+    const [isCollapsed, setIsCollapsed] = React.useState(false);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const isMobile = useBreakpointValue({ base: true, lg: false });
 
-    // Color mode values
-    const bgColor = useColorModeValue('gray.50', 'gray.900');
-    const cardBg = useColorModeValue('white', 'gray.800');
 
-    const tabs = [
-        {
-            id: 'associations',
-            icon: FaBuilding,
-            label: t.tabs.associations,
-            component: <AssociationManagement />
-        },
-        {
-            id: 'volunteers',
-            icon: FaUsers,
-            label: t.tabs.volunteers,
-            component: <VolunteerManagement />
-        },
-        {
-            id: 'volunteerRequests',
-            icon: FaUserPlus,
-            label: t.tabs.volunteerRequests,
-            component: <VolunteerRequests />
-        },
-        {
-            id: 'sessions',
-            icon: FaCalendarAlt,
-            label: t.tabs.sessions,
-            component: <SessionManagement />
-        }
+    const menuItems = [
+        { id: 'admins', icon: FaUserTie, label: t.admins, component: <AdminManagement /> },
+        { id: 'associations', icon: FaBuilding, label: t.associations, component: <AssociationManagement /> },
+        { id: 'volunteers', icon: FaUsers, label: t.volunteers, component: <VolunteerManagement /> },
+        { id: 'volunteerRequests', icon: FaUserPlus, label: t.requests, component: <VolunteerRequests /> },
+        { id: 'sessions', icon: FaCalendarAlt, label: t.sessions, component: <SessionManagement /> },
     ];
 
-    return (
+    const bgColor = useColorModeValue('white', 'gray.800');
+    const borderColor = useColorModeValue('gray.200', 'gray.700');
+    const hoverBg = useColorModeValue('gray.100', 'gray.700');
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login'); // or wherever you want to redirect after logout
+    };
+
+    const SidebarContent = () => (
         <Box
-            minH="100vh"
             bg={bgColor}
-            position="relative"
-            overflow="hidden"
-            py={6}
+            borderRight="1px"
+            borderColor={borderColor}
+            w={isCollapsed ? "80px" : "240px"}
+            h="100vh"
+            position="fixed"
+            transition="width 0.2s"
         >
-            <Container maxW="8xl" position="relative" zIndex={1}>
-                <VStack spacing={8} align="stretch">
-                    {/* Header */}
-                    <Flex justify="space-between" align="center" mb={4}>
-                        <Flex align="center" gap={3}>
-                            <Circle
-                                size="40px"
-                                bg={`${dxcColors.primary.purple}10`}
-                                color={dxcColors.primary.purple}
-                            >
-                                <Icon as={FaTachometerAlt} boxSize={5} />
-                            </Circle>
-                            <Heading
-                                size="lg"
-                                color={dxcColors.primary.purple}
-                            >
-                                {t.pageTitle}
-                            </Heading>
-                        </Flex>
-                        <Button
-                            leftIcon={<Icon as={FaHome} boxSize={4} />}
-                            onClick={() => navigate('/home')}
-                            variant="ghost"
-                            size="sm"
-                            color={dxcColors.primary.purple}
-                            _hover={{
-                                bg: `${dxcColors.primary.purple}10`
-                            }}
+            <Flex direction="column" h="full" py={6}>
+                {/* Header with Current User Info */}
+                <Flex px={isCollapsed ? 4 : 6} align="center" mb={8}>
+                    {!isCollapsed && (
+                        <Avatar
+                            size="md"
+                            name={currentUser?.username || currentUser?.email || 'Admin'}
+                            bg={mainColor}
+                            color="white"
+                            mr={3}
+                        />
+                    )}
+                    {!isCollapsed && (
+                        <VStack align="start" spacing={0}>
+                            <Text fontWeight="bold" fontSize="sm">
+                                {currentUser?.username || 'Admin'}
+                            </Text>
+                            <Text fontSize="xs" color="gray.500">
+                                {currentUser?.email || 'admin@example.com'}
+                            </Text>
+                        </VStack>
+                    )}
+                </Flex>
+
+                {/* Navigation Items */}
+                <VStack spacing={2} flex={1} w="full">
+                    {menuItems.map((item) => (
+                        <Tooltip
+                            key={item.id}
+                            label={isCollapsed ? item.label : ""}
+                            placement="right"
+                            hasArrow
                         >
-                            {t.backToHome}
-                        </Button>
-                    </Flex>
-
-                    {/* Navigation Cards */}
-                    <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
-                        {tabs.map((tab) => (
-                            <Box
-                                key={tab.id}
-                                as="button"
-                                onClick={() => setActiveTab(tab.id)}
-                                bg={activeTab === tab.id ? dxcColors.primary.purple : cardBg}
-                                color={activeTab === tab.id ? 'white' : dxcColors.secondary.darkGray}
-                                p={4}
-                                borderRadius="xl"
-                                boxShadow="md"
-                                transition="all 0.2s"
-                                _hover={{
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: 'lg',
-                                    bg: activeTab === tab.id ? dxcColors.primary.purple : `${dxcColors.primary.purple}10`
+                            <Button
+                                w="full"
+                                px={isCollapsed ? 4 : 6}
+                                py={3}
+                                bg="transparent"
+                                justifyContent={isCollapsed ? "center" : "flex-start"}
+                                onClick={() => {
+                                    setActiveTab(item.id);
+                                    if (isMobile) onClose();
                                 }}
-                                border="1px solid"
-                                borderColor={activeTab === tab.id ? 'transparent' : `${dxcColors.primary.purple}20`}
+                                position="relative"
+                                leftIcon={<Icon as={item.icon} boxSize={5} />}
+                                color={activeTab === item.id ? mainColor : 'gray.500'}
+                                _hover={{
+                                    bg: hoverBg,
+                                    color: mainColor,
+                                }}
+                                _before={{
+                                    content: '""',
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: 0,
+                                    bottom: 0,
+                                    width: '4px',
+                                    bg: mainColor,
+                                    opacity: activeTab === item.id ? 1 : 0,
+                                }}
                             >
-                                <VStack spacing={3}>
-                                    <Circle
-                                        size="45px"
-                                        bg={activeTab === tab.id ? 'white' : `${dxcColors.primary.purple}10`}
-                                        color={activeTab === tab.id ? dxcColors.primary.purple : dxcColors.primary.purple}
-                                    >
-                                        <Icon as={tab.icon} boxSize={5} />
-                                    </Circle>
-                                    <Text
-                                        fontSize="md"
-                                        fontWeight="medium"
-                                    >
-                                        {tab.label}
-                                    </Text>
-                                </VStack>
-                            </Box>
-                        ))}
-                    </SimpleGrid>
-
-                    {/* Content Area */}
-                    <Box
-                        bg={cardBg}
-                        borderRadius="xl"
-                        boxShadow="md"
-                        p={5}
-                        border="1px solid"
-                        borderColor={`${dxcColors.primary.purple}20`}
-                        minH="500px"
-                    >
-                        <SlideFade in={true} offsetY="20px">
-                            {tabs.find(tab => tab.id === activeTab)?.component}
-                        </SlideFade>
-                    </Box>
+                                {!isCollapsed && item.label}
+                            </Button>
+                        </Tooltip>
+                    ))}
                 </VStack>
-            </Container>
+
+                {/* Footer */}
+                <VStack w="full" spacing={4} mt={4}>
+                    <Divider />
+                    <Button
+                        w="full"
+                        variant="ghost"
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        px={isCollapsed ? 4 : 6}
+                        justifyContent={isCollapsed ? "center" : "flex-start"}
+                    >
+                        <Icon
+                            as={isCollapsed ? FaChevronRight : FaChevronLeft}
+                            boxSize={5}
+                            color="gray.500"
+                        />
+                        {!isCollapsed && (
+                            <Text ml={3}>{isCollapsed ? t.expand : t.collapse}</Text>
+                        )}
+                    </Button>
+                    <Button
+                        w="full"
+                        variant="ghost"
+                        onClick={handleLogout} // Updated to use handleLogout
+                        px={isCollapsed ? 4 : 6}
+                        justifyContent={isCollapsed ? "center" : "flex-start"}
+                        color="red.500"
+                        _hover={{ bg: 'red.50' }}
+                    >
+                        <Icon as={FaSignOutAlt} boxSize={5} />
+                        {!isCollapsed && <Text ml={3}>{t.logout}</Text>}
+                    </Button>
+                </VStack>
+            </Flex>
+        </Box>
+    );
+
+    return (
+        <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>
+            {/* Mobile menu button */}
+            {isMobile && (
+                <IconButton
+                    icon={<FaBars />}
+                    position="fixed"
+                    top={4}
+                    left={4}
+                    onClick={onOpen}
+                    aria-label="Open Menu"
+                    zIndex={20}
+                    color="white"
+                    bg={mainColor}
+                    _hover={{ bg: 'purple.700' }}
+                />
+            )}
+
+            {/* Sidebar */}
+            {!isMobile && <SidebarContent />}
+
+            {/* Mobile Drawer */}
+            <Drawer
+                isOpen={isOpen}
+                placement="left"
+                onClose={onClose}
+                returnFocusOnClose={false}
+            >
+                <DrawerOverlay />
+                <DrawerContent>
+                    <DrawerCloseButton />
+                    <SidebarContent />
+                </DrawerContent>
+            </Drawer>
+
+            {/* Main Content */}
+            <Box
+                ml={isMobile ? 0 : (isCollapsed ? "80px" : "240px")}
+                transition="margin-left 0.2s"
+                p={6}
+            >
+                {menuItems.find(item => item.id === activeTab)?.component}
+            </Box>
         </Box>
     );
 };

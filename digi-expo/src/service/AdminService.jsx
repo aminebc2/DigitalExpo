@@ -11,6 +11,67 @@ export default class AdminService {
         };
     }
 
+    // Create Volunteer
+    static async createAdmin(adminData) { // Better parameter name
+        try {
+            const response = await axios.post(`${this.API_URL}/create-admin`, adminData, {
+                headers: this.getHeader()
+            });
+            return response.data; // ✅ Access response.data
+        } catch (error) {
+            console.error('Error creating admin:', error.response || error);
+            throw error.response?.data || error; // ✅ Proper error propagation
+        }
+    }
+
+    // Update Volunteer
+    static async updateAdmin(id, adminData) {
+        try {
+            const response = await axios.put(`${this.API_URL}/update-admin/${id}`, adminData, {
+                headers: this.getHeader()
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error updating admin:', error.response || error);
+            throw error.response?.data || error;
+        }
+    }
+
+// Delete Volunteer
+    static async deleteAdmin(id) {
+        try {
+            const response = await axios.delete(`${this.API_URL}/delete-admin/${id}`, {
+                headers: this.getHeader()
+            });
+            return response.data; // ✅ Correct response
+        } catch (error) {
+            console.error('Error deleting volunteer:', error.response || error);
+            throw error.response?.data || error;
+        }
+    }
+
+    static async getAllAdmins() {
+        try {
+            const response = await axios.get(`${this.API_URL}/all-admins`, {
+                headers: this.getHeader()
+            });
+
+            // The response.data contains the Response object from the backend
+            // which has statusCode, message, and data fields
+            return {
+                statusCode: response.data.statusCode,
+                message: response.data.message,
+                data: response.data.data || [] // Changed from adminList to data
+            };
+        } catch (error) {
+            return {
+                statusCode: error.response?.status || 500,
+                message: error.response?.data?.message || error.message,
+                data: []
+            };
+        }
+    }
+
     static createAssociation(data) {
         const token = localStorage.getItem("token");
         return axios.post(`${this.API_URL}/association`, data, {
