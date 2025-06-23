@@ -169,6 +169,7 @@ public class AdminService implements IAdminService {
             association.setResponsableName(associationDTO.getResponsableName());
             association.setResponsablePhone(associationDTO.getResponsablePhone());
             association.setImageFileName(associationDTO.getImageFileName());
+            association.setDescription(associationDTO.getDescription());
 
             // Save image
             String fileName = saveImageFile(imageFile);
@@ -204,6 +205,7 @@ public class AdminService implements IAdminService {
                 association.setResponsablePhone(associationDTO.getResponsablePhone());
             if (associationDTO.getImageFileName() != null)
                 association.setImageFileName(associationDTO.getImageFileName());
+            if (associationDTO.getDescription() != null) association.setDescription(associationDTO.getDescription());
 
             if (imageFile != null && !imageFile.isEmpty()) {
                 String fileName = saveImageFile(imageFile);

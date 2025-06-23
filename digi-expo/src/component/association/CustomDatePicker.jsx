@@ -45,7 +45,7 @@ const formatDate = (date) => {
 // Styled components
 const StyledDateInput = styled('input')({
     width: '100%',
-    padding: '8px 35px 8px 12px',
+    padding: '8px 12px',
     border: '1px solid #e0e0e0',
     borderRadius: '4px',
     fontSize: '14px',
@@ -55,14 +55,7 @@ const StyledDateInput = styled('input')({
         boxShadow: `0 0 0 2px ${dxcColors.primary.purple}20`
     },
     '&::-webkit-calendar-picker-indicator': {
-        position: 'absolute',
-        right: 10,
-        cursor: 'pointer',
-        opacity: 0.6,
-        transition: 'opacity 0.2s ease',
-        '&:hover': {
-            opacity: 1
-        }
+        display: 'none'
     }
 });
 

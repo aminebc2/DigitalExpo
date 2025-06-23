@@ -71,7 +71,7 @@ const AdminDashboard = () => {
     const { language } = useLanguage();
     const { currentUser, logout } = useContext(AuthContext); // Update this line
     const t = translations[language];
-    const [activeTab, setActiveTab] = React.useState('associations');
+    const [activeTab, setActiveTab] = React.useState('admins');
     const [isCollapsed, setIsCollapsed] = React.useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const isMobile = useBreakpointValue({ base: true, lg: false });

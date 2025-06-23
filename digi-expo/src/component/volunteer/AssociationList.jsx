@@ -39,6 +39,7 @@ import {
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { keyframes } from '@emotion/react';
+import {MdDescription} from "react-icons/md";
 
 const MotionBox = motion(Box);
 const MotionGrid = motion(SimpleGrid);
@@ -71,6 +72,7 @@ const translations = {
         phone: "Téléphone",
         contactInfo: "Coordonnées",
         ville: "Ville",
+        description: "Description",
         contactSection: "Informations de Contact",
         joinButton: "Rejoindre l'Association",
         successTitle: "Succès !",
@@ -99,6 +101,7 @@ const translations = {
         phone: "Phone",
         contactInfo: "Contact Details",
         ville: "City",
+        description: "Description",
         contactSection: "Contact Information",
         joinButton: "Join Association",
         successTitle: "Success!",
@@ -182,22 +185,26 @@ const AssociationCard = ({ association, onJoin, isJoined, isLoading, index }) =>
 
                         <VStack align="stretch" spacing={2}>
                             <HStack spacing={2} color={textColor}>
-                                <Icon as={FaEnvelope} color="purple.500" />
+                                <Icon as={FaEnvelope} color="#5B21B6" />
                                 <Text>{association.email}</Text>
                             </HStack>
                             <HStack spacing={2} color={textColor}>
-                                <Icon as={FaUser} color="purple.500" />
+                                <Icon as={FaUser} color="#5B21B6" />
                                 <Text>{association.responsableName}</Text>
                             </HStack>
                             {association.responsablePhone && (
                                 <HStack spacing={2} color={textColor}>
-                                    <Icon as={FaPhone} color="purple.500" />
+                                    <Icon as={FaPhone} color="#5B21B6" />
                                     <Text>{association.responsablePhone}</Text>
                                 </HStack>
                             )}
                             <HStack spacing={2} color={textColor}>
-                                <Icon as={FaMapMarkerAlt} color="purple.500" />
+                                <Icon as={FaMapMarkerAlt} color="#5B21B6" />
                                 <Text>{association.ville}</Text>
+                            </HStack>
+                            <HStack spacing={2} color={textColor}>
+                                <Icon as={MdDescription} color="#5B21B6" />
+                                <Text>{association.description}</Text>
                             </HStack>
                         </VStack>
 

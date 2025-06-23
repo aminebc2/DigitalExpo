@@ -48,6 +48,7 @@ import {
     FaImage,
     FaSearch,
 } from 'react-icons/fa';
+import {MdDescription} from "react-icons/md";
 
 const colors = {
     primary: {
@@ -120,6 +121,7 @@ const translations = {
             city: "Ville",
             responsible: "Responsable",
             phone: "Numéro de téléphone",
+            description: "Description",
             uploadImage: "Télécharger une image",
             update: "Mettre à jour",
             save: "Enregistrer"
@@ -167,6 +169,7 @@ const translations = {
             city: "City",
             responsible: "Responsible Person",
             phone: "Phone Number",
+            description: "Description",
             uploadImage: "Upload Image",
             update: "Update",
             save: "Save"
@@ -213,6 +216,7 @@ const AssociationManagement = () => {
             ville: '',
             responsableName: '',
             responsablePhone: '',
+            description: '',
             imageFileName: null
         };
     }
@@ -319,6 +323,7 @@ const AssociationManagement = () => {
             ville: assoc.ville,
             responsableName: assoc.responsableName,
             responsablePhone: assoc.responsablePhone,
+            description: assoc.description,
             imageFileName: assoc.imageFileName
         });
         setEditingAssociation(assoc);
@@ -664,6 +669,21 @@ const AssociationManagement = () => {
                                     <Input
                                         name="responsablePhone"
                                         value={formData.responsablePhone}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </FormControl>
+
+                                <FormControl>
+                                    <FormLabel>
+                                        <HStack spacing={2}>
+                                            <MdDescription />
+                                            <Text>{t.form.description}</Text>
+                                        </HStack>
+                                    </FormLabel>
+                                    <Input
+                                        name="description"
+                                        value={formData.description}
                                         onChange={handleInputChange}
                                         required
                                     />

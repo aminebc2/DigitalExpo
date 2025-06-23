@@ -227,31 +227,27 @@ function AssociationProfile() {
             if (response && response.statusCode === 200) {
                 toast({
                     title: "Success",
-                    description: formData.password
-                        ? "Profile updated successfully. Please login again."
-                        : "Profile updated successfully",
+                    description: "Profile updated successfully. Please login again.",
                     status: "success",
-                    duration: 3000,
+                    duration: 2000,
                     isClosable: true,
                 });
 
-                // If password was changed, force logout
-                if (formData.password) {
-                    logout();
-                    setTimeout(() => {
-                        navigate('/login');
-                    }, 2000);
-                } else {
-                    // Update local state with new data
-                    setEditMode(false);
-                    setAssociation(response.association || association);
-                    setFormData(response.association || association);
+                // Update local state with new data
+                setEditMode(false);
+                setAssociation(response.association || association);
+                setFormData(response.association || association);
 
-                    // Update image preview if needed
-                    if (response.association?.imageFileName) {
-                        setImagePreview(`http://localhost:8080/images/${response.association.imageFileName}`);
-                    }
+                // Update image preview if needed
+                if (response.association?.imageFileName) {
+                    setImagePreview(`http://localhost:8080/images/${response.association.imageFileName}`);
                 }
+
+                // Logout and redirect after any successful update
+                setTimeout(() => {
+                    logout();
+                    navigate('/login');
+                }, 2000);
             } else {
                 throw new Error(response?.message || 'Update failed');
             }

@@ -247,45 +247,43 @@ function VolunteerProfile() {
             if (response.statusCode === 200) {
                 toast({
                     title: t.success,
-                    description: dataToSend.password ? t.updateSuccess : "Profile updated successfully",
+                    description: t.updateSuccess,
                     status: "success",
-                    duration: 3000,
+                    duration: 2000,
                     isClosable: true,
                 });
 
-                // If password was changed, force logout
-                if (dataToSend.password) {
-                    logout();
-                    setTimeout(() => {
-                        navigate('/login');
-                    }, 2000);
-                } else {
-                    // Update local state with new data or keep current data if no new data
-                    setEditMode(false);
+                // Update local state with new data
+                setEditMode(false);
 
-                    // Process the response data or keep current data
-                    const updatedVolunteer = response.volunteer || volunteer;
+                // Process the response data or keep current data
+                const updatedVolunteer = response.volunteer || volunteer;
 
-                    // Ensure availableDays is properly formatted
-                    if (typeof updatedVolunteer.availableDays === "string") {
-                        updatedVolunteer.availableDays = updatedVolunteer.availableDays
-                            .split(",")
-                            .map(day => day.trim())
-                            .filter(Boolean); // Remove empty strings
-                    }
-
-                    // Ensure availableDays is always an array
-                    if (!Array.isArray(updatedVolunteer.availableDays)) {
-                        updatedVolunteer.availableDays = [];
-                    }
-
-                    // Update states with processed data
-                    setVolunteer(updatedVolunteer);
-                    setFormData({
-                        ...updatedVolunteer,
-                        password: '' // Reset password field
-                    });
+                // Ensure availableDays is properly formatted
+                if (typeof updatedVolunteer.availableDays === "string") {
+                    updatedVolunteer.availableDays = updatedVolunteer.availableDays
+                        .split(",")
+                        .map(day => day.trim())
+                        .filter(Boolean); // Remove empty strings
                 }
+
+                // Ensure availableDays is always an array
+                if (!Array.isArray(updatedVolunteer.availableDays)) {
+                    updatedVolunteer.availableDays = [];
+                }
+
+                // Update states with processed data
+                setVolunteer(updatedVolunteer);
+                setFormData({
+                    ...updatedVolunteer,
+                    password: '' // Reset password field
+                });
+
+                // Logout and redirect after any successful update
+                setTimeout(() => {
+                    logout();
+                    navigate('/login');
+                }, 2000);
             } else {
                 throw new Error(response?.message || t.updateFailed);
             }

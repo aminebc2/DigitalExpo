@@ -30,7 +30,7 @@ import {
     AlertIcon,
     Tooltip,
     Circle,
-    useToast
+    useToast, AlertDescription, StepDescription
 } from '@chakra-ui/react';
 import {
     FaSearch,
@@ -45,6 +45,7 @@ import {
 import { motion } from 'framer-motion';
 import { useLanguage } from '../../context/LanguageContext';
 import GuestService from '../../service/GuestService';
+import {MdDescription} from "react-icons/md";
 
 const MotionBox = motion(Box);
 const MotionGrid = motion(SimpleGrid);
@@ -424,15 +425,19 @@ const Associations = () => {
                                                 </Heading>
                                                 <HStack spacing={4}>
                                                     <HStack spacing={2} color={textColor}>
-                                                        <Icon as={FaMapMarkerAlt} color="purple.500" />
+                                                        <Icon as={FaMapMarkerAlt} color="#5B21B6" />
                                                         <Text fontWeight="medium">{association.ville}</Text>
                                                     </HStack>
                                                     {association.responsablePhone && (
                                                         <HStack spacing={2} color={textColor}>
-                                                            <Icon as={FaPhone} color="purple.500" />
+                                                            <Icon as={FaPhone} color="#5B21B6" />
                                                             <Text fontWeight="medium">{association.responsablePhone}</Text>
                                                         </HStack>
                                                     )}
+                                                </HStack>
+                                                <HStack spacing={2} color={textColor}>
+                                                    <Icon as={MdDescription} color="#5B21B6" />
+                                                    <Text fontWeight="medium">{association.description}</Text>
                                                 </HStack>
                                                 <Badge
                                                     colorScheme="purple"

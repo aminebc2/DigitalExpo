@@ -1,5 +1,6 @@
 package com.amine.digiexpo.DTO;
 
+import jakarta.persistence.Column;
 import lombok.*;
 
 import java.util.List;
@@ -14,6 +15,16 @@ public class AssociationDTO extends UserDTO {
     private String responsableName;
     private String responsablePhone;
     private String imageFileName;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getImageFileName() {
         return imageFileName;

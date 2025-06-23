@@ -41,6 +41,7 @@ import {
 import { motion } from 'framer-motion';
 import { useLanguage } from "../../context/LanguageContext";
 import GuestService from "../../service/GuestService";
+import {MdDescription} from "react-icons/md";
 
 const MotionBox = motion(Box);
 const MotionFlex = motion(Flex);
@@ -603,6 +604,10 @@ const HomePage = () => {
                                                             <Icon as={FaPhone} color="#5B21B6" />
                                                             <Text fontSize="lg">{association.responsablePhone}</Text>
                                                         </HStack>
+                                                    </HStack>
+                                                    <HStack spacing={8}>
+                                                        <Icon as={MdDescription} color="#5B21B6" />
+                                                        <Text fontSize="lg">{association.description}</Text>
                                                     </HStack>
                                                 </VStack>
                                             </Stack>

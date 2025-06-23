@@ -34,6 +34,18 @@ public class Association extends User {
 
     private String imageFileName;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Session> sessions;
