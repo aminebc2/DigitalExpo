@@ -183,7 +183,7 @@ const Associations = () => {
         <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>
             {/* Hero Section with Search */}
             <Box
-                bgGradient="linear(to-r, purple.800, purple.600)"
+                bg="#582C83"
                 pt={24}
                 pb={32}
                 position="relative"
@@ -275,7 +275,7 @@ const Associations = () => {
                                 leftIcon={<FaSlidersH />}
                                 onClick={onOpen}
                                 bg="white"
-                                color="purple.600"
+                                color="#582C83"
                                 size="lg"
                                 borderRadius="full"
                                 px={8}
@@ -336,7 +336,7 @@ const Associations = () => {
                             textAlign="center"
                             boxShadow={`0 4px 20px ${shadowColor}`}
                         >
-                            <Icon as={FaBuilding} boxSize={12} color="purple.300" mb={4} />
+                            <Icon as={FaBuilding} boxSize={12} color="#582C83" mb={4} />
                             <Text color={textColor} fontSize="xl" fontWeight="medium">
                                 {t.noResults}
                             </Text>
@@ -411,7 +411,7 @@ const Associations = () => {
                                                     size="md"
                                                     borderRadius="full"
                                                     bg="white"
-                                                    color="purple.500"
+                                                    color="#582C83"
                                                     _hover={{
                                                         transform: "scale(1.1)",
                                                     }}
@@ -425,18 +425,18 @@ const Associations = () => {
                                                 </Heading>
                                                 <HStack spacing={4}>
                                                     <HStack spacing={2} color={textColor}>
-                                                        <Icon as={FaMapMarkerAlt} color="#5B21B6" />
+                                                        <Icon as={FaMapMarkerAlt} color="#582C83" />
                                                         <Text fontWeight="medium">{association.ville}</Text>
                                                     </HStack>
                                                     {association.responsablePhone && (
                                                         <HStack spacing={2} color={textColor}>
-                                                            <Icon as={FaPhone} color="#5B21B6" />
+                                                            <Icon as={FaPhone} color="#582C83" />
                                                             <Text fontWeight="medium">{association.responsablePhone}</Text>
                                                         </HStack>
                                                     )}
                                                 </HStack>
                                                 <HStack spacing={2} color={textColor}>
-                                                    <Icon as={MdDescription} color="#5B21B6" />
+                                                    <Icon as={MdDescription} color="#582C83" />
                                                     <Text fontWeight="medium">{association.description}</Text>
                                                 </HStack>
                                                 <Badge
@@ -466,7 +466,7 @@ const Associations = () => {
                 <DrawerContent>
                     <DrawerHeader
                         borderBottomWidth="1px"
-                        bg="purple.500"
+                        bg="#582C83"
                         color="white"
                     >
                         {t.filters}
@@ -482,7 +482,7 @@ const Associations = () => {
                                     placeholder={t.allCities}
                                     size="lg"
                                     borderRadius="lg"
-                                    focusBorderColor="purple.500"
+                                    focusBorderColor="#582C83"
                                 >
                                     {cities.map(city => (
                                         <option key={city} value={city}>{city}</option>
@@ -496,7 +496,7 @@ const Associations = () => {
                                     onChange={(e) => setSortBy(e.target.value)}
                                     size="lg"
                                     borderRadius="lg"
-                                    focusBorderColor="purple.500"
+                                    focusBorderColor="#582C83"
                                 >
                                     <option value="name">{t.sortByName}</option>
                                     <option value="city">{t.sortByCity}</option>

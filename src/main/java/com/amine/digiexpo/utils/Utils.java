@@ -14,14 +14,18 @@ public class Utils {
     private static final String ALPHANUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final SecureRandom secureRandom = new SecureRandom();
 
-    // Generates a random alphanumeric code of the given length
-    public static String generateRandomCode(int length) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int index = secureRandom.nextInt(ALPHANUMERIC_STRING.length());
-            builder.append(ALPHANUMERIC_STRING.charAt(index));
+    public static List<PlanningDTO> generatePlanning(List<Session> sessions) {
+        List<PlanningDTO> planningList = new ArrayList<>();
+        for (Session session : sessions) {
+            if (session.getAssociation() != null && session.getVolunteer() != null) {
+                PlanningDTO dto = new PlanningDTO();
+                dto.setAssociationName(session.getAssociation().getName());
+                dto.setDate(session.getDate());
+                dto.setVolunteerName(session.getVolunteer().getFullName());
+                planningList.add(dto);
+            }
         }
-        return builder.toString();
+        return planningList;
     }
 
     // ----------- USER MAPPING -----------
@@ -147,6 +151,9 @@ public class Utils {
             AssociationDTO assocDTO = new AssociationDTO();
             assocDTO.setId(session.getAssociation().getId());
             assocDTO.setName(session.getAssociation().getName());
+            assocDTO.setEmail(session.getAssociation().getEmail());
+            assocDTO.setResponsableName(session.getAssociation().getResponsableName());
+            assocDTO.setResponsablePhone(session.getAssociation().getResponsablePhone());
             dto.setAssociation(assocDTO);
         }
 

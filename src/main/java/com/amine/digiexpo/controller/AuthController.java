@@ -1,8 +1,6 @@
 package com.amine.digiexpo.controller;
 
-import com.amine.digiexpo.DTO.LoginRequest;
-import com.amine.digiexpo.DTO.RegisterRequest;
-import com.amine.digiexpo.DTO.Response;
+import com.amine.digiexpo.DTO.*;
 import com.amine.digiexpo.service.interfac.IAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +13,21 @@ public class AuthController {
     @Autowired
     private IAuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<Response> register(@RequestBody RegisterRequest registerRequest) {
-        Response response = authService.register(registerRequest);
+    @PostMapping("/register/admin-digital-explorers")
+    public ResponseEntity<Response> registerAdmin(@RequestBody AdminRegisterRequest registerRequest) {
+        Response response = authService.registerAdmin(registerRequest);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/register/association")
+    public ResponseEntity<Response> registerAssociation(@RequestBody AssociationRegisterRequest registerRequest) {
+        Response response = authService.registerAssociation(registerRequest);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/register/volunteer")
+    public ResponseEntity<Response> registerVolunteer(@RequestBody VolunteerRegisterRequest registerRequest) {
+        Response response = authService.registerVolunteer(registerRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
@@ -9,42 +9,47 @@ import {
     HStack,
     Icon,
     Button,
-    useColorModeValue,
     Image,
     SimpleGrid,
     Flex,
     IconButton,
     Circle,
     Stack,
-    Badge,
+    AspectRatio,
+    useDisclosure,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalCloseButton,
+    Tooltip,
     useBreakpointValue,
-    Fade,
-    ScaleFade,
-    Wrap,
-    WrapItem,
-    Grid,
-    Divider,
 } from '@chakra-ui/react';
 import {
     FaBuilding,
     FaArrowRight,
-    FaHandsHelping,
-    FaHeart,
-    FaPhone,
     FaChevronLeft,
     FaChevronRight,
     FaLightbulb,
     FaUsers,
     FaStar,
-    FaArrowLeft
+    FaPhone,
+    FaPlay,
+    FaPause,
+    FaVolumeMute,
+    FaVolumeUp,
+    FaInfoCircle,
+    FaPlus,
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useLanguage } from "../../context/LanguageContext";
 import GuestService from "../../service/GuestService";
-import {MdDescription} from "react-icons/md";
+import { MdDescription } from "react-icons/md";
 
 const MotionBox = motion(Box);
-const MotionFlex = motion(Flex);
+const MotionImage = motion(Image);
+const MotionButton = motion(Button);
 
 const translations = {
     fr: {
@@ -55,7 +60,7 @@ const translations = {
         coordinationDesc: "Gestion simplifiée des sessions et affectation des bénévoles",
         communityImpact: "Impact Communautaire",
         impactDesc: "Faites une réelle différence dans votre communauté locale",
-        featuredAssociations: "Associations en Vedette",
+        featuredAssociations: "Associations partenaires",
         city: "Ville",
         phone: "Téléphone",
         getStarted: "Commencer",
@@ -65,7 +70,10 @@ const translations = {
         associations: "Associations",
         volunteers: "Bénévoles",
         sessions: "Sessions",
-        cities: "Villes"
+        cities: "Villes",
+        officialVideo: "Vidéo Officielle",
+        photoGallery: "Galerie de Photos",
+        seeMoreAssociations: "Voir plus d'associations"
     },
     en: {
         welcome: "Welcome to Digital Explorers",
@@ -85,44 +93,174 @@ const translations = {
         associations: "Associations",
         volunteers: "Volunteers",
         sessions: "Sessions",
-        cities: "Cities"
+        cities: "Cities",
+        officialVideo: "Official Video",
+        photoGallery: "Photo Gallery",
+        seeMoreAssociations: "See more associations"
+    },
+    ar: {
+        welcome: "مرحبًا بكم في Digital Explorers",
+        connectingCommunities: "ربط المجتمعات من خلال الخدمة",
+        platformDescription: "تجمع منصتنا بين الجمعيات والمتطوعين، مما يخلق روابط هادفة وتغييرًا إيجابيًا في المجتمعات. نسهل على الجمعيات إدارة أنشطتها وعلى المتطوعين إيجاد فرص لإحداث فرق.",
+        easyCoordination: "تنسيق سهل",
+        coordinationDesc: "إدارة مبسطة للجلسات وتعيين المتطوعين",
+        communityImpact: "أثر مجتمعي",
+        impactDesc: "أحدث فرقًا حقيقيًا في مجتمعك المحلي",
+        featuredAssociations: "الجمعيات الشريكة",
+        city: "المدينة",
+        phone: "الهاتف",
+        getStarted: "ابدأ",
+        learnMore: "اعرف المزيد",
+        communityBuilding: "بناء المجتمع",
+        connectVolunteers: "تواصل مع متطوعين يشاركونك نفس الأفكار",
+        associations: "جمعيات",
+        volunteers: "متطوعون",
+        sessions: "جلسات",
+        cities: "مدن",
+        officialVideo: "الفيديو الرسمي",
+        photoGallery: "معرض الصور",
+        seeMoreAssociations: "المزيد من الجمعيات"
     }
 };
+
+const colors = {
+    purple: {
+        50: '#F8F5FF',
+        100: '#E9E3FF',
+        200: '#D1C2FF',
+        300: '#B49AFF',
+        400: '#9C74FF',
+        500: '#8445FF',
+        600: '#7028FF',
+        700: '#5B1AE6',
+        800: '#4A15BF',
+        900: '#3A1299',
+    }
+};
+
+const galleryImages = [
+    '/images/1.jpg',
+    '/images/2.jpg',
+    '/images/3.jpg',
+    '/images/4.jpg',
+    '/images/5.jpg',
+    '/images/6.jpg',
+    '/images/7.jpg',
+    '/images/8.jpg',
+    '/images/9.jpg',
+    '/images/10.jpg',
+    '/images/11.jpg',
+    '/images/12.jpg',
+    '/images/13.jpg',
+    '/images/14.jpg',
+    '/images/15.jpg',
+    '/images/16.jpg',
+    '/images/17.jpg',
+    '/images/18.jpg',
+    '/images/19.jpg',
+    '/images/20.jpg',
+    '/images/21.jpg',
+    '/images/22.jpg',
+    '/images/23.jpg',
+    '/images/24.jpg',
+    '/images/25.jpg',
+    '/images/26.jpg',
+    '/images/27.jpg',
+    '/images/28.jpg',
+    '/images/29.jpg',
+    '/images/30.jpg',
+    '/images/31.jpg',
+    '/images/32.jpg',
+    '/images/33.jpg',
+    '/images/34.jpg',
+    '/images/35.jpg',
+    '/images/36.jpg',
+    '/images/37.jpg',
+    '/images/38.jpg',
+    '/images/39.jpg',
+    '/images/40.jpg',
+    '/images/41.jpg',
+    '/images/42.jpg',
+    '/images/43.jpg',
+    '/images/44.jpg',
+    '/images/45.jpg',
+    '/images/46.jpg',
+    '/images/47.jpg',
+    '/images/48.jpg',
+    '/images/49.jpg',
+    '/images/50.jpg',
+];
+
+const officialVideoSrc = "/images/Video.mp4";
+
+function useCountUp(target, duration = 1200) {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        let start = 0;
+        const step = Math.ceil(target / (duration / 16));
+        const interval = setInterval(() => {
+            start += step;
+            if (start >= target) {
+                setCount(target);
+                clearInterval(interval);
+            } else {
+                setCount(start);
+            }
+        }, 16);
+        return () => clearInterval(interval);
+    }, [target, duration]);
+    return count;
+}
+
+const features = [
+    {
+        icon: FaLightbulb,
+        titleKey: "easyCoordination",
+        descKey: "coordinationDesc",
+    },
+    {
+        icon: FaUsers,
+        titleKey: "communityBuilding",
+        descKey: "connectVolunteers",
+    },
+    {
+        icon: FaStar,
+        titleKey: "communityImpact",
+        descKey: "impactDesc",
+    },
+];
 
 const HomePage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [galleryIndex, setGalleryIndex] = useState(0);
+    const [galleryModal, setGalleryModal] = useState(null);
     const [associations, setAssociations] = useState([]);
+    const [assocModal, setAssocModal] = useState(null);
     const { language } = useLanguage();
     const t = translations[language];
     const navigate = useNavigate();
 
-    // Add isAuthenticated check
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Color mode values
-    const bgColor = useColorModeValue('white', 'gray.800');
-    const headerBg = useColorModeValue('purple.50', 'gray.900');
-    const cardBg = useColorModeValue('white', 'gray.700');
-    const textColor = useColorModeValue('gray.600', 'gray.200');
-    const accentColor = useColorModeValue('purple.500', 'purple.300');
-    const shadowColor = useColorModeValue('rgba(95, 36, 159, 0.1)', 'rgba(95, 36, 159, 0.3)');
-
-    const platformImages = [
-        '/images/1.jpg',
-        '/images/2.webp',
-        '/images/3.avif',
-        '/images/4.jpg'
-    ];
+    // Video controls
+    const videoRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const [isMuted, setIsMuted] = useState(true);
 
     useEffect(() => {
-        // Check if user is authenticated
+        const interval = setInterval(() => {
+            setGalleryIndex((prev) => (prev + 1) % galleryImages.length);
+        }, 3500); // Change image every 3.5 seconds
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
         const token = localStorage.getItem('token');
         setIsAuthenticated(!!token);
     }, []);
 
-    // Handle login click
     const handleLoginClick = () => {
         navigate('/login');
     };
@@ -144,521 +282,538 @@ const HomePage = () => {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, []);
 
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % associations.length);
+    // Slider logic for associations
+    const [assocSliderIndex, setAssocSliderIndex] = useState(0);
+    const visibleAssocCount = useBreakpointValue({ base: 1, sm: 2, md: 3 }) || 1;
+
+    const handleAssocPrev = () => {
+        setAssocSliderIndex((prev) =>
+            prev === 0 ? Math.max(0, associations.length - visibleAssocCount) : prev - 1
+        );
+    };
+    const handleAssocNext = () => {
+        setAssocSliderIndex((prev) =>
+            prev + visibleAssocCount >= associations.length
+                ? 0
+                : prev + 1
+        );
     };
 
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + associations.length) % associations.length);
+    const visibleAssociations = associations.slice(
+        assocSliderIndex,
+        assocSliderIndex + visibleAssocCount
+    );
+    if (visibleAssociations.length < visibleAssocCount && associations.length > 0) {
+        // Wrap around for infinite effect
+        visibleAssociations.push(
+            ...associations.slice(0, visibleAssocCount - visibleAssociations.length)
+        );
+    }
+
+    // Animated stats
+    const countAssociations = useCountUp(8);
+    const countVolunteers = useCountUp(100);
+    const countSessions = useCountUp(400);
+    const countCities = useCountUp(7);
+
+    // Video controls handlers
+    const handlePlayPause = () => {
+        const video = videoRef.current;
+        if (!video) return;
+        if (video.paused) {
+            video.play();
+            setIsPlaying(true);
+        } else {
+            video.pause();
+            setIsPlaying(false);
+        }
     };
 
-    useEffect(() => {
-        const timer = setInterval(nextSlide, 5000);
-        return () => clearInterval(timer);
-    }, [associations.length]);
+    const handleMute = () => {
+        const video = videoRef.current;
+        if (!video) return;
+        video.muted = !video.muted;
+        setIsMuted(video.muted);
+    };
 
+    // Responsive
     const isMobile = useBreakpointValue({ base: true, md: false });
 
-    // Animation variants
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 }
-    };
-
-    // Enhanced purple color scheme
-    const colors = {
-        purple: {
-            50: '#F8F5FF',
-            100: '#E9E3FF',
-            200: '#D1C2FF',
-            300: '#B49AFF',
-            400: '#9C74FF',
-            500: '#8445FF',
-            600: '#7028FF',
-            700: '#5B1AE6',
-            800: '#4A15BF',
-            900: '#3A1299',
-        }
-    };
-
     return (
-        <Box>
-            {/* Hero Section */}
-            <Box
-                bgGradient="linear(to-r, purple.800, #5B21B6)"
-                pt={24}
-                pb={32}
-                position="relative"
-                overflow="hidden"
-            >
-                {/* Animated Background Elements */}
-                <Box
-                    position="absolute"
-                    top="0"
-                    left="0"
-                    right="0"
-                    bottom="0"
-                    overflow="hidden"
-                    zIndex="0"
-                >
-                    {[...Array(5)].map((_, i) => (
-                        <Circle
-                            key={i}
-                            position="absolute"
-                            bg={`rgba(255, 255, 255, ${0.03 + i * 0.01})`}
-                            w={`${300 + i * 100}px`}
-                            h={`${300 + i * 100}px`}
-                            top={`${-50 + i * 20}%`}
-                            left={`${-20 + i * 30}%`}
-                            transform="rotate(-45deg)"
-                            filter="blur(60px)"
-                        />
-                    ))}
-                </Box>
-
-                <Container maxW="container.xl" position="relative" zIndex={1}>
-                    <Stack
-                        direction={{ base: 'column', lg: 'row' }}
-                        spacing={{ base: 10, lg: 20 }}
+        <Box bg={colors.purple[50]}>
+            {/* HERO */}
+            <Box py={16} bg="#582C83">
+                <Container maxW="container.xl">
+                    <Flex
+                        direction={{base: "column", md: "row"}}
                         align="center"
+                        justify="space-between"
+                        gap={12}
                     >
+                        {/* Left: Texts */}
                         <VStack
-                            spacing={8}
-                            align={{ base: 'center', lg: 'start' }}
-                            maxW={{ base: 'full', lg: '50%' }}
-                            textAlign={{ base: 'center', lg: 'left' }}
+                            align="start"
+                            spacing={6}
+                            flex={1}
+                            color="white"
+                            justify="center"
+                            minH={{md: "400px"}}
                         >
-                            <MotionBox
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5 }}
+                            <Heading
+                                fontSize={{base: "3xl", md: "5xl"}}
+                                fontWeight="bold"
+                                textAlign="left"
                             >
-                                <Heading
-                                    as="h1"
-                                    fontSize={{ base: '4xl', md: '5xl', lg: '6xl' }}
-                                    fontWeight="bold"
-                                    color="white"
-                                    lineHeight="shorter"
-                                    letterSpacing="tight"
-                                >
-                                    {t.welcome}
-                                </Heading>
-                            </MotionBox>
-                            <MotionBox
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: 0.2 }}
-                            >
-                                <Text
-                                    fontSize={{ base: 'lg', md: 'xl' }}
-                                    color="whiteAlpha.900"
-                                    maxW="600px"
-                                >
-                                    {t.platformDescription}
-                                </Text>
-                            </MotionBox>
+                                {t.welcome}
+                            </Heading>
+                            <Text fontSize={{base: "xl", md: "2xl"}} fontWeight="bold">
+                                {t.connectingCommunities}
+                            </Text>
+                            <Text fontSize={{base: "md", md: "lg"}} maxW="2xl" color="whiteAlpha.800">
+                                {t.platformDescription}
+                            </Text>
                             {!isAuthenticated && (
-                                <MotionBox
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.4 }}
+                                <Button
+                                    size="lg"
+                                    bg="white"
+                                    color="#582C83"
+                                    px={8}
+                                    h={14}
+                                    fontSize="lg"
+                                    _hover={{bg: "gray.100", color: "#582C83", boxShadow: "lg"}}
+                                    rightIcon={<Icon as={FaArrowRight}/>}
+                                    onClick={handleLoginClick}
+                                    shadow="xl"
+                                    mt={4}
                                 >
-                                    <Button
-                                        size="lg"
-                                        bg="white"
-                                        color="#5B21B6"
-                                        px={8}
-                                        h={14}
-                                        fontSize="lg"
-                                        _hover={{
-                                            transform: "translateY(-2px)",
-                                            boxShadow: "lg",
-                                        }}
-                                        transition="all 0.3s"
-                                        rightIcon={<Icon as={FaArrowRight} />}
-                                        onClick={handleLoginClick}
-                                    >
-                                        {t.getStarted}
-                                    </Button>
-                                </MotionBox>
+                                    {t.getStarted}
+                                </Button>
                             )}
                         </VStack>
-
-                        {/* Hero Image Grid with Animation */}
-                        <Grid
-                            templateColumns="repeat(2, 1fr)"
-                            gap={4}
-                            maxW={{ base: 'full', lg: '45%' }}
+                        {/* Right: Video with controls */}
+                        <Box
+                            flex={1}
+                            maxW="750px"
+                            w="100%"
+                            borderRadius="2xl"
+                            overflow="hidden"
+                            boxShadow="2xl"
+                            bg="gray.100"
                             position="relative"
-                            zIndex={1}
                         >
-                            {platformImages.map((image, index) => (
-                                <MotionBox
-                                    key={index}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                                    gridColumn={index === 0 ? 'span 2' : 'auto'}
-                                >
-                                    <Box
-                                        height={index === 0 ? '300px' : '200px'}
-                                        borderRadius="2xl"
-                                        overflow="hidden"
-                                        boxShadow="2xl"
-                                        transform={`translateY(${index * 20}px)`}
-                                        transition="transform 0.3s"
-                                        _hover={{ transform: `translateY(${index * 20 - 10}px)` }}
-                                        bg="whiteAlpha.100"
-                                        backdropFilter="blur(8px)"
-                                    >
-                                        <Image
-                                            src={image}
-                                            alt={`Platform showcase ${index + 1}`}
-                                            objectFit="cover"
-                                            w="full"
-                                            h="full"
-                                        />
-                                    </Box>
-                                </MotionBox>
-                            ))}
-                        </Grid>
-                    </Stack>
+                            <AspectRatio ratio={16 / 9} w="100%">
+                                <video
+                                    ref={videoRef}
+                                    src={officialVideoSrc}
+                                    loop
+                                    autoPlay
+                                    muted={isMuted}
+                                    playsInline
+                                    style={{width: "100%", height: "100%", objectFit: "cover"}}
+                                />
+                            </AspectRatio>
+                            <Flex
+                                position="absolute"
+                                bottom={4}
+                                left="50%"
+                                transform="translateX(-50%)"
+                                zIndex={3}
+                                bg="rgba(255,255,255,0.7)"
+                                borderRadius="full"
+                                boxShadow="md"
+                                px={4}
+                                py={2}
+                                align="center"
+                                gap={4}
+                            >
+                                <Tooltip label={isPlaying ? "Pause" : "Play"}>
+                                    <IconButton
+                                        aria-label={isPlaying ? "Pause" : "Play"}
+                                        icon={isPlaying ? <FaPause/> : <FaPlay/>}
+                                        onClick={handlePlayPause}
+                                        colorScheme="purple"
+                                        variant="ghost"
+                                        isRound
+                                    />
+                                </Tooltip>
+                                <Tooltip label={isMuted ? "Unmute" : "Mute"}>
+                                    <IconButton
+                                        aria-label={isMuted ? "Unmute" : "Mute"}
+                                        icon={isMuted ? <FaVolumeMute/> : <FaVolumeUp/>}
+                                        onClick={handleMute}
+                                        colorScheme="purple"
+                                        variant="ghost"
+                                        isRound
+                                    />
+                                </Tooltip>
+                            </Flex>
+                        </Box>
+                    </Flex>
                 </Container>
             </Box>
 
-            {/* Stats Section - Now positioned to overlap the hero section */}
-            <Box
-                transform="translateY(-100px)"
-                position="relative"
-                zIndex={1}
-                px={4}
-            >
+            {/* STATS */}
+            <Box bg="white" py={12}>
                 <Container maxW="container.xl">
-                    <SimpleGrid
-                        columns={{ base: 2, md: 4 }}
-                        spacing={8}
-                        bg="white"
-                        p={8}
-                        borderRadius="2xl"
-                        boxShadow="xl"
-                    >
+                    <SimpleGrid columns={{base: 1, sm: 2, md: 4}} spacing={8}>
                         {[
-                            { number: '8+', label: t.associations, icon: FaBuilding },
-                            { number: '100+', label: t.volunteers, icon: FaUsers },
-                            { number: '400+', label: t.sessions, icon: FaLightbulb },
-                            { number: '7', label: t.cities, icon: FaStar },
-                        ].map((stat, index) => (
-                            <MotionBox
-                                key={index}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                            {
+                                icon: FaBuilding,
+                                value: countAssociations,
+                                label: t.associations,
+                            },
+                            {
+                                icon: FaUsers,
+                                value: countVolunteers,
+                                label: t.volunteers,
+                            },
+                            {
+                                icon: FaLightbulb,
+                                value: countSessions,
+                                label: t.sessions,
+                            },
+                            {
+                                icon: FaStar,
+                                value: countCities,
+                                label: t.cities,
+                            },
+                        ].map((stat, idx) => (
+                            <Box
+                                key={idx}
+                                bg="white"
+                                borderRadius="2xl"
+                                boxShadow="md"
+                                pt={8}
+                                pb={6}
+                                px={4}
+                                position="relative"
+                                textAlign="center"
+                                _hover={{boxShadow: "xl", transform: "translateY(-4px)"}}
+                                transition="all 0.2s"
                             >
-                                <VStack
-                                    spacing={4}
-                                    p={6}
-                                    borderRadius="xl"
-                                    transition="all 0.3s"
-                                    _hover={{
-                                        transform: 'translateY(-5px)',
-                                        boxShadow: 'lg',
-                                    }}
+                                {/* Top border accent */}
+                                <Box
+                                    position="absolute"
+                                    top={0}
+                                    left={0}
+                                    right={0}
+                                    h="6px"
+                                    bg="#582C83"
+                                    borderTopRadius="2xl"
+                                />
+                                {/* Floating icon */}
+                                <Circle
+                                    size={16}
+                                    bg="#582C83"
+                                    color="white"
+                                    boxShadow="lg"
+                                    position="absolute"
+                                    top={-8}
+                                    left="50%"
+                                    transform="translateX(-50%)"
+                                    border="4px solid white"
                                 >
-                                    <Icon as={stat.icon} boxSize={8} color="#5B21B6" />
-                                    <Heading size="2xl" color="#5B21B6">
-                                        {stat.number}
-                                    </Heading>
-                                    <Text fontSize="lg" color="#5B21B6" fontWeight="medium">
+                                    <Icon as={stat.icon} boxSize={8}/>
+                                </Circle>
+                                <Box mt={6}>
+                                    <Text fontWeight="bold" fontSize="3xl" color="#582C83" mb={1}>
+                                        {stat.value}+
+                                    </Text>
+                                    <Text fontSize="md" color="gray.600" fontWeight="medium">
                                         {stat.label}
                                     </Text>
-                                </VStack>
-                            </MotionBox>
+                                </Box>
+                            </Box>
                         ))}
                     </SimpleGrid>
                 </Container>
             </Box>
 
-            {/* Features Section */}
-            <Box py={20} bg="{colors.purple[50]}">
+            {/* SINGLE IMAGE SECTION (replace src with your design) */}
+            <Box py={16} bg={colors.purple[50]}>
                 <Container maxW="container.xl">
-                    <VStack spacing={16}>
-                        <MotionBox
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            textAlign="center"
-                        >
-                            <Heading
-                                size="2xl"
-                                color="#5B21B6"
-                                mb={4}
-                            >
-                                {t.connectingCommunities}
-                            </Heading>
-                            <Text
-                                fontSize="xl"
-                                color="#5B21B6"
-                                maxW="2xl"
-                                mx="auto"
-                            >
-                                {t.platformDescription}
-                            </Text>
-                        </MotionBox>
-
-                        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
-                            {[
-                                {
-                                    icon: FaLightbulb,
-                                    title: t.easyCoordination,
-                                    description: t.coordinationDesc,
-                                },
-                                {
-                                    icon: FaUsers,
-                                    title: t.communityBuilding,
-                                    description: t.connectVolunteers,
-                                },
-                                {
-                                    icon: FaStar,
-                                    title: t.communityImpact,
-                                    description: t.impactDesc,
-                                },
-                            ].map((feature, index) => (
-                                <MotionBox
-                                    key={index}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                >
-                                    <VStack
-                                        bg="white"
-                                        p={8}
-                                        borderRadius="2xl"
-                                        spacing={6}
-                                        height="full"
-                                        boxShadow="lg"
-                                        transition="all 0.3s"
-                                        _hover={{
-                                            transform: 'translateY(-8px)',
-                                            boxShadow: '2xl',
-                                        }}
-                                    >
-                                        <Circle size={16} bg={colors.purple[100]}>
-                                            <Icon as={feature.icon} color="#5B21B6" boxSize={8} />
-                                        </Circle>
-                                        <Heading size="md" color="#5B21B6">
-                                            {feature.title}
-                                        </Heading>
-                                        <Text color="gray.600" textAlign="center">
-                                            {feature.description}
-                                        </Text>
-                                    </VStack>
-                                </MotionBox>
-                            ))}
-                        </SimpleGrid>
-                    </VStack>
+                    <Image
+                        src="/images/galerie-media.webp"
+                        alt="Processus DigiExpo"
+                        objectFit="contain"
+                        w="100%"
+                        borderRadius="2xl"
+                        boxShadow="2xl"
+                        loading="lazy"
+                    />
                 </Container>
             </Box>
 
-            {/* Featured Associations Section */}
-            <Box py={20}>
+            {/* GALLERY - horizontal scroll */}
+            <Box py={16} bg={colors.purple[100]}>
                 <Container maxW="container.xl">
-                    <VStack spacing={16}>
-                        <MotionBox
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            textAlign="center"
+                    <Heading
+                        size="xl"
+                        color="#582C83"
+                        textAlign="center"
+                        mb={10}
+                        letterSpacing="tight"
+                        fontWeight="extrabold"
+                    >
+                        {t.photoGallery}
+                    </Heading>
+                    {/* Main image with zoom */}
+                    <Box position="relative" w="100%" maxW="900px" mx="auto" mb={6}>
+                        <Image
+                            src={galleryImages[galleryIndex]}
+                            alt={`Gallery ${galleryIndex + 1}`}
+                            objectFit="cover"
+                            w="100%"
+                            h={{base: "220px", md: "400px"}}
+                            borderRadius="xl"
+                            boxShadow="2xl"
+                            cursor="default" // changed from pointer to default
+                            transition="all 0.3s"
+                            _hover={{filter: "brightness(0.85)"}}
+                            loading="lazy"
+                        />
+                        <Box
+                            position="absolute"
+                            bottom={4}
+                            left="50%"
+                            transform="translateX(-50%)"
+                            bg="rgba(0,0,0,0.5)"
+                            color="white"
+                            px={4}
+                            py={1}
+                            borderRadius="full"
+                            fontSize="md"
+                            fontWeight="medium"
+                            pointerEvents="none"
                         >
-                            <Heading
-                                size="2xl"
-                                color="#5B21B6"
-                                mb={4}
-                                position="relative"
-                                _after={{
-                                    content: '""',
-                                    position: 'absolute',
-                                    bottom: '-12px',
-                                    left: '50%',
-                                    transform: 'translateX(-50%)',
-                                    width: '80px',
-                                    height: '4px',
-                                    borderRadius: 'full',
-                                    bg: "#5B21B6",
-                                }}
-                            >
-                                {t.featuredAssociations}
-                            </Heading>
-                        </MotionBox>
-
-                        {/* Associations Carousel */}
-                        <Box position="relative" width="full" overflow="hidden">
-                            {/* Left Arrow */}
-                            <IconButton
-                                icon={<FaChevronLeft />}
-                                onClick={prevSlide}
-                                isDisabled={currentSlide === 0}
-                                colorScheme="purple"
-                                variant="solid"
-                                size="lg"
-                                isRound
-                                aria-label="Previous slide"
-                                position="absolute"
-                                top="50%"
-                                left="4"
-                                transform="translateY(-50%)"
-                                zIndex={2}
-                                boxShadow="md"
-                            />
-                            {/* Carousel Slides */}
-                            <Flex
-                                transition="transform 0.5s ease"
-                                transform={`translateX(-${currentSlide * 100}%)`}
-                            >
-                                {associations.map((association, index) => (
-                                    <Box
-                                        key={index}
-                                        flex="0 0 100%"
-                                        p={4}
-                                    >
-                                        <MotionBox
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.5 }}
-                                            bg="white"
-                                            p={8}
-                                            borderRadius="2xl"
-                                            boxShadow="xl"
-                                            width="full"
-                                            maxW="900px"
-                                            mx="auto"
-                                            overflow="hidden"
-                                        >
-                                            <Stack
-                                                direction={{ base: 'column', md: 'row' }}
-                                                spacing={8}
-                                                align="center"
-                                            >
-                                                <Box
-                                                    width={{ base: "full", md: "300px" }}
-                                                    height={{ base: "200px", md: "250px" }}
-                                                    position="relative"
-                                                    borderRadius="xl"
-                                                    overflow="hidden"
-                                                    boxShadow="lg"
-                                                >
-                                                    <Image
-                                                        src={association.imageFileName
-                                                            ? `http://localhost:8080/images/${association.imageFileName}`
-                                                            : '/images/default-association.jpg'
-                                                        }
-                                                        alt={association.name}
-                                                        objectFit="contain"
-                                                        bg="white"
-                                                        w="full"
-                                                        h="full"
-                                                        p={2}
-                                                        fallback={
-                                                            <Flex
-                                                                w="full"
-                                                                h="full"
-                                                                bg="#5B21B6"
-                                                                align="center"
-                                                                justify="center"
-                                                            >
-                                                                <Icon as={FaBuilding} boxSize={12} color="#5B21B6" />
-                                                            </Flex>
-                                                        }
-                                                    />
-                                                </Box>
-                                                <VStack
-                                                    align="start"
-                                                    spacing={6}
-                                                    flex={1}
-                                                >
-                                                    <Heading
-                                                        size="xl"
-                                                        color="#5B21B6"
-                                                    >
-                                                        {association.name}
-                                                    </Heading>
-                                                    <HStack spacing={6}>
-                                                        <HStack spacing={2}>
-                                                            <Icon as={FaBuilding} color="#5B21B6" />
-                                                            <Text fontSize="lg">{association.ville}</Text>
-                                                        </HStack>
-                                                        <HStack spacing={2}>
-                                                            <Icon as={FaPhone} color="#5B21B6" />
-                                                            <Text fontSize="lg">{association.responsablePhone}</Text>
-                                                        </HStack>
-                                                    </HStack>
-                                                    <HStack spacing={8}>
-                                                        <Icon as={MdDescription} color="#5B21B6" />
-                                                        <Text fontSize="lg">{association.description}</Text>
-                                                    </HStack>
-                                                </VStack>
-                                            </Stack>
-                                        </MotionBox>
-                                    </Box>
-                                ))}
-                            </Flex>
-                            {/* Right Arrow */}
-                            <IconButton
-                                icon={<FaChevronRight />}
-                                onClick={nextSlide}
-                                isDisabled={currentSlide === associations.length - 1}
-                                colorScheme="purple"
-                                variant="solid"
-                                size="lg"
-                                isRound
-                                aria-label="Next slide"
-                                position="absolute"
-                                top="50%"
-                                right="4"
-                                transform="translateY(-50%)"
-                                zIndex={2}
-                                boxShadow="md"
-                            />
-                            {/* Dots */}
-                            <HStack
-                                position="absolute"
-                                bottom="-16"
-                                left="50%"
-                                transform="translateX(-50%)"
-                                spacing={6}
-                                zIndex={2}
-                            >
-                                <HStack spacing={3}>
-                                    {associations.map((_, index) => (
-                                        <Circle
-                                            key={index}
-                                            size={4}
-                                            bg={currentSlide === index ? colors.purple[500] : 'gray.300'}
-                                            cursor="pointer"
-                                            onClick={() => setCurrentSlide(index)}
-                                            transition="all 0.2s"
-                                            _hover={{
-                                                transform: 'scale(1.2)',
-                                            }}
-                                        />
-                                    ))}
-                                </HStack>
-                            </HStack>
                         </Box>
-                    </VStack>
+                    </Box>
+                    {/* Thumbnails */}
+                    <Flex justify="center" align="center" gap={2} wrap="nowrap" overflowX="auto">
+                        {galleryImages.map((img, idx) => (
+                            <Box
+                                key={idx}
+                                border={galleryIndex === idx ? "3px solid #582C83" : "2px solid #E9E3FF"}
+                                borderRadius="md"
+                                overflow="hidden"
+                                boxShadow={galleryIndex === idx ? "lg" : "sm"}
+                                minW="80px"
+                                maxW="80px"
+                                h="60px"
+                                cursor="pointer"
+                                transition="all 0.2s"
+                                _hover={{borderColor: "#582C83"}}
+                                onClick={() => setGalleryIndex(idx)}
+                            >
+                                <Image
+                                    src={img}
+                                    alt={`Thumbnail ${idx + 1}`}
+                                    objectFit="cover"
+                                    w="100%"
+                                    h="100%"
+                                    loading="lazy"
+                                />
+                            </Box>
+                        ))}
+                    </Flex>
+                    {/* Modal for zoomed image */}
+                    <Modal isOpen={galleryModal !== null} onClose={() => setGalleryModal(null)} size="4xl" isCentered>
+                        <ModalOverlay/>
+                        <ModalContent bg="white" borderRadius="2xl" p={2} position="relative">
+                            <ModalCloseButton/>
+                            <ModalBody p={0} display="flex" alignItems="center" justifyContent="center"
+                                       position="relative">
+                                <IconButton
+                                    icon={<FaChevronLeft/>}
+                                    onClick={() => setGalleryModal((galleryModal - 1 + galleryImages.length) % galleryImages.length)}
+                                    colorScheme="purple"
+                                    variant="ghost"
+                                    size="lg"
+                                    isRound
+                                    aria-label="Previous image"
+                                    position="absolute"
+                                    left={2}
+                                    top="50%"
+                                    transform="translateY(-50%)"
+                                    zIndex={2}
+                                    bg="#582C83"
+                                    _hover={{bg: "#3A1299"}}
+                                />
+                                <Image
+                                    src={galleryImages[galleryModal ?? 0]}
+                                    alt="Gallery Modal"
+                                    w="100%"
+                                    maxH="70vh"
+                                    borderRadius="2xl"
+                                    boxShadow="2xl"
+                                    objectFit="contain"
+                                    loading="lazy"
+                                />
+                                <IconButton
+                                    icon={<FaChevronRight/>}
+                                    onClick={() => setGalleryModal((galleryModal + 1) % galleryImages.length)}
+                                    colorScheme="purple"
+                                    variant="ghost"
+                                    size="lg"
+                                    isRound
+                                    aria-label="Next image"
+                                    position="absolute"
+                                    right={2}
+                                    top="50%"
+                                    transform="translateY(-50%)"
+                                    zIndex={2}
+                                    bg="#582C83"
+                                    _hover={{bg: "#3A1299"}}
+                                />
+                            </ModalBody>
+                        </ModalContent>
+                    </Modal>
+                </Container>
+            </Box>
+
+            {/* ASSOCIATIONS - Responsive slider with modal and see more button */}
+            <Box py={20} bg={colors.purple[50]}>
+                <Container maxW="container.xl">
+                    <Heading
+                        size="xl"
+                        color="#582C83"
+                        mb={10}
+                        textAlign="center"
+                        position="relative"
+                        _after={{
+                            content: '""',
+                            position: 'absolute',
+                            bottom: '-12px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '80px',
+                            height: '4px',
+                            borderRadius: 'full',
+                            bg: "#582C83",
+                        }}
+                    >
+                        {t.featuredAssociations}
+                    </Heading>
+                    <Flex align="center" justify="center" mb={6}>
+                        <IconButton
+                            icon={<FaChevronLeft/>}
+                            onClick={handleAssocPrev}
+                            aria-label="Previous"
+                            colorScheme="purple"
+                            variant="ghost"
+                            isRound
+                            mr={2}
+                            disabled={associations.length <= visibleAssocCount}
+                        />
+                        <Flex gap={8} overflow="hidden" w="100%" justify="center">
+                            {visibleAssociations.map((association, idx) => (
+                                <Box
+                                    key={association._id || idx}
+                                    borderRadius="2xl"
+                                    boxShadow="2xl"
+                                    bg="white"
+                                    p={6}
+                                    minW={{base: "260px", md: "300px"}}
+                                    maxW={{base: "260px", md: "300px"}}
+                                    position="relative"
+                                    _hover={{boxShadow: "xl", transform: "translateY(-4px)"}}
+                                    transition="all 0.2s"
+                                >
+                                    <Image
+                                        src={association.imageFileName
+                                            ? `http://localhost:8080/images/${association.imageFileName}`
+                                            : '/images/default-association.jpg'
+                                        }
+                                        alt={association.name}
+                                        objectFit="contain"
+                                        bg="white"
+                                        w="full"
+                                        h="180px"
+                                        mb={4}
+                                        borderRadius="xl"
+                                        boxShadow="md"
+                                    />
+                                    <Heading size="md" color="#582C83" mb={2}>
+                                        {association.name}
+                                    </Heading>
+                                    <Text color="#582C83" fontWeight="bold">
+                                        {association.ville}
+                                    </Text>
+                                    <Button
+                                        leftIcon={<FaInfoCircle/>}
+                                        colorScheme="purple"
+                                        variant="ghost"
+                                        size="sm"
+                                        mt={4}
+                                        onClick={() => setAssocModal(association)}
+                                    >
+                                        {t.learnMore}
+                                    </Button>
+                                </Box>
+                            ))}
+                        </Flex>
+                        <IconButton
+                            icon={<FaChevronRight/>}
+                            onClick={handleAssocNext}
+                            aria-label="Next"
+                            colorScheme="purple"
+                            variant="ghost"
+                            isRound
+                            ml={2}
+                            disabled={associations.length <= visibleAssocCount}
+                        />
+                    </Flex>
+                    <Flex justify="center" mt={4}>
+                        <Button
+                            colorScheme="purple"
+                            variant="solid"
+                            size="lg"
+                            onClick={() => navigate('/associations')}
+                            leftIcon={<FaPlus/>}
+                        >
+                            {t.seeMoreAssociations}
+                        </Button>
+                    </Flex>
+                    {/* Modal code remains unchanged */}
+                    <Modal isOpen={!!assocModal} onClose={() => setAssocModal(null)} size="lg" isCentered>
+                        <ModalOverlay/>
+                        <ModalContent bg="white" borderRadius="2xl" p={2}>
+                            <ModalHeader>{assocModal?.name}</ModalHeader>
+                            <ModalCloseButton/>
+                            <ModalBody>
+                                <VStack align="start" spacing={4}>
+                                    <Image
+                                        src={assocModal?.imageFileName
+                                            ? `http://localhost:8080/images/${assocModal.imageFileName}`
+                                            : '/images/default-association.jpg'
+                                        }
+                                        alt={assocModal?.name}
+                                        objectFit="contain"
+                                        bg="white"
+                                        w="full"
+                                        h="180px"
+                                        borderRadius="xl"
+                                        boxShadow="md"
+                                    />
+                                    <HStack>
+                                        <Icon as={FaBuilding} color="#582C83"/>
+                                        <Text>{assocModal?.ville}</Text>
+                                    </HStack>
+                                    <HStack>
+                                        <Icon as={FaPhone} color="#582C83"/>
+                                        <Text>{assocModal?.responsablePhone}</Text>
+                                    </HStack>
+                                    <HStack>
+                                        <Icon as={MdDescription} color="#582C83"/>
+                                        <Text>{assocModal?.description}</Text>
+                                    </HStack>
+                                </VStack>
+                            </ModalBody>
+                        </ModalContent>
+                    </Modal>
                 </Container>
             </Box>
         </Box>

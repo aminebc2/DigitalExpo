@@ -11,15 +11,34 @@ export default class VolunteerService {
         };
     }
 
-    static async updateAvailableDays(volunteerId, availableDays) {
+    static async getAvailableSessions(volunteerId) {
         try {
-            const response = await axios.post(`${this.API_URL}/available-days/${volunteerId}`,
-                {availableDays}, {
-                    headers: this.getHeader()
-                });
+            const response = await axios.get(`${this.API_URL}/available-sessions/${volunteerId}`, {
+                headers: this.getHeader()
+            });
+            return response.data; // { statusCode, message, data: [sessions] }
+        } catch (error) {
+            console.error('Error fetching available sessions:', error);
+            throw error;
+        }
+    }
+
+    static async getPendingSessions(volunteerId) {
+        const response = await axios.get(`${this.API_URL}/pending-sessions/${volunteerId}`, {
+            headers: this.getHeader()
+        });
+        return response.data;
+    }
+
+    static async chooseSession(sessionId, volunteerId) {
+        try {
+            const dto = { sessionId, volunteerId };
+            const response = await axios.post(`${this.API_URL}/choose-session`, dto, {
+                headers: this.getHeader()
+            });
             return response.data;
         } catch (error) {
-            console.error('Error updating available days:', error);
+            console.error('Error choosing session:', error);
             throw error;
         }
     }

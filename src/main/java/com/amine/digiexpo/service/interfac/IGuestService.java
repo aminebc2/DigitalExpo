@@ -5,4 +5,6 @@ import com.amine.digiexpo.DTO.Response;
 public interface IGuestService {
 
     Response getAllAssociations();
+
+    Response getPlanning();
 }

@@ -1,6 +1,5 @@
 package com.amine.digiexpo.service.impl;
 
-import com.amine.digiexpo.DTO.AssociationDTO;
 import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.DTO.SessionDTO;
 import com.amine.digiexpo.DTO.VolunteerDTO;
@@ -9,6 +8,7 @@ import com.amine.digiexpo.Repository.VolunteerRepository;
 import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.entity.Session;
 import com.amine.digiexpo.entity.Volunteer;
+import com.amine.digiexpo.enumeration.SessionStatus;
 import com.amine.digiexpo.service.interfac.IVolunteerService;
 import com.amine.digiexpo.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-
-import static com.amine.digiexpo.utils.Utils.mapSessionListToDTOListWithAssociationDetails;
-import static com.amine.digiexpo.utils.Utils.mapSessionToDTOWithAssociationDetails;
+import java.util.Set;
 
 @Service
 public class VolunteerService implements IVolunteerService {
@@ -60,6 +58,83 @@ public class VolunteerService implements IVolunteerService {
         } catch (Exception e) {
             // Handle errors and return failure response
             return new Response(500, "Failed to update volunteer availability: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('BENEVOLE')")
+    public Response getPendingSessions(Long volunteerId) {
+        try {
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+            List<Association> associations = new ArrayList<>(volunteer.getAssociations());
+            List<Session> sessions = sessionRepository.findByStatusAndVolunteerIsNullAndAssociationIn(
+                    SessionStatus.PENDING, associations
+            );
+            List<SessionDTO> sessionDTOs = sessions.stream()
+                    .map(Utils::mapSessionToDTOWithRelations)
+                    .toList();
+            return new Response(200, "Pending sessions", sessionDTOs);
+        } catch (Exception e) {
+            return new Response(500, "Failed to retrieve pending sessions: " + e.getMessage(), null);
+        }
+    }
+
+    private List<SessionDTO> mapSessionListToDTOListWithAssociationDetails(List<Session> sessions) {
+        return sessions.stream()
+                .map(Utils::mapSessionToDTOWithRelations)
+                .toList();
+    }
+
+    public Response chooseSessionToAnimate(Long sessionId, Long volunteerId) {
+        try {
+            Session session = sessionRepository.findById(sessionId)
+                    .orElseThrow(() -> new RuntimeException("Session not found"));
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+
+            if (session.getVolunteer() != null) {
+                return new Response(400, "Session already has a volunteer", null);
+            }
+
+            Association association = session.getAssociation();
+            if (association == null || !volunteer.getAssociations().contains(association)) {
+                return new Response(400, "You are not part of this association", null);
+            }
+
+            // Assign volunteer and set status to CONFIRMED
+            session.setVolunteer(volunteer);
+            session.setStatus(SessionStatus.CONFIRMED);
+            sessionRepository.save(session);
+
+            return new Response(200, "You have been assigned to animate the session", Utils.mapSessionToDTOWithRelations(session));
+        } catch (RuntimeException e) {
+            return new Response(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new Response(500, "Unexpected error: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('BENEVOLE')")
+    public Response getAvailableSessionsToAnimate(Long volunteerId) {
+        try {
+            Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                    .orElseThrow(() -> new RuntimeException("Volunteer not found"));
+
+            // Get all associations the volunteer is part of
+            Set<Association> associationSet = volunteer.getAssociations();
+            List<Association> associationList = new ArrayList<>(associationSet);
+            List<Session> availableSessions = sessionRepository.findByStatusAndVolunteerIsNullAndAssociationIn(
+                    SessionStatus.PENDING, associationList);
+
+            List<SessionDTO> sessionDTOs = availableSessions.stream()
+                    .map(Utils::mapSessionToDTOWithRelations)
+                    .toList();
+
+            return new Response(200, "Available sessions retrieved", sessionDTOs);
+        } catch (Exception e) {
+            return new Response(500, "Failed to retrieve available sessions: " + e.getMessage(), null);
         }
     }
 

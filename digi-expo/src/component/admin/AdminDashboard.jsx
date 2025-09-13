@@ -26,6 +26,9 @@ import {
     Tooltip,
     Divider,
     Button,
+    Heading,
+    Container,
+    useToast,
 } from '@chakra-ui/react';
 import {
     FaBuilding,
@@ -51,7 +54,8 @@ const translations = {
         sessions: "Sessions",
         logout: "Déconnexion",
         collapse: "Réduire",
-        expand: "Développer"
+        expand: "Développer",
+        logoutSuccess: "Vous avez été déconnecté avec succès"
     },
     en: {
         dashboard: "Dashboard",
@@ -62,20 +66,21 @@ const translations = {
         sessions: "Sessions",
         logout: "Logout",
         collapse: "Collapse",
-        expand: "Expand"
+        expand: "Expand",
+        logoutSuccess: "You have been successfully logged out"
     }
 };
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { language } = useLanguage();
-    const { currentUser, logout } = useContext(AuthContext); // Update this line
+    const { currentUser, logout } = useContext(AuthContext);
     const t = translations[language];
     const [activeTab, setActiveTab] = React.useState('admins');
     const [isCollapsed, setIsCollapsed] = React.useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const isMobile = useBreakpointValue({ base: true, lg: false });
-
+    const isMobile = useBreakpointValue({ base: true, md: false });
+    const toast = useToast();
 
     const menuItems = [
         { id: 'admins', icon: FaUserTie, label: t.admins, component: <AdminManagement /> },
@@ -91,7 +96,14 @@ const AdminDashboard = () => {
 
     const handleLogout = () => {
         logout();
-        navigate('/login'); // or wherever you want to redirect after logout
+        toast({
+            title: t.logoutSuccess,
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+            position: 'top'
+        });
+        navigate('/login');
     };
 
     const SidebarContent = () => (
@@ -103,25 +115,42 @@ const AdminDashboard = () => {
             h="100vh"
             position="fixed"
             transition="width 0.2s"
+            overflowY="auto"
+            css={{
+                '&::-webkit-scrollbar': {
+                    width: '4px',
+                },
+                '&::-webkit-scrollbar-track': {
+                    width: '6px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                    background: mainColor,
+                    borderRadius: '24px',
+                },
+            }}
         >
             <Flex direction="column" h="full" py={6}>
                 {/* Header with Current User Info */}
-                <Flex px={isCollapsed ? 4 : 6} align="center" mb={8}>
-                    {!isCollapsed && (
-                        <Avatar
-                            size="md"
-                            name={currentUser?.username || currentUser?.email || 'Admin'}
-                            bg={mainColor}
-                            color="white"
-                            mr={3}
-                        />
-                    )}
+                <Flex
+                    px={isCollapsed ? 4 : 6}
+                    align="center"
+                    mb={8}
+                    flexDirection={isCollapsed ? "column" : "row"}
+                    gap={2}
+                >
+                    <Avatar
+                        size={isCollapsed ? "sm" : "md"}
+                        name={currentUser?.username || currentUser?.email || 'Admin'}
+                        bg={mainColor}
+                        color="white"
+                        mr={isCollapsed ? 0 : 3}
+                    />
                     {!isCollapsed && (
                         <VStack align="start" spacing={0}>
-                            <Text fontWeight="bold" fontSize="sm">
+                            <Text fontWeight="bold" fontSize="sm" noOfLines={1}>
                                 {currentUser?.username || 'Admin'}
                             </Text>
-                            <Text fontSize="xs" color="gray.500">
+                            <Text fontSize="xs" color="gray.500" noOfLines={1}>
                                 {currentUser?.email || 'admin@example.com'}
                             </Text>
                         </VStack>
@@ -164,6 +193,7 @@ const AdminDashboard = () => {
                                     bg: mainColor,
                                     opacity: activeTab === item.id ? 1 : 0,
                                 }}
+                                fontSize={isCollapsed ? "sm" : "md"}
                             >
                                 {!isCollapsed && item.label}
                             </Button>
@@ -174,26 +204,28 @@ const AdminDashboard = () => {
                 {/* Footer */}
                 <VStack w="full" spacing={4} mt={4}>
                     <Divider />
+                    {!isMobile && (
+                        <Button
+                            w="full"
+                            variant="ghost"
+                            onClick={() => setIsCollapsed(!isCollapsed)}
+                            px={isCollapsed ? 4 : 6}
+                            justifyContent={isCollapsed ? "center" : "flex-start"}
+                        >
+                            <Icon
+                                as={isCollapsed ? FaChevronRight : FaChevronLeft}
+                                boxSize={5}
+                                color="gray.500"
+                            />
+                            {!isCollapsed && (
+                                <Text ml={3}>{isCollapsed ? t.expand : t.collapse}</Text>
+                            )}
+                        </Button>
+                    )}
                     <Button
                         w="full"
                         variant="ghost"
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        px={isCollapsed ? 4 : 6}
-                        justifyContent={isCollapsed ? "center" : "flex-start"}
-                    >
-                        <Icon
-                            as={isCollapsed ? FaChevronRight : FaChevronLeft}
-                            boxSize={5}
-                            color="gray.500"
-                        />
-                        {!isCollapsed && (
-                            <Text ml={3}>{isCollapsed ? t.expand : t.collapse}</Text>
-                        )}
-                    </Button>
-                    <Button
-                        w="full"
-                        variant="ghost"
-                        onClick={handleLogout} // Updated to use handleLogout
+                        onClick={handleLogout}
                         px={isCollapsed ? 4 : 6}
                         justifyContent={isCollapsed ? "center" : "flex-start"}
                         color="red.500"
@@ -207,22 +239,37 @@ const AdminDashboard = () => {
         </Box>
     );
 
+    const activeComponent = menuItems.find(item => item.id === activeTab)?.component;
+    const activeLabel = menuItems.find(item => item.id === activeTab)?.label;
+
     return (
         <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')}>
             {/* Mobile menu button */}
             {isMobile && (
-                <IconButton
-                    icon={<FaBars />}
+                <Box
                     position="fixed"
-                    top={4}
-                    left={4}
-                    onClick={onOpen}
-                    aria-label="Open Menu"
-                    zIndex={20}
-                    color="white"
+                    top={0}
+                    left={0}
+                    right={0}
                     bg={mainColor}
-                    _hover={{ bg: 'purple.700' }}
-                />
+                    p={4}
+                    zIndex={20}
+                    display="flex"
+                    alignItems="center"
+                    gap={4}
+                >
+                    <IconButton
+                        icon={<FaBars />}
+                        onClick={onOpen}
+                        aria-label="Open Menu"
+                        color="white"
+                        bg="transparent"
+                        _hover={{ bg: 'purple.700' }}
+                    />
+                    <Heading size="md" color="white" noOfLines={1}>
+                        {activeLabel}
+                    </Heading>
+                </Box>
             )}
 
             {/* Sidebar */}
@@ -236,8 +283,8 @@ const AdminDashboard = () => {
                 returnFocusOnClose={false}
             >
                 <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerCloseButton />
+                <DrawerContent maxW="280px">
+                    <DrawerCloseButton color="white" top={5} />
                     <SidebarContent />
                 </DrawerContent>
             </Drawer>
@@ -246,9 +293,12 @@ const AdminDashboard = () => {
             <Box
                 ml={isMobile ? 0 : (isCollapsed ? "80px" : "240px")}
                 transition="margin-left 0.2s"
-                p={6}
+                pt={isMobile ? "72px" : 6}
+                px={4}
             >
-                {menuItems.find(item => item.id === activeTab)?.component}
+                <Container maxW="container.xl" py={4}>
+                    {activeComponent}
+                </Container>
             </Box>
         </Box>
     );

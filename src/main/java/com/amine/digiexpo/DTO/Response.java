@@ -28,6 +28,10 @@ public class Response {
     private List<VolunteerDTO> volunteerList;
     private List<SessionDTO> sessionList;
     private List<VolunteerRequestDTO> volunteerRequestList;
+    private List<PlanningDTO> planningList;
+
+    public List<PlanningDTO> getPlanningList() { return planningList; }
+    public void setPlanningList(List<PlanningDTO> planningList) { this.planningList = planningList; }
 
     // Constructors
     public Response() {}

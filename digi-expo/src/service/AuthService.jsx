@@ -28,9 +28,21 @@ export const loginUser = async (loginRequest) => {
     }
 };
 
-export const registerUser = async (registerRequest) => {
+export const registerAssociation = async (registerRequest) => {
     try {
-        const response = await api.post(`${API_URL}/register`, registerRequest);
+        const response = await api.post(`${API_URL}/register/association`, registerRequest);
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            throw new Error(error.response.data.message || 'Registration failed');
+        }
+        throw new Error('Network error. Please try again later.');
+    }
+};
+
+export const registerVolunteer = async (registerRequest) => {
+    try {
+        const response = await api.post(`${API_URL}/register/volunteer`, registerRequest);
         return response.data;
     } catch (error) {
         if (error.response) {

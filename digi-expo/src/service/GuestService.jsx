@@ -17,4 +17,18 @@ export default class GuestService {
             throw error;
         }
     }
+
+    static async getPlanning() {
+        try {
+            const response = await axios.get(`${this.API_URL}/planning`);
+            return {
+                statusCode: response.data.statusCode,
+                message: response.data.message,
+                planningList: response.data.planningList
+            };
+        } catch (error) {
+            console.error('Error fetching planning:', error);
+            throw error;
+        }
+    }
 }

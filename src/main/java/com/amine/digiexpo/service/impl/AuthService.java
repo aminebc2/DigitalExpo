@@ -1,14 +1,12 @@
 package com.amine.digiexpo.service.impl;
 
-import com.amine.digiexpo.DTO.LoginRequest;
-import com.amine.digiexpo.DTO.RegisterRequest;
-import com.amine.digiexpo.DTO.Response;
-import com.amine.digiexpo.DTO.UserDTO;
+import com.amine.digiexpo.DTO.*;
 import com.amine.digiexpo.Repository.UserRepository;
 import com.amine.digiexpo.entity.Admin;
 import com.amine.digiexpo.entity.Association;
 import com.amine.digiexpo.entity.User;
 import com.amine.digiexpo.entity.Volunteer;
+import com.amine.digiexpo.enumeration.Role;
 import com.amine.digiexpo.service.interfac.IAuthService;
 import com.amine.digiexpo.utils.JWTUtils;
 import com.amine.digiexpo.utils.Utils;
@@ -74,9 +72,8 @@ public class AuthService implements IAuthService {
         }
     }
 
-
     @Override
-    public Response register(RegisterRequest registerRequest) {
+    public Response registerAdmin(AdminRegisterRequest registerRequest) {
         try {
             // Check if the user already exists
             if (userRepository.findByUsername(registerRequest.getUsername()).isPresent() ||
@@ -84,38 +81,75 @@ public class AuthService implements IAuthService {
                 return new Response(400, "Username or email already exists", null);
             }
 
-            // Create user based on role
-            User user;
-            switch (registerRequest.getRole()) {
-                case ADMIN:
-                    user = new Admin();
-                    break;
-                case ASSOCIATION:
-                    user = new Association();
-                    break;
-                case BENEVOLE: // or VOLUNTEER depending on your choice
-                    user = new Volunteer();
-                    break;
-                default:
-                    return new Response(400, "Invalid role", null);
-            }
+            Admin admin = new Admin();
+            admin.setUsername(registerRequest.getUsername());
+            admin.setEmail(registerRequest.getEmail());
+            admin.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            admin.setRole(Role.ADMIN);
+            admin.setFullName(registerRequest.getFullName());
+            admin.setPhoneNumber(registerRequest.getPhoneNumber());
 
-            // Fill common fields
-            user.setUsername(registerRequest.getUsername());
-            user.setEmail(registerRequest.getEmail());
-            user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-            user.setRole(registerRequest.getRole());
 
-            // Save the user
-            User savedUser = userRepository.save(user);
-
-            // Map entity to DTO
+            User savedUser = userRepository.save(admin);
             UserDTO userDTO = Utils.mapUserToDTO(savedUser);
 
-            // Return successful response
-            return new Response(201, "Registration successful", userDTO);
+            return new Response(201, "Admin registration successful", userDTO);
         } catch (Exception e) {
-            // Handle exceptions and return error response
+            return new Response(500, "Registration failed: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response registerAssociation(AssociationRegisterRequest registerRequest) {
+        try {
+            // Check if the user already exists
+            if (userRepository.findByUsername(registerRequest.getUsername()).isPresent() ||
+                    userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+                return new Response(400, "Username or email already exists", null);
+            }
+
+            Association association = new Association();
+            association.setUsername(registerRequest.getUsername());
+            association.setEmail(registerRequest.getEmail());
+            association.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            association.setRole(Role.ASSOCIATION);
+            association.setName(registerRequest.getName());
+            association.setVille(registerRequest.getVille());
+            association.setResponsableName(registerRequest.getResponsableName());
+            association.setResponsablePhone(registerRequest.getResponsablePhone());
+
+            User savedUser = userRepository.save(association);
+            UserDTO userDTO = Utils.mapUserToDTO(savedUser);
+
+            return new Response(201, "Association registration successful", userDTO);
+        } catch (Exception e) {
+            return new Response(500, "Registration failed: " + e.getMessage(), null);
+        }
+    }
+
+    @Override
+    public Response registerVolunteer(VolunteerRegisterRequest registerRequest) {
+        try {
+            // Check if the user already exists
+            if (userRepository.findByUsername(registerRequest.getUsername()).isPresent() ||
+                    userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+                return new Response(400, "Username or email already exists", null);
+            }
+
+            Volunteer volunteer = new Volunteer();
+            volunteer.setUsername(registerRequest.getUsername());
+            volunteer.setEmail(registerRequest.getEmail());
+            volunteer.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            volunteer.setRole(Role.BENEVOLE);
+            volunteer.setPhoneNumber(registerRequest.getPhoneNumber());
+            volunteer.setFullName(registerRequest.getFullName());
+            volunteer.setAvailableDays(registerRequest.getAvailableDays());
+
+            User savedUser = userRepository.save(volunteer);
+            UserDTO userDTO = Utils.mapUserToDTO(savedUser);
+
+            return new Response(201, "Volunteer registration successful", userDTO);
+        } catch (Exception e) {
             return new Response(500, "Registration failed: " + e.getMessage(), null);
         }
     }

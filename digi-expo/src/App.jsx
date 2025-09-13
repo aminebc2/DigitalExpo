@@ -24,6 +24,9 @@ import Associations from "./component/common/Association";
 import { LanguageProvider } from './context/LanguageContext';
 import theme from './theme/chakraTheme';
 import Aboutus from "./component/common/Aboutus";
+import VolunteerChooseSessionPage from "./component/volunteer/VolunteerChooseSessionPage";
+import GalerieMedia from "./component/common/GalerieMedia";
+import Planning from "./component/common/Planning";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -71,6 +74,8 @@ function AppRoutes() {
             <Route path="/home" element={<Home />} />
             <Route path="/associations" element={<Associations />} />
             <Route path="/aboutus" element={<Aboutus/>} />
+            <Route path="/galerie-media" element={<GalerieMedia/>} />
+            <Route path="/planning" element={<Planning/>} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
@@ -133,6 +138,14 @@ function AppRoutes() {
                 element={
                     <ProtectedRoute allowedRoles={['BENEVOLE']}>
                         <AssociationList />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/volunteer/choose-session"
+                element={
+                    <ProtectedRoute allowedRoles={['BENEVOLE']}>
+                        <VolunteerChooseSessionPage />
                     </ProtectedRoute>
                 }
             />

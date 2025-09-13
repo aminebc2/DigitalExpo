@@ -51,7 +51,7 @@ const translations = {
         legal: {
             privacy: "Confidentialité",
             terms: "Conditions",
-            copyright: "© 2025 DXC Technology Company. Tous droits réservés."
+            copyright: "© 2026 DXC Technology Company. Tous droits réservés."
         }
     },
     en: {
@@ -82,7 +82,7 @@ const translations = {
         legal: {
             privacy: "Privacy",
             terms: "Terms",
-            copyright: "© 2025 DXC Technology Company. All rights reserved."
+            copyright: "© 2026 DXC Technology Company. All rights reserved."
         }
     }
 };

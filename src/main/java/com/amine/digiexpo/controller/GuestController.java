@@ -2,6 +2,7 @@ package com.amine.digiexpo.controller;
 
 import com.amine.digiexpo.DTO.Response;
 import com.amine.digiexpo.service.impl.AssociationService;
+import com.amine.digiexpo.service.impl.GuestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +15,19 @@ public class GuestController {
 
     @Autowired
     private AssociationService associationService;
+    @Autowired
+    private GuestService guestService;
 
 
     @GetMapping("/all-associations")
     public ResponseEntity<Response> getAllAssociations() {
         Response response = associationService.getAllAssociations();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/planning")
+    public ResponseEntity<Response> getPlanning() {
+        Response response = guestService.getPlanning();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

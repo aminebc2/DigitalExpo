@@ -1,17 +1,22 @@
 package com.amine.digiexpo.DTO;
 
 import com.amine.digiexpo.enumeration.Role;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
+import java.time.DayOfWeek;
+import java.util.List;
 
-public class AssociationRegisterRequest {
+@NoArgsConstructor
+@AllArgsConstructor
+public class VolunteerRegisterRequest {
     private String username;
     private String email;
     private String password;
     private Role role;
-    private String name;
-    private String ville;
-    private String responsableName;
-    private String responsablePhone;
+    private String phoneNumber;
+    private String fullName;
+    private List<DayOfWeek> availableDays;
 
     public String getUsername() {
         return username;
@@ -45,35 +50,27 @@ public class AssociationRegisterRequest {
         this.role = role;
     }
 
-    public String getName() {
-        return name;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
-    public String getVille() {
-        return ville;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setVille(String ville) {
-        this.ville = ville;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
-    public String getResponsableName() {
-        return responsableName;
+    public List<DayOfWeek> getAvailableDays() {
+        return availableDays;
     }
 
-    public void setResponsableName(String responsableName) {
-        this.responsableName = responsableName;
-    }
-
-    public String getResponsablePhone() {
-        return responsablePhone;
-    }
-
-    public void setResponsablePhone(String responsablePhone) {
-        this.responsablePhone = responsablePhone;
+    public void setAvailableDays(List<DayOfWeek> availableDays) {
+        this.availableDays = availableDays;
     }
 }
