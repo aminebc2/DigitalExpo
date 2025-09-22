@@ -31,3 +31,42 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node.js / React ###
+digi-expo/node_modules/
+digi-expo/build/
+digi-expo/.env
+digi-expo/.env.local
+digi-expo/.env.development.local
+digi-expo/.env.test.local
+digi-expo/.env.production.local
+digi-expo/npm-debug.log*
+digi-expo/yarn-debug.log*
+digi-expo/yarn-error.log*
+digi-expo/.npm
+digi-expo/.yarn-integrity
+
+### Uploaded Files ###
+uploads/
+!uploads/.gitkeep
+
+### Logs ###
+logs/
+*.log
+*.log.*
+
+### OS Generated Files ###
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+### Temporary Files ###
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
