@@ -70,3 +70,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+### Analysis/Temporary Files ###
+allfiles.txt
+bigfiles.txt
+sizedfiles.txt
